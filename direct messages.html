@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages - Class of 2026</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Montserrat:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#435b9f",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#221b00",
+                        "on-primary-fixed": "#00174a",
+                        "on-primary-container": "#758dd5",
+                        "outline": "#757682",
+                        "inverse-on-surface": "#f0f1f2",
+                        "surface-container-low": "#f3f4f5",
+                        "secondary": "#705d00",
+                        "secondary-fixed": "#ffe16d",
+                        "background": "#f8f9fa",
+                        "surface-container-high": "#e7e8e9",
+                        "on-primary-fixed-variant": "#2a4386",
+                        "on-tertiary-container": "#009dbd",
+                        "primary-container": "#002366",
+                        "surface-container-highest": "#e1e3e4",
+                        "tertiary-container": "#002d38",
+                        "on-secondary-container": "#6e5c00",
+                        "primary-fixed-dim": "#b3c5ff",
+                        "on-surface-variant": "#444650",
+                        "primary": "#00113a",
+                        "secondary-container": "#fcd400",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f8f9fa",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "surface-variant": "#e1e3e4",
+                        "tertiary-fixed-dim": "#3cd7ff",
+                        "on-secondary-fixed-variant": "#544600",
+                        "on-tertiary-fixed-variant": "#004e5f",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c5c6d2",
+                        "on-background": "#191c1d",
+                        "inverse-surface": "#2e3132",
+                        "on-tertiary-fixed": "#001f27",
+                        "on-surface": "#191c1d",
+                        "error": "#ba1a1a",
+                        "surface-container": "#edeeef",
+                        "tertiary-fixed": "#b4ebff",
+                        "inverse-primary": "#b3c5ff",
+                        "surface": "#f8f9fa",
+                        "secondary-fixed-dim": "#e9c400",
+                        "primary-fixed": "#dbe1ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#00171e",
+                        "surface-dim": "#d9dadb",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-max": "1280px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "card-gap": "20px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Be Vietnam Pro"],
+                        "label-sm": ["Be Vietnam Pro"],
+                        "display-lg": ["Montserrat"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Montserrat"],
+                        "headline-lg": ["Montserrat"],
+                        "headline-lg-mobile": ["Montserrat"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 4px 20px rgba(0, 35, 102, 0.08);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col pt-16">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 dark:bg-surface-container/70 border-b border-outline-variant/30 shadow-sm backdrop-blur-xl">
+<div class="flex justify-between items-center px-margin-desktop h-16 w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Class of 2026</div>
+<div class="flex items-center gap-4">
+<button aria-label="Notifications" class="text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200 p-2 rounded-full active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-outline-variant/30 object-cover" data-alt="A small, circular avatar image showing a stylized geometric icon representing a user profile, rendered in bright, modern colors with a subtle 3D lighting effect on a clean white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCo71NfO8H4KaUZEKTjNFnv-a2BnsjOlVxMnZL3rCpnctDD9tgBWkeMiFGFNjAxAFKycOESZdXpn42_wigLvOGWkrbUNVOtvuwNTX0RoM8cW5uKtcgRTRLLh5VBYHg_R1qPL26BG3tKhzLF4aWBaX1eAc8Py-_ObMufaP7xUZep0kC-MJSANHJqBoGe97utUHCSb0ugIp8L-FrnmTTexk4WIYvxOWSiI3pEs-2LjNrbaj0FdstT8KZuCQ"/>
+</div>
+</div>
+</header>
+<div class="flex-1 w-full max-w-container-max mx-auto flex h-[calc(100vh-64px)] overflow-hidden">
+<!-- Side Navigation (Left Sidebar) -->
+<nav class="hidden md:flex flex-col w-64 bg-surface dark:bg-surface-container-low border-r border-outline-variant/30 p-4 space-y-2 h-full z-40">
+<div class="mb-6 flex flex-col items-start px-2">
+<img alt="Class of 2026 Logo" class="w-12 h-12 rounded-xl mb-3 object-cover" data-alt="A sharp, high-contrast logo for a university 'Class of 2026' featuring an interlocking crest design, utilizing deep navy blues and bright gold accents in a modern, flat-vector style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBO_XtSzOQaEtCrrXcAbErKD7iQdzm7GJqHKDAxQ7ogPA_5iFS0o8UvoETzTtN516jL6nG8l06t6-pAMAq7ZW_5B1tkMIvZUZtc_zTim4PRjXQIbpaeqSRStPgd6JRVymAA8XcRP8AgIyTjPY82brn0ilYkkZJk4IxWTkgjjCXlw8AVXFm0b0llZWZu-x0WwKUNZ41Rhr9MQ0oMoDZ9hUPdRoQ1j-khSJNhLLDCD24qriJHPOD5jYRKA"/>
+<h2 class="font-headline-md text-headline-md text-primary font-bold">Class Lounge</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1">2026 Elite</p>
+</div>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span>
+<span class="font-body-md text-body-md font-medium">Feed</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 p-3 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-body-md text-body-md">Messages</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body-md text-body-md font-medium">Directory</span>
+</a>
+<div class="mt-auto pt-4">
+<button class="w-full py-3 bg-secondary text-on-secondary font-bold rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">edit</span>
+                     New Post
+                 </button>
+</div>
+</nav>
+<!-- Main Content Area: Messaging Interface -->
+<main class="flex-1 flex bg-surface-bright h-full relative">
+<!-- Conversations List (Middle Pane) -->
+<aside class="w-full md:w-80 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest h-full z-10 transition-transform duration-300 md:relative absolute inset-0" id="conversations-pane">
+<!-- Search & Filter Header -->
+<div class="p-4 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md sticky top-0 z-20">
+<h1 class="font-headline-md text-headline-md font-bold text-primary mb-4">Messages</h1>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 font-body-md text-body-md text-on-surface focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="Search conversations..." type="text"/>
+</div>
+</div>
+<!-- Chat List -->
+<div class="flex-1 overflow-y-auto hide-scrollbar p-2 space-y-1">
+<!-- Active Chat Item -->
+<button class="w-full flex items-start gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors text-left" onclick="showChatPane()">
+<div class="relative shrink-0">
+<img alt="Sarah Jenkins" class="w-12 h-12 rounded-full object-cover border-2 border-surface-container-lowest shadow-sm" data-alt="A close-up portrait of an energetic college student smiling warmly, photographed in soft, bright daylight against a blurred campus background, creating an approachable and vibrant mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyDT6-ktTvfpRGZwfsO_paU4KRwpNzpzaVi5eGer2p4q1QBff1JcSW_hgTa9GYJ-Nol7OWZBKyzukrMWZgl5Z4wbtYmokpjbsuXxgdckzKW92R8z6py3BvfiZE0M04TEgU3O31h8S7HHEITtbskAbaPGDc8AXi1xyWleloUfpJM3JHoLLBF88CqYXlwcvNiT_8tGX90M9J5wXFup-yoRPqL7gZWHnY_h7gkKUv0UTItQkFFBq7NcsHPQ"/>
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-surface-container-lowest rounded-full"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-body-md text-body-md font-semibold text-primary truncate">Sarah Jenkins</h3>
+<span class="font-label-sm text-label-sm text-primary font-bold">10:42 AM</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface truncate font-medium">Are we still on for the study group later?</p>
+</div>
+</button>
+<!-- Unread Chat Item -->
+<button class="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors text-left">
+<div class="relative shrink-0">
+<img alt="Study Group Alpha" class="w-12 h-12 rounded-full object-cover border border-outline-variant/30" data-alt="A stylish, abstract 3D render of a geometric sphere with soft lighting and a muted blue gradient, serving as a cool, modern default avatar." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK_6YL9BE4HnfIpWRRwYBv-ROCs1SPgcd3OZGOAVPb1oNRDZHeDk6PoLmgqtU7C0fTOqerm1t0X0AlbriMLUsfQGtGMVPracK1ehXZ9tCekedCmi_d1yB95xNONkL_Tckm_pz0HLt9njnCHsIvPQ3Z4HhGOMPN-hjrNVkCoP16TPgfRP6fyrbcD5774kH0zRwSFDETKcBPZoWV7m0e1iD5puBK6mxGDruJ93zKQkMhS3-xlu9cNo_oDw"/>
+<div class="absolute -top-1 -right-1 w-4 h-4 bg-error text-on-error font-label-sm text-[10px] flex items-center justify-center rounded-full border-2 border-surface-container-lowest">3</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-body-md text-body-md font-semibold text-on-surface truncate">Study Group Alpha</h3>
+<span class="font-label-sm text-label-sm text-error font-bold">Yesterday</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface font-medium truncate">David: I found the notes for chapter 4!</p>
+</div>
+</button>
+<!-- Read Chat Item -->
+<button class="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors text-left">
+<div class="relative shrink-0">
+<img alt="Michael Chen" class="w-12 h-12 rounded-full object-cover border border-outline-variant/30" data-alt="A portrait of a male college student reading a book in a modern, well-lit library setting, capturing a focused and academic atmosphere with soft, natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMpoJ016780KIy0SgtW0A-ldQiOnYrQlYXljNVzTURuURt6dQ4S9lDCLcZUtDOT-a4mT2ZLcRjc9BSYNcAXTI7TbHQbVrEYWfSPfPe-TDEVLxyvKQij3NQt7VTw8Vx1K6d_wnsUlC5gAPTvjXC-iieC8jqqoeGgwR9CVPxzKwIDfNCcInfWcKNdo30b3DBRpoUN7ZGs1-smidSzmDUNPFHNNrrdWkypG0BAfuiP9nCNM2FJGSzhbG2Mg"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-body-md text-body-md font-medium text-on-surface truncate">Michael Chen</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">Mon</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Yeah, that sounds like a plan. See ya.</p>
+</div>
+</button>
+<!-- Read Chat Item -->
+<button class="w-full flex items-start gap-3 p-3 rounded-xl hover:bg-surface-container-low transition-colors text-left">
+<div class="relative shrink-0">
+<img alt="Cafe Crew" class="w-12 h-12 rounded-full object-cover border border-outline-variant/30" data-alt="A vibrant, stylized illustration of a coffee cup with abstract geometric shapes emerging from the steam, representing a casual campus cafe meetup in a modern flat design style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6ljySlI1cGFr2EMiG2Oi_834HcRCJG-NzZL45-9496OMYiiCNH2duDJI1Pwyjc1pVPmejL6jXBwM-8rM-c4PsIJ7GCZwevPPxkDsxRTYYrI-ZY5LaScJ_MTDvrW2yUlPbAAVBx7Hbk7vkNl5vIEyOA6ofELdAvohVkQgVGkoEBuV_WkZ1tFn0nThULK1tas0_1Ybs3TYaRBcie9345E4Fa7VDHQHkEwZld38WsoFzRoYxRjmpETeZRA"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-baseline mb-1">
+<h3 class="font-body-md text-body-md font-medium text-on-surface truncate">Cafe Crew</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">Sun</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant truncate">Emma: Anyone want to grab coffee before lecture?</p>
+</div>
+</button>
+</div>
+</aside>
+<!-- Chat Window (Right Pane) -->
+<section class="flex-1 flex flex-col bg-surface-container-lowest h-full relative z-20 translate-x-full md:translate-x-0 transition-transform duration-300" id="chat-pane">
+<!-- Chat Header -->
+<header class="h-[72px] flex items-center justify-between px-6 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md sticky top-0 z-10">
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant p-2 -ml-2 rounded-full hover:bg-surface-container-low" onclick="showConversationsPane()">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="relative">
+<img alt="Sarah Jenkins" class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="A close-up portrait of an energetic college student smiling warmly, photographed in soft, bright daylight against a blurred campus background, creating an approachable and vibrant mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDojg2l0tmMYiDjsEUeGhdPklSxJ_MKuorAEngb_1rm0FJsWXtfj0oTPObjqgFpQ0lw0UtaGJCxi1FcxqMGd71kRZ9uD2FDgi6KwDzC1zhYaJ4-hSaMmygsUMT2H5v9sEyc-KpKc96da5vpBPI4Dxd3F6Ka12NDwJDXH2UCJWgvineHiYI43yLkk-FXuKZ-LV0eNmrZjy9n_sRIUIhVAiT3eYoDRW-0K9byFefBEugAkOOcUxP8c-OjxA"/>
+<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-surface-container-lowest rounded-full"></div>
+</div>
+<div>
+<h2 class="font-body-md text-body-md font-bold text-primary flex items-center gap-2">
+                                Sarah Jenkins
+                                <span class="px-2 py-0.5 bg-gradient-to-r from-secondary to-primary text-on-primary font-label-sm text-[10px] rounded-full">2026</span>
+</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant font-normal">Active now</p>
+</div>
+</div>
+<div class="flex gap-2">
+<button aria-label="Audio Call" class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+</button>
+<button aria-label="Video Call" class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="videocam">videocam</span>
+</button>
+<button aria-label="More Options" class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Message History -->
+<div class="flex-1 overflow-y-auto p-6 space-y-6 hide-scrollbar bg-surface-bright/50">
+<!-- Date Divider -->
+<div class="flex justify-center my-4">
+<span class="px-3 py-1 bg-surface-container-low rounded-full font-label-sm text-label-sm text-on-surface-variant font-medium">Today</span>
+</div>
+<!-- Incoming Message -->
+<div class="flex gap-3 max-w-[85%]">
+<img alt="Sarah Jenkins" class="w-8 h-8 rounded-full object-cover shrink-0 mt-auto" data-alt="A close-up portrait of an energetic college student smiling warmly, photographed in soft, bright daylight against a blurred campus background, creating an approachable and vibrant mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5MQhbTwfzwwvYw4JL0HHcf0Hy0gqtSL0X-ZzVHhWN0uiaLwRM_fq6rzzDV8vhB8esbOycCBeAlE85uqbnmUnYuOrRbkEP8e6OGPEeU7Qyd16uI_UEcFN0m5arbYHw2YudMcoodjq4sI7qGDHT03dz7ZYpLxVG0UUu6G3fjalq4Hr6dDYIU3Y1Xyw7f-HNV-Lc2nzLILDP_XzE1V4GH3liC1ftmxtGo1DSUqKpVGb83izVwejRFqlXVg"/>
+<div class="flex flex-col gap-1 items-start">
+<div class="px-4 py-2.5 bg-surface-container-low text-on-surface rounded-2xl rounded-bl-sm font-body-md text-body-md shadow-sm">
+                                Hey! How did the midterm go?
+                            </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal px-1">10:30 AM</span>
+</div>
+</div>
+<!-- Outgoing Message -->
+<div class="flex gap-3 max-w-[85%] ml-auto justify-end">
+<div class="flex flex-col gap-1 items-end">
+<div class="px-4 py-2.5 bg-primary text-on-primary rounded-2xl rounded-br-sm font-body-md text-body-md shadow-sm">
+                                Not too bad! I think the study guide really helped.
+                            </div>
+<div class="flex items-center gap-1 px-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">10:35 AM</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="done_all">done_all</span>
+</div>
+</div>
+</div>
+<!-- Outgoing Message (Continuation) -->
+<div class="flex gap-3 max-w-[85%] ml-auto justify-end mt-2">
+<div class="flex flex-col gap-1 items-end">
+<div class="px-4 py-2.5 bg-primary text-on-primary rounded-2xl rounded-tr-sm rounded-br-sm font-body-md text-body-md shadow-sm">
+                                Definitely need a coffee break though ☕
+                            </div>
+<div class="flex items-center gap-1 px-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal">10:36 AM</span>
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="done_all">done_all</span>
+</div>
+</div>
+</div>
+<!-- Incoming Message -->
+<div class="flex gap-3 max-w-[85%]">
+<img alt="Sarah Jenkins" class="w-8 h-8 rounded-full object-cover shrink-0 mt-auto" data-alt="A close-up portrait of an energetic college student smiling warmly, photographed in soft, bright daylight against a blurred campus background, creating an approachable and vibrant mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDVYopo3z9W00hGLdknXY3W42yoa4_UBr3ISJVdDupU-jXHk20DfQ-B2QfHT4YIKgGMBCzpBTZl2TK9agJIISyR75qNtnwN609hpfwHjbs9x5Q97_COzBvHZ9lhSEAlQE1B7DU0ujH16A__Nnc2iVYwi__qudEJoR9_ddrIe2UIdMW9hqkTGcuDMvvp00D_2mv56Lyc9s4vieGuQBUK_BhkkHrvEo-Fze5phV3LOXb4kaf0a7STn6tIw"/>
+<div class="flex flex-col gap-1 items-start">
+<div class="px-4 py-2.5 bg-surface-container-low text-on-surface rounded-2xl rounded-bl-sm font-body-md text-body-md shadow-sm">
+                                Same here!
+                            </div>
+<div class="px-4 py-2.5 bg-surface-container-low text-on-surface rounded-2xl rounded-tl-sm rounded-bl-sm font-body-md text-body-md shadow-sm mt-1">
+                                Are we still on for the study group later?
+                            </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-normal px-1 mt-1">10:42 AM</span>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<div class="p-4 bg-surface-container-lowest border-t border-outline-variant/30">
+<div class="flex items-end gap-2 bg-surface-container-low rounded-2xl p-2 focus-within:ring-2 focus-within:ring-primary/50 transition-all border border-transparent focus-within:border-primary/20">
+<button aria-label="Add Attachment" class="p-2 text-outline hover:text-primary transition-colors shrink-0 rounded-full hover:bg-surface-container-highest">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+</button>
+<textarea class="flex-1 max-h-32 bg-transparent border-none resize-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder:text-outline py-2 hide-scrollbar" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" placeholder="Type a message..." rows="1"></textarea>
+<button aria-label="Insert Emoji" class="p-2 text-outline hover:text-primary transition-colors shrink-0 rounded-full hover:bg-surface-container-highest mr-1">
+<span class="material-symbols-outlined" data-icon="mood">mood</span>
+</button>
+<button aria-label="Send Message" class="p-2 bg-secondary text-on-secondary rounded-full hover:bg-secondary/90 transition-colors shrink-0 shadow-sm flex items-center justify-center h-10 w-10">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Mobile Navigation (Bottom) -->
+<nav class="md:hidden fixed bottom-0 w-full bg-surface/90 backdrop-blur-lg border-t border-outline-variant/30 flex justify-around items-center h-16 z-50 px-4 pb-safe">
+<a class="flex flex-col items-center gap-1 text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary p-2" href="#">
+<div class="relative">
+<span class="material-symbols-outlined" data-icon="chat_bubble" data-weight="fill">chat_bubble</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-error rounded-full border-2 border-surface"></span>
+</div>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+</a>
+</nav>
+<script>
+        // Simple mobile navigation logic for the two-pane layout
+        const chatPane = document.getElementById('chat-pane');
+        const conversationsPane = document.getElementById('conversations-pane');
+
+        function showChatPane() {
+            if (window.innerWidth < 768) {
+                chatPane.classList.remove('translate-x-full');
+                chatPane.classList.add('translate-x-0');
+            }
+        }
+
+        function showConversationsPane() {
+            if (window.innerWidth < 768) {
+                chatPane.classList.add('translate-x-full');
+                chatPane.classList.remove('translate-x-0');
+            }
+        }
+
+        // Handle resize to reset states if moving from mobile to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                chatPane.classList.remove('translate-x-full', 'translate-x-0');
+            } else {
+                // Default to conversations view on mobile if resized down
+                if(!chatPane.classList.contains('translate-x-0')) {
+                    chatPane.classList.add('translate-x-full');
+                }
+            }
+        });
+    </script>
+</body></html>

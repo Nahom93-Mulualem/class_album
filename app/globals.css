@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #00113a;
+    --primary-container: #002366;
+    --primary-fixed: #dbe1ff;
+    --primary-fixed-dim: #b3c5ff;
+    --on-primary: #ffffff;
+    --on-primary-container: #758dd5;
+
+    --secondary: #705d00;
+    --secondary-container: #fcd400;
+    --secondary-fixed: #ffe16d;
+    --secondary-fixed-dim: #e9c400;
+    --on-secondary: #ffffff;
+    --on-secondary-container: #6e5c00;
+
+    --tertiary: #00171e;
+    --tertiary-container: #002d38;
+
+    --background: #f8f9fa;
+    --surface: #f8f9fa;
+    --surface-bright: #f8f9fa;
+    --surface-dim: #d9dadb;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #f3f4f5;
+    --surface-container: #edeeef;
+    --surface-container-high: #e7e8e9;
+    --surface-container-highest: #e1e3e4;
+    --surface-variant: #e1e3e4;
+
+    --outline: #757682;
+    --outline-variant: #c5c6d2;
+    --on-surface: #191c1d;
+    --on-surface-variant: #444650;
+    --on-background: #191c1d;
+
+    --error: #ba1a1a;
+    --error-container: #ffdad6;
+    --on-error: #ffffff;
+  }
+}
+
+@theme {
+  --color-primary: #00113a;
+  --color-primary-container: #002366;
+  --color-primary-fixed: #dbe1ff;
+  --color-primary-fixed-dim: #b3c5ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #758dd5;
+
+  --color-secondary: #705d00;
+  --color-secondary-container: #fcd400;
+  --color-secondary-fixed: #ffe16d;
+  --color-secondary-fixed-dim: #e9c400;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #6e5c00;
+
+  --color-tertiary: #00171e;
+  --color-tertiary-container: #002d38;
+
+  --color-background: #f8f9fa;
+  --color-surface: #f8f9fa;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-dim: #d9dadb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-variant: #e1e3e4;
+
+  --color-outline: #757682;
+  --color-outline-variant: #c5c6d2;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #444650;
+  --color-on-background: #191c1d;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+
+  --font-body: "Be Vietnam Pro", system-ui, sans-serif;
+  --font-headline: "Montserrat", sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Montserrat", sans-serif;
+}
+
+.ambient-shadow {
+  box-shadow: 0px 4px 24px rgba(0, 35, 102, 0.07);
+}
+
+.ambient-shadow-lg {
+  box-shadow: 0px 10px 35px rgba(0, 35, 102, 0.12);
+}
+
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 10px 28px rgba(0, 35, 102, 0.11);
+}
+
+.glass-nav {
+  background: rgba(248, 249, 250, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Material Symbols font helper */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 22px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  vertical-align: middle;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c6d2;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #757682;
+}

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Class of 2026 - Personal Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#435b9f",
+                    "on-secondary": "#ffffff",
+                    "on-secondary-fixed": "#221b00",
+                    "on-primary-fixed": "#00174a",
+                    "on-primary-container": "#758dd5",
+                    "outline": "#757682",
+                    "inverse-on-surface": "#f0f1f2",
+                    "surface-container-low": "#f3f4f5",
+                    "secondary": "#705d00",
+                    "secondary-fixed": "#ffe16d",
+                    "background": "#f8f9fa",
+                    "surface-container-high": "#e7e8e9",
+                    "on-primary-fixed-variant": "#2a4386",
+                    "on-tertiary-container": "#009dbd",
+                    "primary-container": "#002366",
+                    "surface-container-highest": "#e1e3e4",
+                    "tertiary-container": "#002d38",
+                    "on-secondary-container": "#6e5c00",
+                    "primary-fixed-dim": "#b3c5ff",
+                    "on-surface-variant": "#444650",
+                    "primary": "#00113a",
+                    "secondary-container": "#fcd400",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9fa",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#e1e3e4",
+                    "tertiary-fixed-dim": "#3cd7ff",
+                    "on-secondary-fixed-variant": "#544600",
+                    "on-tertiary-fixed-variant": "#004e5f",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#c5c6d2",
+                    "on-background": "#191c1d",
+                    "inverse-surface": "#2e3132",
+                    "on-tertiary-fixed": "#001f27",
+                    "on-surface": "#191c1d",
+                    "error": "#ba1a1a",
+                    "surface-container": "#edeeef",
+                    "tertiary-fixed": "#b4ebff",
+                    "inverse-primary": "#b3c5ff",
+                    "surface": "#f8f9fa",
+                    "secondary-fixed-dim": "#e9c400",
+                    "primary-fixed": "#dbe1ff",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#00171e",
+                    "surface-dim": "#d9dadb",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "gutter": "24px",
+                    "unit": "4px",
+                    "margin-desktop": "32px",
+                    "margin-mobile": "16px",
+                    "card-gap": "20px"
+            },
+            "fontFamily": {
+                    "body-md": ["Be Vietnam Pro"],
+                    "label-sm": ["Be Vietnam Pro"],
+                    "display-lg": ["Montserrat"],
+                    "body-lg": ["Be Vietnam Pro"],
+                    "headline-md": ["Montserrat"],
+                    "headline-lg": ["Montserrat"],
+                    "headline-lg-mobile": ["Montserrat"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+        }
+        .ambient-shadow {
+            box-shadow: 0px 4px 20px rgba(0, 35, 102, 0.08);
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0px 8px 24px rgba(0, 35, 102, 0.12);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface antialiased bg-background pt-16">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/70 dark:bg-surface-container/70 border-b border-outline-variant/30 shadow-sm backdrop-blur-xl">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full max-w-container-max mx-auto">
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
+                Class of 2026
+            </div>
+<div class="hidden md:flex flex-1 justify-center space-x-6">
+<!-- No active tab fits perfectly, assuming 'Feed' or a generic profile isn't in top nav directly, but let's just make it look inactive to focus on content, or hide nav items if it's a focused view. We will omit top nav links to adhere to focused view if needed, but JSON has search_bar on right. Let's just put search. -->
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 text-body-md font-body-md focus:ring-2 focus:ring-primary focus:outline-none placeholder:text-on-surface-variant transition-all" placeholder="Search..." type="text"/>
+</div>
+</div>
+<div class="flex items-center space-x-4 text-primary dark:text-primary-fixed">
+<button class="hover:bg-surface-container-high transition-colors duration-200 active:scale-95 transition-transform p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="notifications" style="font-variation-settings: 'FILL' 0;">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A polished headshot of a college student in their early twenties, smiling warmly against a blurred outdoor campus background on a sunny day. The lighting is bright and natural, reflecting a youthful, exclusive, and connected vibe in a modern light-mode setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMadESbSvIK5s8eufSx-NFjgmEI7lYtohh0FOnrbDS-8t55m1ZezZ9mXjB-DU3gbcDHJ6MqDJlST0ErXSVYSv6Kl82BfkInb5HkFl0CwGXMCQcFvqUOWWKbkOO3RCHsjuNQf27eIOrzm2XHrCc_MNObr2MdwOkRH32RvWYIBFKOFKqzYQygTRJLlLfEQPWJuFz2XhLgyolwr-ZFTyoTlUS-A6pEEXCQqLLBtsdDxJLZpn4xryyWm-MGg"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Layout Grid -->
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-gutter flex flex-col md:flex-row gap-gutter">
+<!-- Left Sidebar / SideNavBar (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col p-4 space-y-2 bg-surface dark:bg-surface-container-low border-r border-outline-variant/30 w-64 h-[calc(100vh-64px)] fixed left-0 top-16 shadow-none">
+<div class="mb-6 flex items-center space-x-3 p-2">
+<div class="w-12 h-12 rounded-full overflow-hidden border border-outline-variant/30 shrink-0">
+<img alt="Class of 2026 Logo" class="w-full h-full object-cover" data-alt="A sleek, modern crest logo for the Class of 2026, featuring geometric shapes in electric gold and royal navy, set against a crisp white background. The design is youthful, exclusive, and evokes a premium digital campus lounge feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYrdl0FLwBny_qRG7LABq7abv_bUNY0Q_iwTcv5KvjhgGP4pk6iyrk9ooUynCNHK7OkaD9aCJoAZIBYezsaXzzWtHO9NklWBCecvcGCX95ZjFji7W8lqLmOKWDJp4-cmqJxh320SvlRe0JGCdnwP1y4JovM6krB_GRpba_WZ36u2Ou-Z7O2x9A0zhhftZXhmwbKNDJbwwxIwnk7CwpkhiGToneIDzI2s_UDO6CVqMsdwiiCkOipq9tvA"/>
+</div>
+<div>
+<h2 class="font-headline-md text-body-lg font-bold text-primary dark:text-primary-fixed leading-tight">Class Lounge</h2>
+<p class="font-body-md text-label-sm text-on-surface-variant">2026 Elite</p>
+</div>
+</div>
+<nav class="space-y-1 flex-1">
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="dynamic_feed">dynamic_feed</span>
+<span class="font-body-md text-body-md font-medium">Feed</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-high rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-body-md text-body-md font-medium">Messages</span>
+</a>
+<a class="flex items-center space-x-3 px-4 py-3 bg-secondary-container text-on-secondary-container font-bold rounded-xl hover:translate-x-1 transition-all duration-200 cursor-pointer" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body-md text-body-md">Directory</span>
+</a>
+</nav>
+<div class="mt-auto pt-4">
+<button class="w-full bg-secondary text-on-secondary font-body-md font-bold py-3 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+<span>New Post</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area (Offset for sidebar on desktop) -->
+<main class="flex-1 md:ml-64 w-full flex flex-col gap-card-gap">
+<!-- Profile Header -->
+<section class="bg-surface rounded-xl overflow-hidden ambient-shadow border border-surface-variant flex flex-col relative pb-6">
+<!-- Cover Photo -->
+<div class="w-full h-48 md:h-64 bg-surface-container-highest relative">
+<img alt="Cover Photo" class="w-full h-full object-cover" data-alt="A sweeping panoramic view of an ivy-league style university campus quad during a golden hour sunset. The sky is painted in warm oranges and purples, contrasting with the lush green lawns and historic brick buildings. The scene is bright, optimistic, and visually rich, fitting a modern light-mode social profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL89L9PaJ9NEi-lfnwJ5qTDX1cbySDaTvCeYF9k33qDbkrFRk6m8EHpKOtBPCr3Jf48aRrjdnyEorml_ONa40iQTxiUHEpBbtdH4sl66eA649UZsBaA7lXP4D3z9w40oHosCwG_DAHI4VqiuYX7Fi7X7rTqqhKJPDPbqSIAVlAz22VBTEaG82CVcc2_pPGcSxy5hjDkeI6L1jEy1NpJkOECRZIiJGQ8yZm2f2A2VhveeoJYGenEuScWg"/>
+</div>
+<!-- Profile Info Group -->
+<div class="px-6 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end -mt-16 md:-mt-20 relative z-10 gap-4">
+<div class="flex flex-col md:flex-row items-center md:items-end gap-4 w-full md:w-auto">
+<!-- Avatar -->
+<div class="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-surface overflow-hidden bg-surface-container relative ambient-shadow shrink-0">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="A close-up portrait of a cheerful university student with short hair, wearing a casual navy blue hoodie. They are standing in a well-lit modern library with blurred bookshelves in the background. The mood is approachable and academic, perfectly suited for a premium social network light theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMLGCNKFCr7a7iihM-ILAGx8wgcjhWgZ6G9lJSFTgXX8c4dhm_MAMiOziO1tPRIZaGgUvGtj3JyOqKyMhS6EWpNky4VhuTuknCyMt2oOsex1Fyx05WN93WpuKdhefX1W3Ma7HeRAXg1V3KV7DQnTSnAqLGOLja6D0RFGfkWrDAVJjJMEpzzIYxzuGGz8wX8eJaIWkzL6xquakSbjuJHPk7TyZZEMh8CfC2-Bo7omnHCyl-El_nMOaoKA"/>
+</div>
+<!-- Name & Title -->
+<div class="text-center md:text-left mb-2">
+<h1 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-1 flex items-center justify-center md:justify-start gap-2">
+                                Alex Chen
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r from-secondary to-primary-container text-on-primary">
+                                    Class of '26
+                                </span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Computer Science • Design Thinker</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-3 w-full md:w-auto justify-center md:justify-end mb-2">
+<button class="px-6 py-2 rounded-lg bg-primary-container text-on-primary font-body-md font-semibold hover:opacity-90 transition-opacity">Message</button>
+<button class="px-6 py-2 rounded-lg border-2 border-primary-container text-primary-container font-body-md font-semibold hover:bg-surface-container-low transition-colors">Connect</button>
+</div>
+</div>
+<!-- Status Message -->
+<div class="px-6 md:px-8 mt-6">
+<div class="bg-surface-container-low border border-surface-variant rounded-lg p-4 inline-flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">celebration</span>
+<p class="font-body-md text-body-md text-on-surface italic">"Planning the mid-term reunion! DM me if you want to help out. 🎉"</p>
+</div>
+</div>
+</section>
+<!-- Lower Layout: Bio & Gallery Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-card-gap">
+<!-- Sidebar / Bio (Spans 4 cols on XL) -->
+<section class="xl:col-span-4 flex flex-col gap-card-gap">
+<!-- About Card -->
+<div class="bg-surface rounded-xl p-6 ambient-shadow border border-surface-variant transition-all card-hover">
+<h3 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container">person</span>
+                            About
+                        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                            Passionate about building intuitive digital experiences and exploring the intersection of tech and humanities. Always down for a coffee chat or a late-night hackathon.
+                        </p>
+<div class="space-y-4">
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body-md text-body-md">B.S. Computer Science</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined">event</span>
+<span class="font-body-md text-body-md">Graduating May 2026</span>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-body-md text-body-md">North Campus Dorms</span>
+</div>
+</div>
+<!-- Interests Chips -->
+<div class="mt-6">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">Interests</h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-primary-container/10 text-primary-container font-body-md text-sm rounded-lg">UI/UX</span>
+<span class="px-3 py-1 bg-primary-container/10 text-primary-container font-body-md text-sm rounded-lg">AI</span>
+<span class="px-3 py-1 bg-primary-container/10 text-primary-container font-body-md text-sm rounded-lg">Photography</span>
+<span class="px-3 py-1 bg-primary-container/10 text-primary-container font-body-md text-sm rounded-lg">Bouldering</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Media Gallery (Spans 8 cols on XL) -->
+<section class="xl:col-span-8 bg-surface rounded-xl p-6 ambient-shadow border border-surface-variant">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container">photo_library</span>
+                            Gallery
+                        </h3>
+<a class="font-body-md text-body-md text-primary font-medium hover:underline" href="#">View All</a>
+</div>
+<!-- Bento Grid for Gallery -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 auto-rows-[150px] md:auto-rows-[200px]">
+<!-- Large Feature Item -->
+<div class="col-span-2 row-span-2 rounded-xl overflow-hidden relative group cursor-pointer border border-surface-variant">
+<img alt="Hackathon group" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A lively group of university students laughing and working around a large wooden table in a brightly lit modern student center. Laptops, coffee cups, and notebooks are scattered around. The image exudes a youthful, collaborative, and energetic mood characteristic of a premium campus lifestyle brand." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqevVO5_wHxhoQDc4KRJHtQwo3DPY1n-8I7xivRIAY-oVmzxZruRcIb3djwnzfBLgNk1jJsW-BdyWVzREJ6Mq4BVhnp1XyYvB5a5fMAHRzcSgPBeDummr6XPPXuRiIDESfaRfvQOrg87-nP2QbJd7AhuxsCiPZIiho8b2jmNCBVClqxoudmn4nH0Q0GNt0ED5H8yBNdCkFIrOkB-TMrCoUEAVXwQqIeBen-2Vb_1klmV01mZOP8H0U_A"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+<p class="text-on-primary font-body-md font-semibold">Spring Hackathon '24</p>
+</div>
+</div>
+<!-- Square Items -->
+<div class="rounded-xl overflow-hidden relative group cursor-pointer border border-surface-variant">
+<img alt="Study session" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A close-up aesthetic shot of a sleek latte art next to an open notebook and a silver laptop on a minimalist cafe table. Soft natural light spills across the scene, creating a calm, focused, and modern light-mode study vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVKSi5KNEGsCkJ978c4-ItkyffXdqLQkoV9YtsZtAMwuAZn0LrFoFjc2pCWQM6dMeixLe30ykUPrz7j2XJ0AuSVE6TpQC_cf6JbwivOFctHZOhCw9LkZky8LUqCZPVaBkb7uvIY8zVMJB5Aympx1AvHKbAC7wXwWPq8zH3TpWS6G2eI4lS9d9tSosBXAZKsxFuuPVYWf_3lM20LgCkBWOCzq_0BPpoYRytLaeznmqYKUnn9bGc-d9_QA"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl">favorite</span>
+</div>
+</div>
+<div class="rounded-xl overflow-hidden relative group cursor-pointer border border-surface-variant">
+<img alt="Game day" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A vibrant outdoor shot of a university football stadium filled with cheering fans wearing navy and gold. The sky is bright blue. The atmosphere is energetic, exclusive, and spirited, perfectly aligning with a youthful collegiate network." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_9Dak6Gw2NMOfsHraBsnp50b5H4GNZDWHdVKUhqQPmViOiVAe3_lDSaMSPy8T1829gtlccidWMTTlG293aTbZYeLeyXa9dg5e68NqtuMOxu01PtCaps2rd3VK1kmWcUF1H-h5J1kU9uvGFkztsvZ1lLEzfYn4_u9cOPVMtPbPXcpWE4rK7uK2ffDEE1cUlnrthHdZqgf0Ho6CCDn5EKA-GIsGB5w4WvocweWhAJZau37ag9hLoyOf-Q"/>
+<!-- Video Icon Overlay -->
+<div class="absolute top-2 right-2 bg-surface/80 rounded-full p-1 backdrop-blur-sm">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+</div>
+<div class="rounded-xl overflow-hidden relative group cursor-pointer border border-surface-variant">
+<img alt="Campus architecture" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="An abstract, architectural photo looking up at modern glass and steel campus building against a clear sky. The geometry is clean and striking, reflecting a premium, intellectual, and modern design aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-8_4OIWUx9-YFYuzTuwPrDZVPig1ofbP_x4hESMcy_EhRWYmwh852WZnRZ_5QFPh6NKz-yzb8HyQHxdywfAzx3av5oxDQH0sFoHmHW5zCacywcr5VedZVcfxUpuigktGkJ8zpnuC2VEg9SbMRx9zd1xNkGlJUB0wumSe2dl90ZlKIf6b14dvHWVDcF7B7b64IVstsI2rHoOBxOvffVnXwJxVwS5v4yTLXrR71BqoKWVkqy5OAjO3hpw"/>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>
