@@ -53,16 +53,16 @@ export default function TopNavBar() {
       <div className="flex justify-between items-center px-4 md:px-8 h-16 w-full max-w-7xl mx-auto">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 rounded-lg bg-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
-              26&apos;
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-base shadow-sm group-hover:scale-105 transition-transform border border-secondary-container/20">
+              🔥
             </div>
             <div>
-              <span className="font-headline text-lg md:text-xl font-bold text-primary tracking-tight">
-                Class of 2026
+              <span className="font-headline text-lg md:text-xl font-bold text-primary tracking-tight group-hover:text-primary-container transition-colors">
+                Phoenix
               </span>
               <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-primary-fixed text-primary rounded-full">
-                Software Eng
+                Batch &apos;26
               </span>
             </div>
           </Link>
@@ -217,7 +217,7 @@ export default function TopNavBar() {
                   <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
                   <p className="text-xs text-on-surface-variant truncate">{currentUser.track}</p>
                   <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-secondary-container to-primary-container text-on-primary rounded-full">
-                    Class of &apos;26
+                    Phoenix &apos;26
                   </span>
                 </div>
                 <Link

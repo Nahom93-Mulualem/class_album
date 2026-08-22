@@ -54,7 +54,7 @@ export default function DirectoryPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[11px] font-bold text-secondary-container bg-primary-container px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Class of 2026
+              Phoenix • Class of 2026
             </span>
             <span className="text-xs font-semibold text-on-surface-variant">Software Engineering Roster</span>
           </div>

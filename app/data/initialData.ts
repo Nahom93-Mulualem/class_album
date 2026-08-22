@@ -33,10 +33,17 @@ export interface Post {
   timeAgo: string;
   content: string;
   image?: string;
+  video?: string;
   tag: "Career & Offers" | "Campus Life" | "Hackathons & Tech" | "Projects";
   likesCount: number;
   isLiked?: boolean;
   comments: Comment[];
+}
+
+export interface ReactionItem {
+  emoji: string;
+  count: number;
+  users: string[];
 }
 
 export interface MessageItem {
@@ -45,6 +52,7 @@ export interface MessageItem {
   text: string;
   time: string;
   isRead?: boolean;
+  reactions?: ReactionItem[];
 }
 
 export interface Conversation {
@@ -370,6 +378,33 @@ export const INITIAL_POSTS: Post[] = [
     isLiked: false,
     comments: [],
   },
+  {
+    id: "post-4",
+    authorId: "liam-zhang",
+    authorName: "Liam Zhang",
+    authorAvatar:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuD1Z_H8W0Wq-1hN3VqF0zS97QOklm_P4H9yX6wL5uE2kF1_rG_c4wP6nL3_rS7pT5kQ8wU9mZ4_pT6yU1oN2wM3qL_5",
+    authorTrack: "Robotics & Embedded C++",
+    timeAgo: "2 days ago",
+    content:
+      "Live demo test of our Senior Capstone quadcopter navigation system running autonomous obstacle avoidance! 🚁 Watch it thread the needle through the robotics arena.",
+    video:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    tag: "Projects",
+    likesCount: 112,
+    isLiked: true,
+    comments: [
+      {
+        id: "c-4",
+        authorName: "Alex Chen",
+        authorAvatar:
+          "https://lh3.googleusercontent.com/aida-public/AB6AXuDMLGCNKFCr7a7iihM-ILAGx8wgcjhWgZ6G9lJSFTgXX8c4dhm_MAMiOziO1tPRIZaGgUvGtj3JyOqKyMhS6EWpNky4VhuTuknCyMt2oOsex1Fyx05WN93WpuKdhefX1W3Ma7HeRAXg1V3KV7DQnTSnAqLGOLja6D0RFGfkWrDAVJjJMEpzzIYxzuGGz8wX8eJaIWkzL6xquakSbjuJHPk7TyZZEMh8CfC2-Bo7omnHCyl-El_nMOaoKA",
+        authorTrack: "Full-Stack & AI Systems",
+        timeAgo: "1 day ago",
+        content: "The PID loop stability here is insane!! What frequency is the telemetry stream running at?",
+      },
+    ],
+  },
 ];
 
 // Initial 1-on-1 Direct Messaging Conversations
@@ -387,6 +422,9 @@ export const INITIAL_CONVERSATIONS: Conversation[] = [
         text: "Hey Alex! How did the distributed systems midterm go?",
         time: "10:30 AM",
         isRead: true,
+        reactions: [
+          { emoji: "👋", count: 1, users: ["current-user"] },
+        ],
       },
       {
         id: "m-2",
@@ -394,6 +432,10 @@ export const INITIAL_CONVERSATIONS: Conversation[] = [
         text: "Not too bad! The Raft consensus study guide really helped a lot.",
         time: "10:35 AM",
         isRead: true,
+        reactions: [
+          { emoji: "🔥", count: 2, users: ["current-user", "sarah-jenkins"] },
+          { emoji: "🚀", count: 1, users: ["sarah-jenkins"] },
+        ],
       },
       {
         id: "m-3",
@@ -401,6 +443,10 @@ export const INITIAL_CONVERSATIONS: Conversation[] = [
         text: "Definitely need a massive coffee break though ☕",
         time: "10:36 AM",
         isRead: true,
+        reactions: [
+          { emoji: "❤️", count: 1, users: ["sarah-jenkins"] },
+          { emoji: "😂", count: 1, users: ["current-user"] },
+        ],
       },
       {
         id: "m-4",

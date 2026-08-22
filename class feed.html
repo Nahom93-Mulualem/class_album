@@ -149,24 +149,87 @@
                       "headline-lg-mobile": [
                               "24px",
                               {
-                                      "lineHeight": "1.2",
-                                      "fontWeight": "700"
-                              }
-                      ]
-              }
-      },
-          },
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#002366',
+                        'primary-container': '#003399',
+                        'on-primary': '#FFFFFF',
+                        'primary-fixed': '#D6E4FF',
+                        'secondary': '#FF6B00',
+                        'secondary-container': '#FF8533',
+                        'on-secondary': '#FFFFFF',
+                        'background': '#FFFFFF',
+                        'on-background': '#1A1C1E',
+                        'surface': '#FFFFFF',
+                        'surface-bright': '#F8FAFC',
+                        'surface-container-lowest': '#FFFFFF',
+                        'surface-container-low': '#F1F5F9',
+                        'surface-container': '#E2E8F0',
+                        'surface-container-high': '#CBD5E1',
+                        'surface-container-highest': '#94A3B8',
+                        'on-surface': '#1A1C1E',
+                        'on-surface-variant': '#475569',
+                        'outline': '#64748B',
+                        'outline-variant': '#E2E8F0',
+                        'error': '#BA1A1A',
+                        'on-error': '#FFFFFF',
+                    },
+                    fontFamily: {
+                        'headline-lg': ['Montserrat', 'sans-serif'],
+                        'headline-md': ['Montserrat', 'sans-serif'],
+                        'headline-sm': ['Montserrat', 'sans-serif'],
+                        'body-lg': ['Be Vietnam Pro', 'sans-serif'],
+                        'body-md': ['Be Vietnam Pro', 'sans-serif'],
+                        'label-sm': ['Be Vietnam Pro', 'sans-serif'],
+                    },
+                    fontSize: {
+                        'headline-lg': ['32px', { lineHeight: '40px', letterSpacing: '-0.02em' }],
+                        'headline-md': ['24px', { lineHeight: '32px', letterSpacing: '-0.01em' }],
+                        'headline-sm': ['20px', { lineHeight: '28px', letterSpacing: '0' }],
+                        'body-lg': ['16px', { lineHeight: '24px', letterSpacing: '0.01em' }],
+                        'body-md': ['14px', { lineHeight: '20px', letterSpacing: '0.01em' }],
+                        'label-sm': ['11px', { lineHeight: '16px', letterSpacing: '0.05em' }],
+                    },
+                    spacing: {
+                        'gutter': '24px',
+                        'margin-desktop': '32px',
+                        'margin-mobile': '16px',
+                        'container-max': '1280px',
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'xs': '4px',
+                        'sm': '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '24px',
+                        'full': '9999px',
+                    }
+                }
+            }
         }
     </script>
-<style>
-        body {
-            background-color: #f8f9fa; /* background */
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+            display: inline-block;
+            vertical-align: middle;
         }
+        .filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Visual Hierarchy: Ambient elevation system (avoid heavy, dirty shadows) */
         .ambient-shadow {
-            box-shadow: 0px 4px 20px rgba(0, 35, 102, 0.08);
+            box-shadow: 0px 4px 20px rgba(0, 35, 102, 0.05);
+        }
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
         .card-hover:hover {
-            transform: translateY(-4px);
+            transform: translateY(-2px);
             box-shadow: 0px 8px 24px rgba(0, 35, 102, 0.12);
         }
     </style>
@@ -175,8 +238,8 @@
 <!-- TopNavBar (Shared Component) -->
 <nav class="fixed top-0 w-full z-50 bg-surface/70 dark:bg-surface-container/70 border-b border-outline-variant/30 shadow-sm backdrop-blur-xl">
 <div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 w-full max-w-container-max mx-auto">
-<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">
-                Class of 2026
+<div class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed flex items-center gap-2">
+                <span>🔥</span> Phoenix
             </div>
 <!-- Mobile Menu Toggle (Hidden on Desktop) -->
 <button class="md:hidden text-primary p-2">

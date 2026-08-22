@@ -10,8 +10,8 @@ import ImageLightboxModal from "./components/ImageLightboxModal";
 import ToastContainer from "./components/ToastContainer";
 
 export const metadata: Metadata = {
-  title: "Class of 2026 • Software Engineering Alumni & Lounge",
-  description: "Official digital lounge and class directory for Software Engineering Class of 2026 graduates.",
+  title: "Phoenix • Software Engineering Class of 2026 Alumni & Lounge",
+  description: "Official digital lounge and class directory for the Phoenix Software Engineering Batch of 2026.",
 };
 
 export default function RootLayout({

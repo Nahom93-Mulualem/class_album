@@ -113,7 +113,7 @@ export default function FeedPage() {
                 rows={2}
                 value={composerText}
                 onChange={(e) => setComposerText(e.target.value)}
-                placeholder="Share a milestone, senior capstone update, or tech announcement..."
+                placeholder="Share a milestone, senior capstone update, code clip, or video demo..."
                 className="w-full bg-surface-container-low border border-transparent focus:border-primary/30 rounded-xl p-3 text-sm font-body text-on-surface outline-none transition-all placeholder:text-on-surface-variant/70 resize-none"
               />
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-outline-variant/20">
@@ -121,7 +121,7 @@ export default function FeedPage() {
                   <button
                     type="button"
                     onClick={() => setIsNewPostModalOpen(true)}
-                    className="p-2 rounded-lg hover:bg-primary-fixed/30 text-primary transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                    className="p-2 rounded-lg hover:bg-primary-fixed/30 text-primary transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-lg">image</span>
                     <span className="hidden sm:inline">Photo</span>
@@ -129,7 +129,15 @@ export default function FeedPage() {
                   <button
                     type="button"
                     onClick={() => setIsNewPostModalOpen(true)}
-                    className="p-2 rounded-lg hover:bg-primary-fixed/30 text-primary transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                    className="p-2 rounded-lg hover:bg-secondary-container/40 text-secondary transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-lg">videocam</span>
+                    <span className="hidden sm:inline">Video</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsNewPostModalOpen(true)}
+                    className="p-2 rounded-lg hover:bg-primary-fixed/30 text-primary transition-colors flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-lg">celebration</span>
                     <span className="hidden sm:inline">Milestone</span>
@@ -197,7 +205,7 @@ export default function FeedPage() {
                           {post.authorName}
                         </Link>
                         <span className="bg-gradient-to-r from-secondary-container to-primary-container text-on-secondary-container text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                          26&apos;
+                          Phoenix &apos;26
                         </span>
                       </div>
                       <p className="text-xs text-on-surface-variant font-medium">
@@ -215,6 +223,19 @@ export default function FeedPage() {
                 <div className="px-5 pb-3 font-body text-sm text-on-surface leading-relaxed">
                   <p>{post.content}</p>
                 </div>
+
+                {/* Post Attached Video */}
+                {post.video && (
+                  <div className="w-full bg-black overflow-hidden relative group">
+                    <video
+                      src={post.video}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full max-h-[460px] object-contain bg-black"
+                    />
+                  </div>
+                )}
 
                 {/* Post Attached Image */}
                 {post.image && (
@@ -345,7 +366,7 @@ export default function FeedPage() {
               Senior Class Events
             </h3>
             <span className="text-[11px] font-bold text-secondary-container bg-primary-container px-2 py-0.5 rounded-full">
-              2026
+              Phoenix &apos;26
             </span>
           </div>
 
@@ -391,31 +412,6 @@ export default function FeedPage() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* Trending SE Topics Bento */}
-        <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 ambient-shadow p-5">
-          <h3 className="font-headline text-sm font-bold text-primary mb-3 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">trending_up</span>
-            Trending in SE &apos;26
-          </h3>
-          <div className="space-y-2.5">
-            <div className="p-2.5 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
-              <span className="text-[10px] text-outline font-semibold uppercase tracking-wider">Capstone Track</span>
-              <p className="text-xs font-bold text-primary mt-0.5">#SeniorCapstone2026</p>
-              <p className="text-[11px] text-on-surface-variant">48 Classmates discussing</p>
-            </div>
-            <div className="p-2.5 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
-              <span className="text-[10px] text-outline font-semibold uppercase tracking-wider">Career Hub</span>
-              <p className="text-xs font-bold text-primary mt-0.5">#FullTimeOffers & #AIinternships</p>
-              <p className="text-[11px] text-on-surface-variant">32 Offers shared this week</p>
-            </div>
-            <div className="p-2.5 bg-surface-container-low rounded-xl hover:bg-surface-container transition-colors">
-              <span className="text-[10px] text-outline font-semibold uppercase tracking-wider">Commencement</span>
-              <p className="text-xs font-bold text-primary mt-0.5">#SEClassOf2026Gala</p>
-              <p className="text-[11px] text-on-surface-variant">May 22, 2026</p>
-            </div>
           </div>
         </div>
       </aside>

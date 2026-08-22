@@ -5,6 +5,8 @@ import {
   Student,
   Post,
   Conversation,
+  MessageItem,
+  ReactionItem,
   TechEvent,
   GalleryItem,
   YearbookSignature,
@@ -25,13 +27,14 @@ interface AppContextType {
   students: Student[];
   toggleConnect: (studentId: string) => void;
   posts: Post[];
-  createPost: (content: string, tag: Post["tag"], image?: string) => void;
+  createPost: (content: string, tag: Post["tag"], image?: string, video?: string) => void;
   toggleLikePost: (postId: string) => void;
   addComment: (postId: string, content: string) => void;
   conversations: Conversation[];
   activeConversationId: string;
   setActiveConversationId: (id: string) => void;
   sendMessage: (conversationId: string, text: string) => void;
+  toggleMessageReaction: (conversationId: string, messageId: string, emoji: string) => void;
   startConversationWithStudent: (studentId: string) => string;
   events: TechEvent[];
   toggleRSVP: (eventId: string) => void;
@@ -99,7 +102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const createPost = (content: string, tag: Post["tag"], image?: string) => {
+  const createPost = (content: string, tag: Post["tag"], image?: string, video?: string) => {
     const newPost: Post = {
       id: `post-${Date.now()}`,
       authorId: currentUser.id,
@@ -109,6 +112,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timeAgo: "Just now",
       content,
       image,
+      video,
       tag,
       likesCount: 0,
       isLiked: false,
@@ -116,7 +120,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setPosts([newPost, ...posts]);
     setIsNewPostModalOpen(false);
-    showToast("Post shared to Class of 2026 Feed! 🎉");
+    showToast("Post shared to Phoenix Feed! 🎉");
   };
 
   const toggleLikePost = (postId: string) => {
@@ -232,6 +236,57 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, 1400);
   };
 
+  const toggleMessageReaction = (conversationId: string, messageId: string, emoji: string) => {
+    setConversations((prev) =>
+      prev.map((conv) => {
+        if (conv.id !== conversationId) return conv;
+
+        const updatedMessages = conv.messages.map((msg) => {
+          if (msg.id !== messageId) return msg;
+
+          const existingReactions = msg.reactions || [];
+          const reactionIndex = existingReactions.findIndex((r) => r.emoji === emoji);
+
+          if (reactionIndex > -1) {
+            const currentReaction = existingReactions[reactionIndex];
+            const hasReacted = currentReaction.users.includes(currentUser.id);
+
+            let newReactions: ReactionItem[];
+            if (hasReacted) {
+              // User un-reacts
+              const newUsers = currentReaction.users.filter((u) => u !== currentUser.id);
+              if (newUsers.length === 0) {
+                newReactions = existingReactions.filter((_, idx) => idx !== reactionIndex);
+              } else {
+                newReactions = existingReactions.map((r, idx) =>
+                  idx === reactionIndex ? { ...r, count: r.count - 1, users: newUsers } : r
+                );
+              }
+            } else {
+              // User adds reaction
+              newReactions = existingReactions.map((r, idx) =>
+                idx === reactionIndex
+                  ? { ...r, count: r.count + 1, users: [...r.users, currentUser.id] }
+                  : r
+              );
+            }
+            return { ...msg, reactions: newReactions };
+          } else {
+            // New emoji reaction
+            const newReaction: ReactionItem = {
+              emoji,
+              count: 1,
+              users: [currentUser.id],
+            };
+            return { ...msg, reactions: [...existingReactions, newReaction] };
+          }
+        });
+
+        return { ...conv, messages: updatedMessages };
+      })
+    );
+  };
+
   const startConversationWithStudent = (studentId: string): string => {
     const existing = conversations.find((c) => c.studentId === studentId);
     if (existing) {
@@ -306,6 +361,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeConversationId,
         setActiveConversationId,
         sendMessage,
+        toggleMessageReaction,
         startConversationWithStudent,
         events,
         toggleRSVP,

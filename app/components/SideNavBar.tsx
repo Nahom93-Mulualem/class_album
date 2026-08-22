@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "../context/AppContext";
-import GraduationCountdown from "./GraduationCountdown";
 
 export default function SideNavBar() {
   const pathname = usePathname();
@@ -44,12 +43,12 @@ export default function SideNavBar() {
     <aside className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface border-r border-outline-variant/30 p-4 space-y-3 z-40 overflow-y-auto hide-scrollbar">
       {/* Lounge Badge */}
       <div className="flex items-center gap-3 p-2 mb-2">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-container to-primary text-secondary-container flex items-center justify-center font-headline font-bold text-lg shadow-sm border border-secondary-container/20">
-          26&apos;
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-lg shadow-sm border border-secondary-container/20">
+          🔥
         </div>
         <div>
-          <h2 className="font-headline text-base font-bold text-primary leading-tight">Class Lounge</h2>
-          <p className="font-body text-xs text-on-surface-variant font-medium">Software Eng &apos;26</p>
+          <h2 className="font-headline text-base font-bold text-primary leading-tight">Phoenix Lounge</h2>
+          <p className="font-body text-xs text-on-surface-variant font-medium">Batch of 2026</p>
         </div>
       </div>
 
@@ -92,15 +91,10 @@ export default function SideNavBar() {
         ))}
       </nav>
 
-      {/* Graduation Countdown Widget */}
-      <div className="pt-2">
-        <GraduationCountdown />
-      </div>
-
-      {/* Class Tagline */}
-      <div className="px-2 py-1 text-center">
-        <p className="text-[11px] text-outline">Software Engineering Class of 2026</p>
-        <p className="text-[10px] text-outline-variant">Building the future together</p>
+      {/* Phoenix Batch Tagline */}
+      <div className="px-2 py-3 text-center mt-auto border-t border-outline-variant/20">
+        <p className="text-[11px] font-semibold text-primary">Phoenix • Class of 2026</p>
+        <p className="text-[10px] text-outline">Software Engineering Alumni</p>
       </div>
     </aside>
   );
