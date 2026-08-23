@@ -11,7 +11,7 @@ export default function DirectoryPage() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrack, setSelectedTrack] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(8);
+  const [visibleCount, setVisibleCount] = useState(12);
 
   const techTracks = [
     "All",
@@ -232,12 +232,18 @@ export default function DirectoryPage() {
 
       {/* Load More Pagination Button */}
       {visibleCount < filteredStudents.length && (
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex items-center justify-center gap-3">
           <button
-            onClick={() => setVisibleCount((prev) => prev + 4)}
+            onClick={() => setVisibleCount((prev) => prev + 12)}
             className="bg-surface-container-high text-primary font-headline text-xs font-bold py-3 px-8 rounded-full hover:bg-surface-container-highest transition-colors shadow-sm cursor-pointer"
           >
             Load More Classmates ({filteredStudents.length - visibleCount} remaining)
+          </button>
+          <button
+            onClick={() => setVisibleCount(filteredStudents.length)}
+            className="bg-primary-container text-on-primary-container font-headline text-xs font-bold py-3 px-6 rounded-full hover:brightness-105 transition-all shadow-sm cursor-pointer"
+          >
+            Show All ({filteredStudents.length})
           </button>
         </div>
       )}

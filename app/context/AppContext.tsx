@@ -21,15 +21,22 @@ import {
   INITIAL_NOTIFICATIONS,
 } from "../data/initialData";
 
+export interface ExtendedUser extends Student {
+  username?: string;
+  email?: string;
+  role?: "STUDENT" | "ADMIN";
+  isActive?: boolean;
+}
+
 interface AppContextType {
-  currentUser: Student;
-  updateCurrentUser: (updated: Partial<Student>) => void;
+  currentUser: ExtendedUser;
+  updateCurrentUser: (updated: Partial<ExtendedUser>) => void;
   students: Student[];
   toggleConnect: (studentId: string) => void;
   posts: Post[];
-  createPost: (content: string, tag: Post["tag"], image?: string, video?: string) => void;
-  toggleLikePost: (postId: string) => void;
-  addComment: (postId: string, content: string) => void;
+  createPost: (content: string, tag: Post["tag"], image?: string, video?: string) => Promise<void>;
+  toggleLikePost: (postId: string) => Promise<void>;
+  addComment: (postId: string, content: string) => Promise<void>;
   conversations: Conversation[];
   activeConversationId: string;
   setActiveConversationId: (id: string) => void;
@@ -53,12 +60,20 @@ interface AppContextType {
   closeLightbox: () => void;
   toastMessage: string | null;
   showToast: (msg: string) => void;
+  refreshAuthSession: () => Promise<void>;
+  logoutUser: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<Student>(CURRENT_USER);
+  const [currentUser, setCurrentUser] = useState<ExtendedUser>({
+    ...CURRENT_USER,
+    username: "admin",
+    role: "ADMIN",
+    isActive: true,
+  });
+
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
@@ -84,7 +99,62 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const openLightbox = (imageUrl: string) => setLightboxImage(imageUrl);
   const closeLightbox = () => setLightboxImage(null);
 
-  const updateCurrentUser = (updated: Partial<Student>) => {
+  // Refresh current session from server cookie
+  const refreshAuthSession = async () => {
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setCurrentUser(data.user);
+        }
+      }
+    } catch {
+      // Fallback
+    }
+  };
+
+  // Fetch live database records for directory and posts
+  const fetchLiveDatabaseData = async () => {
+    try {
+      // 1. Fetch Users
+      const usersRes = await fetch("/api/users");
+      if (usersRes.ok) {
+        const data = await usersRes.json();
+        if (data.users && data.users.length > 0) {
+          setStudents(data.users);
+        }
+      }
+
+      // 2. Fetch Posts
+      const postsRes = await fetch("/api/posts");
+      if (postsRes.ok) {
+        const data = await postsRes.json();
+        if (data.posts && data.posts.length > 0) {
+          setPosts(data.posts);
+        }
+      }
+    } catch {
+      // Offline fallback
+    }
+  };
+
+  useEffect(() => {
+    refreshAuthSession();
+    fetchLiveDatabaseData();
+  }, []);
+
+  const logoutUser = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      showToast("Signed out successfully.");
+      window.location.href = "/login";
+    } catch {
+      window.location.href = "/login";
+    }
+  };
+
+  const updateCurrentUser = (updated: Partial<ExtendedUser>) => {
     setCurrentUser((prev) => ({ ...prev, ...updated }));
     showToast("Profile updated successfully!");
   };
@@ -102,7 +172,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const createPost = (content: string, tag: Post["tag"], image?: string, video?: string) => {
+  const createPost = async (content: string, tag: Post["tag"], image?: string, video?: string) => {
+    try {
+      const res = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, tag, image, video }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.post) {
+          setPosts([data.post, ...posts]);
+          setIsNewPostModalOpen(false);
+          showToast("Post shared to Phoenix Feed! 🎉");
+          return;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+
+    // Local state fallback
     const newPost: Post = {
       id: `post-${Date.now()}`,
       authorId: currentUser.id,
@@ -123,7 +214,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast("Post shared to Phoenix Feed! 🎉");
   };
 
-  const toggleLikePost = (postId: string) => {
+  const toggleLikePost = async (postId: string) => {
+    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
@@ -137,11 +229,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return p;
       })
     );
+
+    try {
+      await fetch(`/api/posts/${postId}/like`, { method: "POST" });
+    } catch {
+      // Revert if needed
+    }
   };
 
-  const addComment = (postId: string, content: string) => {
+  const addComment = async (postId: string, content: string) => {
     if (!content.trim()) return;
-    const newComment = {
+
+    const optimisticComment = {
       id: `c-${Date.now()}`,
       authorName: currentUser.name,
       authorAvatar: currentUser.avatar,
@@ -149,15 +248,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       timeAgo: "Just now",
       content,
     };
+
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
-          return { ...p, comments: [...p.comments, newComment] };
+          return { ...p, comments: [...p.comments, optimisticComment] };
         }
         return p;
       })
     );
     showToast("Comment posted!");
+
+    try {
+      const res = await fetch(`/api/posts/${postId}/comment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.comment) {
+          setPosts((prev) =>
+            prev.map((p) => {
+              if (p.id === postId) {
+                return {
+                  ...p,
+                  comments: p.comments.map((c) =>
+                    c.id === optimisticComment.id ? data.comment : c
+                  ),
+                };
+              }
+              return p;
+            })
+          );
+        }
+      }
+    } catch {
+      // Keep optimistic
+    }
   };
 
   const sendMessage = (conversationId: string, text: string) => {
@@ -191,14 +319,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Simulated Smart Reply from the classmate after 1.4 seconds
+    // Simulated smart reply
     setTimeout(() => {
       const conv = conversations.find((c) => c.id === conversationId);
       const student = students.find((s) => s.id === conv?.studentId);
       if (!student) return;
 
       const replySamples = [
-        `Sounds awesome! Let's sync up on that after the afternoon lecture! 🚀`,
+        `Sounds awesome! Let's sync up after the afternoon lecture! 🚀`,
         `Got it! I'm pushing my code branch now, let me know what you think. 💻`,
         `Awesome idea, let's grab coffee at the campus center and work through the details! ☕`,
         `Nice! That's going to make our Senior Capstone demo so much stronger.`,
@@ -253,7 +381,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
             let newReactions: ReactionItem[];
             if (hasReacted) {
-              // User un-reacts
               const newUsers = currentReaction.users.filter((u) => u !== currentUser.id);
               if (newUsers.length === 0) {
                 newReactions = existingReactions.filter((_, idx) => idx !== reactionIndex);
@@ -263,7 +390,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 );
               }
             } else {
-              // User adds reaction
               newReactions = existingReactions.map((r, idx) =>
                 idx === reactionIndex
                   ? { ...r, count: r.count + 1, users: [...r.users, currentUser.id] }
@@ -272,7 +398,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             }
             return { ...msg, reactions: newReactions };
           } else {
-            // New emoji reaction
             const newReaction: ReactionItem = {
               emoji,
               count: 1,
@@ -380,6 +505,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         closeLightbox,
         toastMessage,
         showToast,
+        refreshAuthSession,
+        logoutUser,
       }}
     >
       {children}

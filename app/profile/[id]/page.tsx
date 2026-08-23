@@ -23,7 +23,7 @@ export default function ClassmateProfilePage() {
   const [activeTab, setActiveTab] = useState<"about" | "gallery" | "yearbook">("about");
   const [newSignature, setNewSignature] = useState("");
 
-  const student = students.find((s) => s.id === studentId);
+  const student = students.find((s) => s.id === studentId || (s as any).username === studentId);
 
   if (!student) {
     return (

@@ -7,7 +7,7 @@ import { useApp } from "../context/AppContext";
 
 export default function SideNavBar() {
   const pathname = usePathname();
-  const { setIsNewPostModalOpen, conversations } = useApp();
+  const { setIsNewPostModalOpen, conversations, currentUser } = useApp();
 
   const totalUnreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
@@ -37,6 +37,17 @@ export default function SideNavBar() {
       icon: "person",
       isActive: pathname === "/profile",
     },
+    ...(currentUser.role === "ADMIN"
+      ? [
+          {
+            href: "/admin",
+            label: "Admin Console",
+            icon: "admin_panel_settings",
+            isActive: pathname.startsWith("/admin"),
+            isAdminSpecial: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -69,7 +80,11 @@ export default function SideNavBar() {
             href={item.href}
             className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
               item.isActive
-                ? "bg-secondary-container text-on-secondary-container font-bold shadow-sm translate-x-1"
+                ? item.isAdminSpecial
+                  ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold shadow-md translate-x-1"
+                  : "bg-secondary-container text-on-secondary-container font-bold shadow-sm translate-x-1"
+                : item.isAdminSpecial
+                ? "text-violet-700 dark:text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 font-bold hover:translate-x-1"
                 : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary hover:translate-x-1"
             }`}
           >

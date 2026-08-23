@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../app/generated/prisma"
@@ -10,4 +8,135 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  username           String              @unique
+  email              String              @unique
+  password           String              // bcrypt hashed password
+  role               Role                @default(STUDENT)
+  isActive           Boolean             @default(true)
+  name               String
+  avatar             String
+  degree             String              @default("B.S. Software Engineering")
+  gradYear           String              @default("2026")
+  track              String
+  statusQuote        String?
+  bio                String?
+  dorm               String?
+  skills             String[]
+  github             String?
+  linkedin           String?
+  connected          Boolean             @default(false)
+  online             Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  posts              Post[]
+  comments           Comment[]
+  likes              PostLike[]
+  sentMessages       Message[]           @relation("SentMessages")
+  receivedMessages   Message[]           @relation("ReceivedMessages")
+  yearbookSignatures YearbookSignature[]
+  rsvps              EventRSVP[]
+}
+
+model Post {
+  id           String      @id @default(cuid())
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorName   String
+  authorAvatar String
+  authorTrack  String
+  timeAgo      String      @default("Just now")
+  content      String
+  image        String?
+  video        String?
+  tag          String      @default("Projects") // "Career & Offers" | "Campus Life" | "Hackathons & Tech" | "Projects"
+  likesCount   Int         @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  comments     Comment[]
+  likes        PostLike[]
+}
+
+model PostLike {
+  id        String   @id @default(cuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model Comment {
+  id           String   @id @default(cuid())
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorName   String
+  authorAvatar String
+  authorTrack  String
+  timeAgo      String   @default("Just now")
+  content      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  text       String
+  isRead     Boolean  @default(false)
+  reactions  String?  // JSON string for reactions
+  createdAt  DateTime @default(now())
+}
+
+model TechEvent {
+  id          String      @id @default(cuid())
+  title       String
+  month       String
+  day         String
+  location    String
+  time        String
+  description String
+  createdAt   DateTime    @default(now())
+
+  rsvps       EventRSVP[]
+}
+
+model EventRSVP {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     TechEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([eventId, userId])
+}
+
+model YearbookSignature {
+  id           String   @id @default(cuid())
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorName   String
+  authorAvatar String
+  authorTrack  String
+  message      String
+  date         String
+  createdAt    DateTime @default(now())
 }

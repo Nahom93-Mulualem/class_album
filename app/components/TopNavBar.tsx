@@ -214,12 +214,31 @@ export default function TopNavBar() {
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-50">
                 <div className="px-3 py-2 border-b border-outline-variant/20 mb-1">
-                  <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
+                    {currentUser.role === "ADMIN" && (
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-700 rounded-full border border-fuchsia-400/40">
+                        ADMIN
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-on-surface-variant truncate">{currentUser.track}</p>
                   <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-secondary-container to-primary-container text-on-primary rounded-full">
                     Phoenix &apos;26
                   </span>
                 </div>
+
+                {currentUser.role === "ADMIN" && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 rounded-xl transition-colors mb-1"
+                  >
+                    <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
+                    Admin Dashboard
+                  </Link>
+                )}
+
                 <Link
                   href="/profile"
                   onClick={() => setIsUserMenuOpen(false)}
@@ -244,6 +263,17 @@ export default function TopNavBar() {
                   <span className="material-symbols-outlined text-lg">chat_bubble</span>
                   Direct Messages
                 </Link>
+
+                <div className="border-t border-outline-variant/20 mt-1 pt-1 space-y-0.5">
+                  <Link
+                    href="/login"
+                    onClick={() => setIsUserMenuOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-primary hover:bg-surface-container-low rounded-xl transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">switch_account</span>
+                    Switch / Login Account
+                  </Link>
+                </div>
               </div>
             )}
           </div>
