@@ -19,6 +19,12 @@ export default function MobileBottomNav() {
       isActive: pathname === "/",
     },
     {
+      href: "/memories",
+      label: "Memories",
+      icon: "auto_awesome",
+      isActive: pathname.startsWith("/memories"),
+    },
+    {
       href: "/messages",
       label: "Messages",
       icon: "chat_bubble",
@@ -40,7 +46,7 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full glass-nav border-t border-outline-variant/30 z-50 px-2 py-1 shadow-lg">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full glass-nav border-t border-outline-variant/30 z-50 px-1 py-1 shadow-lg transition-colors duration-250">
       <div className="flex justify-around items-center h-14">
         {navItems.map((item) => (
           <Link
@@ -64,7 +70,7 @@ export default function MobileBottomNav() {
             </div>
             <span className="text-[10px] mt-0.5 font-body">{item.label}</span>
             {item.badge !== undefined && (
-              <span className="absolute top-0 right-4 w-4 h-4 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-0 right-3 w-4 h-4 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center">
                 {item.badge}
               </span>
             )}

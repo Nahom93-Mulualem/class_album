@@ -7,7 +7,18 @@ import { useApp } from "../context/AppContext";
 
 export default function TopNavBar() {
   const router = useRouter();
-  const { currentUser, students, notifications, markNotificationAsRead, markAllNotificationsRead } = useApp();
+  const {
+    currentUser,
+    students,
+    memories,
+    notifications,
+    markNotificationAsRead,
+    markAllNotificationsRead,
+    theme,
+    toggleTheme,
+    restoreAdminAuthority,
+  } = useApp();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -19,16 +30,27 @@ export default function TopNavBar() {
 
   const unreadNotifsCount = notifications.filter((n) => !n.read).length;
 
-  // Filter students based on search query
+  // Filter students and memories based on search query
   const filteredStudents = searchQuery.trim()
     ? students
-        .filter(
-          (s) =>
-            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
-        )
-        .slice(0, 5)
+      .filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      .slice(0, 4)
+    : [];
+
+  const filteredMemories = searchQuery.trim()
+    ? memories
+      .filter(
+        (m) =>
+          m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          m.story.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .slice(0, 3)
     : [];
 
   // Close dropdowns on outside click
@@ -49,34 +71,37 @@ export default function TopNavBar() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm backdrop-blur-xl">
+    <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm backdrop-blur-xl transition-colors duration-250">
       <div className="flex justify-between items-center px-4 md:px-8 h-16 w-full max-w-7xl mx-auto">
-        {/* Brand */}
+        {/* Brand & Digital Yearbook Logo */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-base shadow-sm group-hover:scale-105 transition-transform border border-secondary-container/20">
-              🔥
+            <div className="w-10 h-10 rounded-full overflow-hidden shadow-md group-hover:scale-105 transition-transform border border-secondary-container/40 p-0.5 bg-black/40 shrink-0">
+              <img
+                src="/phoenix-logo.png"
+                alt="Phoenix Batch 2026 Crest"
+                className="w-full h-full object-cover rounded-full"
+              />
             </div>
             <div>
-              <span className="font-headline text-lg md:text-xl font-bold text-primary tracking-tight group-hover:text-primary-container transition-colors">
-                Phoenix
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 bg-primary-fixed text-primary rounded-full">
-                Batch &apos;26
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-headline text-lg md:text-xl font-bold text-primary tracking-tight group-hover:text-primary-container transition-colors">
+                  Phoenix
+                </span>
+              </div>
             </div>
           </Link>
         </div>
 
         {/* Global Live Search (Desktop) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8 relative" ref={searchRef}>
+        <div className="hidden md:flex flex-1 max-w-md mx-6 relative" ref={searchRef}>
           <div className="relative w-full group">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">
               search
             </span>
             <input
               type="text"
-              placeholder="Search SE classmates, skills (Rust, AI, React)..."
+              placeholder="Search classmates, memories, graduation milestones..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -89,67 +114,139 @@ export default function TopNavBar() {
 
           {/* Search Results Dropdown */}
           {isSearchOpen && searchQuery.trim() && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl p-2 z-50 max-h-80 overflow-y-auto">
-              <div className="px-3 py-1.5 text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">
-                Software Engineering Classmates ({filteredStudents.length})
-              </div>
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
-                  <Link
-                    key={student.id}
-                    href={`/profile/${student.id}`}
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      setSearchQuery("");
-                    }}
-                    className="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-lg transition-colors group"
-                  >
-                    <img
-                      src={student.avatar}
-                      alt={student.name}
-                      className="w-8 h-8 rounded-full object-cover border border-outline-variant/30"
-                    />
-                    <div className="flex-1 min-w-0 text-left">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-primary group-hover:text-primary-container truncate">
-                          {student.name}
-                        </span>
-                        <span className="text-[10px] bg-secondary-container/30 text-secondary font-bold px-1.5 py-0.2 rounded">
-                          &apos;26
-                        </span>
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-3 z-50 max-h-80 overflow-y-auto hide-scrollbar animate-modal-entry">
+              {/* Classmates */}
+              {filteredStudents.length > 0 && (
+                <div className="mb-3">
+                  <div className="px-2 py-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                    Classmates ({filteredStudents.length})
+                  </div>
+                  {filteredStudents.map((student) => (
+                    <Link
+                      key={student.id}
+                      href={`/profile/${student.id}`}
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-xl transition-colors group"
+                    >
+                      <img
+                        src={student.avatar}
+                        alt={student.name}
+                        className="w-8 h-8 rounded-full object-cover border border-outline-variant/30"
+                      />
+                      <div className="flex-1 min-w-0 text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm text-primary group-hover:text-primary-container truncate">
+                            {student.name}
+                          </span>
+                          <span className="text-[10px] bg-secondary-container/30 text-secondary font-bold px-1.5 py-0.2 rounded">
+                            &apos;26
+                          </span>
+                        </div>
+                        <p className="text-xs text-on-surface-variant truncate">{student.track}</p>
                       </div>
-                      <p className="text-xs text-on-surface-variant truncate">{student.track}</p>
-                    </div>
-                  </Link>
-                ))
-              ) : (
-                <div className="p-4 text-center text-xs text-on-surface-variant">
-                  No classmate matching &quot;{searchQuery}&quot; found.
+                    </Link>
+                  ))}
                 </div>
               )}
-              <div className="border-t border-outline-variant/20 mt-1 pt-1">
+
+              {/* Memories */}
+              {filteredMemories.length > 0 && (
+                <div>
+                  <div className="px-2 py-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                    Yearbook Memories ({filteredMemories.length})
+                  </div>
+                  {filteredMemories.map((mem) => (
+                    <Link
+                      key={mem.id}
+                      href="/memories"
+                      onClick={() => {
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                      className="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-xl transition-colors group"
+                    >
+                      <img
+                        src={mem.image}
+                        alt={mem.title}
+                        className="w-9 h-9 rounded-lg object-cover border border-outline-variant/30"
+                      />
+                      <div className="flex-1 min-w-0 text-left">
+                        <span className="font-semibold text-xs text-primary group-hover:text-primary-container truncate block">
+                          {mem.title}
+                        </span>
+                        <span className="text-[10px] text-on-surface-variant">
+                          🎓 {mem.category} • {mem.year}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+
+              {filteredStudents.length === 0 && filteredMemories.length === 0 && (
+                <div className="p-4 text-center text-xs text-on-surface-variant">
+                  No classmate or memory matching &quot;{searchQuery}&quot; found.
+                </div>
+              )}
+
+              <div className="border-t border-outline-variant/20 mt-2 pt-2 flex items-center justify-between px-2 text-xs font-bold text-primary">
                 <Link
                   href="/directory"
                   onClick={() => setIsSearchOpen(false)}
-                  className="block text-center py-1.5 text-xs font-bold text-primary hover:underline"
+                  className="hover:underline text-[11px]"
                 >
-                  View All in Directory →
+                  All Classmates →
+                </Link>
+                <Link
+                  href="/memories"
+                  onClick={() => setIsSearchOpen(false)}
+                  className="hover:underline text-[11px] text-secondary"
+                >
+                  All Memories →
                 </Link>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Actions (Notifications, Profile) */}
-        <div className="flex items-center gap-3">
+        {/* Right Actions: Theme Toggle, Notifications, Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Prominent Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
+            title={`Current: ${theme === "light" ? "Sunlight Warm" : "Midnight Obsidian"} — Click to switch`}
+            className="relative p-2.5 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all active:scale-90 flex items-center justify-center group shadow-xs cursor-pointer"
+          >
+            <div className="relative w-5 h-5 flex items-center justify-center">
+              {theme === "light" ? (
+                <span className="material-symbols-outlined text-amber-500 text-xl transition-transform duration-300 group-hover:rotate-45">
+                  light_mode
+                </span>
+              ) : (
+                <span className="material-symbols-outlined text-indigo-300 text-xl transition-transform duration-300 group-hover:-rotate-12">
+                  dark_mode
+                </span>
+              )}
+            </div>
+            {/* Subtle glow indicator */}
+            <span
+              className={`absolute -bottom-0.5 w-1.5 h-1.5 rounded-full ${theme === "light" ? "bg-amber-400" : "bg-indigo-400"
+                }`}
+            ></span>
+          </button>
+
           {/* Notifications Popover */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="relative p-2 text-primary hover:bg-surface-container-high rounded-full transition-colors active:scale-95 flex items-center justify-center"
+              className="relative p-2.5 text-on-surface hover:bg-surface-container-high rounded-full border border-outline-variant/20 transition-all active:scale-90 flex items-center justify-center cursor-pointer"
               aria-label="Notifications"
             >
-              <span className="material-symbols-outlined text-2xl">notifications</span>
+              <span className="material-symbols-outlined text-xl">notifications</span>
               {unreadNotifsCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
                   {unreadNotifsCount}
@@ -158,24 +255,25 @@ export default function TopNavBar() {
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-4 z-50">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-4 z-50 animate-modal-entry">
                 <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-2">
                   <h4 className="font-headline font-bold text-sm text-primary">Notifications</h4>
                   <button
                     onClick={markAllNotificationsRead}
-                    className="text-xs font-semibold text-secondary hover:underline"
+                    className="text-xs font-semibold text-secondary hover:underline cursor-pointer"
                   >
                     Mark all read
                   </button>
                 </div>
-                <div className="space-y-2 max-h-72 overflow-y-auto">
+                <div className="space-y-2 max-h-72 overflow-y-auto hide-scrollbar">
                   {notifications.map((notif) => (
                     <div
                       key={notif.id}
                       onClick={() => markNotificationAsRead(notif.id)}
-                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${
-                        notif.read ? "bg-surface hover:bg-surface-container-low" : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
-                      }`}
+                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${notif.read
+                        ? "bg-surface hover:bg-surface-container-low"
+                        : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
+                        }`}
                     >
                       <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 text-sm font-bold">
                         {notif.type === "message" && "💬"}
@@ -185,10 +283,14 @@ export default function TopNavBar() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-primary line-clamp-1">{notif.title}</p>
-                        <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">{notif.description}</p>
+                        <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">
+                          {notif.description}
+                        </p>
                         <span className="text-[10px] text-outline mt-1 block">{notif.time}</span>
                       </div>
-                      {!notif.read && <span className="w-2 h-2 rounded-full bg-secondary shrink-0 mt-1.5"></span>}
+                      {!notif.read && (
+                        <span className="w-2 h-2 rounded-full bg-secondary shrink-0 mt-1.5"></span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -200,7 +302,7 @@ export default function TopNavBar() {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-primary/30 transition-all"
+              className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-primary/40 transition-all active:scale-95 cursor-pointer"
             >
               <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-surface-container-high shrink-0 shadow-sm">
                 <img
@@ -212,20 +314,17 @@ export default function TopNavBar() {
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-50">
+              <div className="absolute right-0 mt-2 w-60 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-50 animate-modal-entry">
                 <div className="px-3 py-2 border-b border-outline-variant/20 mb-1">
                   <div className="flex items-center justify-between">
                     <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
                     {currentUser.role === "ADMIN" && (
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-700 rounded-full border border-fuchsia-400/40">
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 rounded-full border border-fuchsia-400/40">
                         ADMIN
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-on-surface-variant truncate">{currentUser.track}</p>
-                  <span className="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 bg-gradient-to-r from-secondary-container to-primary-container text-on-primary rounded-full">
-                    Phoenix &apos;26
-                  </span>
+
                 </div>
 
                 {currentUser.role === "ADMIN" && (
@@ -239,6 +338,7 @@ export default function TopNavBar() {
                   </Link>
                 )}
 
+
                 <Link
                   href="/profile"
                   onClick={() => setIsUserMenuOpen(false)}
@@ -247,24 +347,17 @@ export default function TopNavBar() {
                   <span className="material-symbols-outlined text-lg">person</span>
                   My Profile
                 </Link>
-                <Link
-                  href="/directory"
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">group</span>
-                  SE Class Directory
-                </Link>
-                <Link
-                  href="/messages"
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
-                >
-                  <span className="material-symbols-outlined text-lg">chat_bubble</span>
-                  Direct Messages
-                </Link>
-
                 <div className="border-t border-outline-variant/20 mt-1 pt-1 space-y-0.5">
+                  <button
+                    onClick={async () => {
+                      await restoreAdminAuthority();
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-xl transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-base">verified_user</span>
+                    <span>Restore Admin Authority</span>
+                  </button>
                   <Link
                     href="/login"
                     onClick={() => setIsUserMenuOpen(false)}

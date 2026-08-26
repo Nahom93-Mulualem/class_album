@@ -7,7 +7,7 @@ import { useApp } from "../context/AppContext";
 
 export default function SideNavBar() {
   const pathname = usePathname();
-  const { setIsNewPostModalOpen, conversations, currentUser } = useApp();
+  const { setIsNewPostModalOpen, setIsNewMemoryModalOpen, conversations, currentUser, memories } = useApp();
 
   const totalUnreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
@@ -19,10 +19,18 @@ export default function SideNavBar() {
       isActive: pathname === "/",
     },
     {
+      href: "/memories",
+      label: "Memories",
+      icon: "auto_awesome",
+      badge: "Yearbook",
+      isSpecial: true,
+      isActive: pathname.startsWith("/memories"),
+    },
+    {
       href: "/messages",
       label: "Messages",
       icon: "chat_bubble",
-      badge: totalUnreadMessages > 0 ? totalUnreadMessages : undefined,
+      badge: totalUnreadMessages > 0 ? `${totalUnreadMessages}` : undefined,
       isActive: pathname.startsWith("/messages"),
     },
     {
@@ -39,38 +47,52 @@ export default function SideNavBar() {
     },
     ...(currentUser.role === "ADMIN"
       ? [
-          {
-            href: "/admin",
-            label: "Admin Console",
-            icon: "admin_panel_settings",
-            isActive: pathname.startsWith("/admin"),
-            isAdminSpecial: true,
-          },
-        ]
+        {
+          href: "/admin",
+          label: "Admin Console",
+          icon: "admin_panel_settings",
+          isActive: pathname.startsWith("/admin"),
+          isAdminSpecial: true,
+        },
+      ]
       : []),
   ];
 
   return (
-    <aside className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface border-r border-outline-variant/30 p-4 space-y-3 z-40 overflow-y-auto hide-scrollbar">
-      {/* Lounge Badge */}
-      <div className="flex items-center gap-3 p-2 mb-2">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-lg shadow-sm border border-secondary-container/20">
-          🔥
+    <aside className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface border-r border-outline-variant/30 p-3 space-y-2 z-40 overflow-y-auto hide-scrollbar transition-colors duration-250">
+      {/* Lounge Badge with Official Crest */}
+      <div className="flex items-center gap-3 p-2 mb-1">
+        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-secondary-container/40 shrink-0 p-0.5 bg-black/40">
+          <img
+            src="/phoenix-logo.png"
+            alt=""
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
         <div>
-          <h2 className="font-headline text-base font-bold text-primary leading-tight">Phoenix Lounge</h2>
-          <p className="font-body text-xs text-on-surface-variant font-medium">Batch of 2026</p>
+          <h2 className="font-headline text-sm font-bold text-primary leading-tight">Phoenix Lounge</h2>
+
         </div>
       </div>
 
-      {/* New Post Action */}
-      <button
-        onClick={() => setIsNewPostModalOpen(true)}
-        className="w-full py-3 px-4 bg-secondary-container text-on-secondary-container rounded-xl font-headline font-bold text-sm shadow-sm hover:brightness-95 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-      >
-        <span className="material-symbols-outlined text-lg">add_circle</span>
-        <span>New Post</span>
-      </button>
+      {/* Quick Action Buttons */}
+      <div className="space-y-2">
+        <button
+          onClick={() => setIsNewPostModalOpen(true)}
+          className="w-full py-2.5 px-4 bg-secondary-container text-on-secondary-container rounded-xl font-headline font-bold text-xs shadow-sm hover:brightness-95 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-lg">add_circle</span>
+          <span>New Feed Post</span>
+        </button>
+
+        <button
+          onClick={() => setIsNewMemoryModalOpen(true)}
+          className="w-full py-2.5 px-4 bg-surface-container-low hover:bg-surface-container-high text-primary border border-outline-variant/30 rounded-xl font-headline font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-lg text-secondary">photo_camera</span>
+          <span>Add to Yearbook</span>
+        </button>
+      </div>
 
       {/* Navigation Items */}
       <nav className="space-y-1.5 flex-1 pt-2">
@@ -78,15 +100,16 @@ export default function SideNavBar() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${
-              item.isActive
-                ? item.isAdminSpecial
-                  ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold shadow-md translate-x-1"
-                  : "bg-secondary-container text-on-secondary-container font-bold shadow-sm translate-x-1"
-                : item.isAdminSpecial
+            className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 ${item.isActive
+              ? item.isAdminSpecial
+                ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold shadow-md translate-x-1"
+                : "bg-secondary-container text-on-secondary-container font-bold shadow-sm translate-x-1"
+              : item.isAdminSpecial
                 ? "text-violet-700 dark:text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 font-bold hover:translate-x-1"
-                : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary hover:translate-x-1"
-            }`}
+                : item.isSpecial
+                  ? "text-primary hover:bg-surface-container-high font-semibold hover:translate-x-1"
+                  : "text-on-surface-variant hover:bg-surface-container-high hover:text-primary hover:translate-x-1"
+              }`}
           >
             <div className="flex items-center gap-3">
               <span
@@ -98,7 +121,14 @@ export default function SideNavBar() {
               <span className="font-body text-sm">{item.label}</span>
             </div>
             {item.badge !== undefined && (
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-error text-on-error rounded-full">
+              <span
+                className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${item.isSpecial
+                  ? item.isActive
+                    ? "bg-primary text-on-primary"
+                    : "bg-secondary-container text-on-secondary-container"
+                  : "bg-error text-on-error"
+                  }`}
+              >
                 {item.badge}
               </span>
             )}
@@ -109,7 +139,7 @@ export default function SideNavBar() {
       {/* Phoenix Batch Tagline */}
       <div className="px-2 py-3 text-center mt-auto border-t border-outline-variant/20">
         <p className="text-[11px] font-semibold text-primary">Phoenix • Class of 2026</p>
-        <p className="text-[10px] text-outline">Software Engineering Alumni</p>
+        <p className="text-[10px] text-on-surface-variant">Software Engineering Vault</p>
       </div>
     </aside>
   );

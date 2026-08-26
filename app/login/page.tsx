@@ -123,21 +123,57 @@ export default function LoginPage() {
 
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-container text-secondary-container flex items-center justify-center font-headline font-bold text-2xl shadow-md border border-secondary-container/20">
-                🔥
+              <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-lg border border-secondary-container/40 p-0.5 bg-black/40 shrink-0">
+                <img
+                  src="/phoenix-logo.png"
+                  alt="Phoenix Batch 2026 Official Logo"
+                  className="w-full h-full object-cover rounded-xl"
+                />
               </div>
               <div>
                 <h1 className="font-headline text-2xl font-bold text-primary tracking-tight">
                   Phoenix Sign In
                 </h1>
                 <p className="text-xs text-on-surface-variant font-medium">
-                  Software Engineering Class of 2026
+                  Software Engineering Class of 2020 - 2026
                 </p>
               </div>
             </div>
             <p className="text-xs text-on-surface-variant pt-2">
-              Sign in with your cohort credentials to access the digital lounge, class directory, and yearbook.
+              Sign in with your cohort credentials to access the digital lounge, class directory, and yearbook vault.
             </p>
+          </div>
+
+          {/* Instant Admin Authority Quick Action */}
+          <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 font-medium">
+              <span className="material-symbols-outlined text-lg text-amber-600 dark:text-amber-400">
+                admin_panel_settings
+              </span>
+              <span>Need administrator authority?</span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  const res = await fetch("/api/auth/restore-admin", { method: "POST" });
+                  const data = await res.json();
+                  if (res.ok && data.user) {
+                    showToast("👑 Admin Authority Restored! Redirecting to Admin Console...", "success");
+                    await refreshAuthSession();
+                    router.push("/admin");
+                  }
+                } catch {
+                  setError("Failed to restore admin authority.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="px-3 py-1.5 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold shadow-xs hover:brightness-95 active:scale-95 transition-all shrink-0 cursor-pointer"
+            >
+              👑 Instant Admin Access
+            </button>
           </div>
 
           {error && (
@@ -172,7 +208,7 @@ export default function LoginPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold text-on-surface">Password</label>
-                <span className="text-[11px] text-outline">Default: Student@2026! / Admin@2026!</span>
+                <span className="text-[11px] text-outline">Default: admin123 / Student@2026!</span>
               </div>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg">
@@ -195,7 +231,7 @@ export default function LoginPage() {
               className="w-full py-3 bg-gradient-to-r from-primary to-primary-container text-secondary-container rounded-xl font-headline font-bold text-xs md:text-sm shadow-md hover:brightness-110 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               {loading ? (
-                <span>Authenticating with PostgreSQL...</span>
+                <span className="inline-block w-4 h-4 border-2 border-secondary-container border-t-transparent rounded-full animate-spin"></span>
               ) : (
                 <>
                   <span>Sign In to Phoenix</span>

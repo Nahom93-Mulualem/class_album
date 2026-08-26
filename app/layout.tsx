@@ -7,11 +7,13 @@ import MobileBottomNav from "./components/MobileBottomNav";
 import NewPostModal from "./components/NewPostModal";
 import EditProfileModal from "./components/EditProfileModal";
 import ImageLightboxModal from "./components/ImageLightboxModal";
+import NewMemoryModal from "./components/NewMemoryModal";
+import MemoryDetailModal from "./components/MemoryDetailModal";
 import ToastContainer from "./components/ToastContainer";
 
 export const metadata: Metadata = {
-  title: "Phoenix • Software Engineering Class of 2026 Alumni & Lounge",
-  description: "Official digital lounge and class directory for the Phoenix Software Engineering Batch of 2026.",
+  title: "Phoenix • Software Engineering Class of 2026 Digital Yearbook & Lounge",
+  description: "Official digital lounge, class directory, and digital yearbook memory vault for the Phoenix Software Engineering Batch of 2026.",
 };
 
 export default function RootLayout({
@@ -20,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full light">
+    <html lang="en" className="h-full">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -35,7 +37,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-body bg-background text-on-background antialiased selection:bg-secondary-container selection:text-on-secondary-container">
         <AppProvider>
-          {/* Top Shared Navbar */}
+          {/* Top Shared Navbar with Theme Toggle */}
           <TopNavBar />
 
           {/* Main App Layout Container */}
@@ -55,6 +57,8 @@ export default function RootLayout({
           {/* Global Modals & Notifications */}
           <NewPostModal />
           <EditProfileModal />
+          <NewMemoryModal />
+          <MemoryDetailModal />
           <ImageLightboxModal />
           <ToastContainer />
         </AppProvider>

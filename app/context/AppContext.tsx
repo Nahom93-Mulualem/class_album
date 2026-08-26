@@ -11,6 +11,7 @@ import {
   GalleryItem,
   YearbookSignature,
   NotificationItem,
+  MemoryItem,
   CURRENT_USER,
   INITIAL_STUDENTS,
   INITIAL_POSTS,
@@ -19,6 +20,7 @@ import {
   INITIAL_GALLERY,
   INITIAL_SIGNATURES,
   INITIAL_NOTIFICATIONS,
+  INITIAL_MEMORIES,
 } from "../data/initialData";
 
 export interface ExtendedUser extends Student {
@@ -28,7 +30,21 @@ export interface ExtendedUser extends Student {
   isActive?: boolean;
 }
 
+export interface ToastItem {
+  message: string;
+  type?: "success" | "info" | "heart" | "copy" | "event";
+}
+
+export interface LightboxData {
+  url: string;
+  type?: "image" | "video";
+  title?: string;
+}
+
 interface AppContextType {
+  theme: "light" | "dark";
+  toggleTheme: () => void;
+  setTheme: (t: "light" | "dark") => void;
   currentUser: ExtendedUser;
   updateCurrentUser: (updated: Partial<ExtendedUser>) => void;
   students: Student[];
@@ -51,22 +67,34 @@ interface AppContextType {
   notifications: NotificationItem[];
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  memories: MemoryItem[];
+  addMemory: (memory: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => void;
+  toggleLikeMemory: (memoryId: string) => void;
+  addMemoryComment: (memoryId: string, content: string) => void;
   isNewPostModalOpen: boolean;
   setIsNewPostModalOpen: (open: boolean) => void;
   isEditProfileModalOpen: boolean;
   setIsEditProfileModalOpen: (open: boolean) => void;
-  lightboxImage: string | null;
-  openLightbox: (imageUrl: string) => void;
+  isNewMemoryModalOpen: boolean;
+  setIsNewMemoryModalOpen: (open: boolean) => void;
+  activeMemoryForDetail: MemoryItem | null;
+  setActiveMemoryForDetail: (memory: MemoryItem | null) => void;
+  lightboxMedia: LightboxData | null;
+  openLightbox: (url: string, type?: "image" | "video", title?: string) => void;
   closeLightbox: () => void;
-  toastMessage: string | null;
-  showToast: (msg: string) => void;
+  toast: ToastItem | null;
+  showToast: (msg: string, type?: ToastItem["type"]) => void;
   refreshAuthSession: () => Promise<void>;
+  restoreAdminAuthority: () => Promise<boolean>;
   logoutUser: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  // Theme State
+  const [theme, setThemeState] = useState<"light" | "dark">("light");
+
   const [currentUser, setCurrentUser] = useState<ExtendedUser>({
     ...CURRENT_USER,
     username: "admin",
@@ -82,22 +110,74 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [gallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [yearbookSignatures, setYearbookSignatures] = useState<YearbookSignature[]>(INITIAL_SIGNATURES);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [memories, setMemories] = useState<MemoryItem[]>(INITIAL_MEMORIES);
 
   // Modals & UI States
   const [isNewPostModalOpen, setIsNewPostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isNewMemoryModalOpen, setIsNewMemoryModalOpen] = useState(false);
+  const [activeMemoryForDetail, setActiveMemoryForDetail] = useState<MemoryItem | null>(null);
+  const [lightboxMedia, setLightboxMedia] = useState<LightboxData | null>(null);
+  const [toast, setToast] = useState<ToastItem | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("phoenix_theme") as "light" | "dark" | null;
+      if (savedTheme === "dark" || savedTheme === "light") {
+        setThemeState(savedTheme);
+        applyThemeClass(savedTheme);
+      } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const initial = prefersDark ? "dark" : "light";
+        setThemeState(initial);
+        applyThemeClass(initial);
+      }
+    } catch {
+      // Fallback
+    }
+  }, []);
+
+  const applyThemeClass = (t: "light" | "dark") => {
+    const root = document.documentElement;
+    if (t === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
+      root.setAttribute("data-theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      root.classList.add("light");
+      root.setAttribute("data-theme", "light");
+    }
+  };
+
+  const setTheme = (newTheme: "light" | "dark") => {
+    setThemeState(newTheme);
+    applyThemeClass(newTheme);
+    try {
+      localStorage.setItem("phoenix_theme", newTheme);
+    } catch {
+      // ignore
+    }
+  };
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    showToast(next === "dark" ? "Switched to Midnight Obsidian Theme 🌙" : "Switched to Sunlight Warm Theme ☀️", "info");
+  };
+
+  const showToast = (msg: string, type: ToastItem["type"] = "info") => {
+    setToast({ message: msg, type });
     setTimeout(() => {
-      setToastMessage((prev) => (prev === msg ? null : prev));
+      setToast((prev) => (prev?.message === msg ? null : prev));
     }, 3200);
   };
 
-  const openLightbox = (imageUrl: string) => setLightboxImage(imageUrl);
-  const closeLightbox = () => setLightboxImage(null);
+  const openLightbox = (url: string, type: "image" | "video" = "image", title?: string) => {
+    setLightboxMedia({ url, type, title });
+  };
+  const closeLightbox = () => setLightboxMedia(null);
 
   // Refresh current session from server cookie
   const refreshAuthSession = async () => {
@@ -107,6 +187,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         if (data.user) {
           setCurrentUser(data.user);
+          return;
         }
       }
     } catch {
@@ -114,10 +195,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Restore Admin Authority
+  const restoreAdminAuthority = async (): Promise<boolean> => {
+    try {
+      const res = await fetch("/api/auth/restore-admin", { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setCurrentUser(data.user);
+        showToast("👑 Admin Authority Restored! Welcome back, Admin.", "success");
+        return true;
+      }
+    } catch {
+      // Fallback
+    }
+
+    setCurrentUser((prev) => ({
+      ...prev,
+      role: "ADMIN",
+      isActive: true,
+    }));
+    showToast("👑 Admin Authority Restored!", "success");
+    return true;
+  };
+
   // Fetch live database records for directory and posts
   const fetchLiveDatabaseData = async () => {
     try {
-      // 1. Fetch Users
       const usersRes = await fetch("/api/users");
       if (usersRes.ok) {
         const data = await usersRes.json();
@@ -126,7 +229,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // 2. Fetch Posts
       const postsRes = await fetch("/api/posts");
       if (postsRes.ok) {
         const data = await postsRes.json();
@@ -147,7 +249,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logoutUser = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      showToast("Signed out successfully.");
+      showToast("Signed out successfully.", "info");
       window.location.href = "/login";
     } catch {
       window.location.href = "/login";
@@ -156,7 +258,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateCurrentUser = (updated: Partial<ExtendedUser>) => {
     setCurrentUser((prev) => ({ ...prev, ...updated }));
-    showToast("Profile updated successfully!");
+    showToast("Profile updated successfully!", "success");
   };
 
   const toggleConnect = (studentId: string) => {
@@ -164,7 +266,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((s) => {
         if (s.id === studentId) {
           const nextState = !s.connected;
-          showToast(nextState ? `Connected with ${s.name}!` : `Disconnected from ${s.name}`);
+          showToast(nextState ? `Connected with ${s.name}! 🤝` : `Disconnected from ${s.name}`, "info");
           return { ...s, connected: nextState };
         }
         return s;
@@ -185,7 +287,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (data.post) {
           setPosts([data.post, ...posts]);
           setIsNewPostModalOpen(false);
-          showToast("Post shared to Phoenix Feed! 🎉");
+          showToast("Post shared to Phoenix Feed! 🎉", "success");
           return;
         }
       }
@@ -193,7 +295,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Fallback
     }
 
-    // Local state fallback
     const newPost: Post = {
       id: `post-${Date.now()}`,
       authorId: currentUser.id,
@@ -211,15 +312,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setPosts([newPost, ...posts]);
     setIsNewPostModalOpen(false);
-    showToast("Post shared to Phoenix Feed! 🎉");
+    showToast("Post shared to Phoenix Feed! 🎉", "success");
   };
 
   const toggleLikePost = async (postId: string) => {
-    // Optimistic UI update
     setPosts((prev) =>
       prev.map((p) => {
         if (p.id === postId) {
           const isLiked = !p.isLiked;
+          if (isLiked) {
+            showToast(`Liked ${p.authorName}'s update! ❤️`, "heart");
+          }
           return {
             ...p,
             isLiked,
@@ -257,7 +360,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return p;
       })
     );
-    showToast("Comment posted!");
+    showToast("Comment posted! 💬", "success");
 
     try {
       const res = await fetch(`/api/posts/${postId}/comment`, {
@@ -286,6 +389,73 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Keep optimistic
     }
+  };
+
+  // Memories methods
+  const addMemory = (memoryData: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => {
+    const newMemory: MemoryItem = {
+      ...memoryData,
+      id: `mem-${Date.now()}`,
+      likesCount: 1,
+      isLiked: true,
+      comments: [],
+    };
+    setMemories([newMemory, ...memories]);
+    setIsNewMemoryModalOpen(false);
+    showToast(`Memory added to Digital Yearbook! 🎓📸`, "success");
+  };
+
+  const toggleLikeMemory = (memoryId: string) => {
+    setMemories((prev) =>
+      prev.map((m) => {
+        if (m.id === memoryId) {
+          const isLiked = !m.isLiked;
+          if (isLiked) {
+            showToast(`Loved "${m.title}"! ❤️`, "heart");
+          }
+          const updated = {
+            ...m,
+            isLiked,
+            likesCount: isLiked ? m.likesCount + 1 : Math.max(0, m.likesCount - 1),
+          };
+          if (activeMemoryForDetail?.id === memoryId) {
+            setActiveMemoryForDetail(updated);
+          }
+          return updated;
+        }
+        return m;
+      })
+    );
+  };
+
+  const addMemoryComment = (memoryId: string, content: string) => {
+    if (!content.trim()) return;
+
+    const newComment = {
+      id: `mc-${Date.now()}`,
+      authorName: currentUser.name,
+      authorAvatar: currentUser.avatar,
+      authorTrack: currentUser.track,
+      timeAgo: "Just now",
+      content,
+    };
+
+    setMemories((prev) =>
+      prev.map((m) => {
+        if (m.id === memoryId) {
+          const updated = {
+            ...m,
+            comments: [...m.comments, newComment],
+          };
+          if (activeMemoryForDetail?.id === memoryId) {
+            setActiveMemoryForDetail(updated);
+          }
+          return updated;
+        }
+        return m;
+      })
+    );
+    showToast("Yearbook comment added! ✍️", "success");
   };
 
   const sendMessage = (conversationId: string, text: string) => {
@@ -319,7 +489,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Simulated smart reply
+    // Simulated reply
     setTimeout(() => {
       const conv = conversations.find((c) => c.id === conversationId);
       const student = students.find((s) => s.id === conv?.studentId);
@@ -440,7 +610,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((e) => {
         if (e.id === eventId) {
           const nextState = !e.isRSVPed;
-          showToast(nextState ? `RSVP confirmed for ${e.title}! 🎟️` : `Removed RSVP for ${e.title}`);
+          showToast(nextState ? `RSVP confirmed for ${e.title}! 🎟️` : `Removed RSVP for ${e.title}`, "event");
           return { ...e, isRSVPed: nextState };
         }
         return e;
@@ -459,7 +629,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       message,
     };
     setYearbookSignatures([newSig, ...yearbookSignatures]);
-    showToast("Yearbook memory signed! 🎓✍️");
+    showToast("Yearbook memory signed! 🎓✍️", "success");
   };
 
   const markNotificationAsRead = (id: string) => {
@@ -468,12 +638,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    showToast("All notifications marked as read.");
+    showToast("All notifications marked as read.", "info");
   };
 
   return (
     <AppContext.Provider
       value={{
+        theme,
+        toggleTheme,
+        setTheme,
         currentUser,
         updateCurrentUser,
         students,
@@ -496,16 +669,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         notifications,
         markNotificationAsRead,
         markAllNotificationsRead,
+        memories,
+        addMemory,
+        toggleLikeMemory,
+        addMemoryComment,
         isNewPostModalOpen,
         setIsNewPostModalOpen,
         isEditProfileModalOpen,
         setIsEditProfileModalOpen,
-        lightboxImage,
+        isNewMemoryModalOpen,
+        setIsNewMemoryModalOpen,
+        activeMemoryForDetail,
+        setActiveMemoryForDetail,
+        lightboxMedia,
         openLightbox,
         closeLightbox,
-        toastMessage,
+        toast,
         showToast,
         refreshAuthSession,
+        restoreAdminAuthority,
         logoutUser,
       }}
     >

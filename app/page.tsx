@@ -262,13 +262,13 @@ export default function FeedPage() {
                     {/* Like Button */}
                     <button
                       onClick={() => toggleLikePost(post.id)}
-                      className={`flex items-center gap-1.5 text-xs font-semibold transition-all cursor-pointer group ${
+                      className={`flex items-center gap-1.5 text-xs font-semibold transition-all active:scale-90 cursor-pointer group ${
                         post.isLiked ? "text-error font-bold" : "hover:text-error"
                       }`}
                     >
                       <span
                         className={`material-symbols-outlined text-xl group-hover:scale-125 transition-transform ${
-                          post.isLiked ? "text-error" : ""
+                          post.isLiked ? "text-error animate-heart-burst" : ""
                         }`}
                         style={{ fontVariationSettings: post.isLiked ? "'FILL' 1" : "'FILL' 0" }}
                       >
@@ -358,6 +358,34 @@ export default function FeedPage() {
 
       {/* Right Column: Upcoming SE Events & Highlights (Desktop) */}
       <aside className="hidden lg:block lg:col-span-4 space-y-5 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto hide-scrollbar pb-8">
+        {/* Digital Yearbook Vault Spotlight Card */}
+        <div className="bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl p-5 border border-secondary-container/30 shadow-lg relative overflow-hidden group">
+          <div className="absolute -right-4 -bottom-4 text-7xl font-headline font-black text-white/5 pointer-events-none">
+            &apos;26
+          </div>
+          <div className="relative z-10 space-y-2.5">
+            <div className="flex items-center gap-1.5">
+              <span className="text-base">🎓</span>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-secondary-container bg-secondary-container/20 px-2 py-0.5 rounded-full">
+                Memory Vault
+              </span>
+            </div>
+            <h3 className="font-headline font-bold text-base text-white">
+              Class of 2026 Digital Yearbook
+            </h3>
+            <p className="text-xs text-primary-fixed leading-relaxed">
+              Explore graduation photos, hackathons, and moments in a visual masonry gallery.
+            </p>
+            <Link
+              href="/memories"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-secondary-container text-on-secondary-container rounded-xl font-headline font-bold text-xs shadow-md hover:brightness-95 active:scale-95 transition-all mt-1"
+            >
+              <span>Open Yearbook</span>
+              <span className="material-symbols-outlined text-base">arrow_forward</span>
+            </Link>
+          </div>
+        </div>
+
         {/* Upcoming SE Events Card */}
         <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 ambient-shadow p-5">
           <div className="flex items-center justify-between mb-4">
