@@ -8,11 +8,20 @@ const connectionString =
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres2@localhost:5432/class_album?schema=public";
 
+const isProduction = process.env.NODE_ENV === "production";
+const needsSsl =
+  connectionString.includes("sslmode=require") ||
+  connectionString.includes("render.com") ||
+  connectionString.includes("neon.tech") ||
+  connectionString.includes("supabase.co") ||
+  process.env.PGSSLMODE === "require";
+
 const pool = new Pool({
   connectionString,
-  max: 10,
+  max: isProduction ? 15 : 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
+  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
 });
 
 const adapter = new PrismaPg(pool);

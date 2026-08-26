@@ -8,7 +8,17 @@ const connectionString =
   process.env.DATABASE_URL ||
   "postgresql://postgres:postgres2@localhost:5432/class_album?schema=public";
 
-const pool = new Pool({ connectionString });
+const needsSsl =
+  connectionString.includes("sslmode=require") ||
+  connectionString.includes("render.com") ||
+  connectionString.includes("neon.tech") ||
+  connectionString.includes("supabase.co") ||
+  process.env.PGSSLMODE === "require";
+
+const pool = new Pool({
+  connectionString,
+  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+});
 
 async function main() {
   console.log("🌱 Starting PostgreSQL database seeding via pg pool...");
