@@ -12,6 +12,7 @@
     "seed": "node prisma/seed.mjs"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "@types/canvas-confetti": "^1.9.0",
@@ -26,7 +27,6 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
