@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useApp } from "./context/AppContext";
 import { Post } from "./data/initialData";
@@ -26,6 +26,17 @@ export default function FeedPage() {
     "post-1": true,
     "post-2": true,
   });
+  const [accessDeniedAlert, setAccessDeniedAlert] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("error") === "access_denied_admin_only") {
+        setAccessDeniedAlert(true);
+        showToast("⚠️ Admin Console is restricted to Administrators only.", "info");
+      }
+    }
+  }, [showToast]);
 
   const filterTags = ["All", "Projects", "Career & Offers", "Hackathons & Tech", "Campus Life"];
 
@@ -64,36 +75,61 @@ export default function FeedPage() {
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Main Feed Column */}
       <div className="col-span-1 lg:col-span-8 space-y-5 pb-20 md:pb-8">
-        {/* Welcome Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-gradient-to-r from-primary-container to-primary text-on-primary rounded-2xl p-6 shadow-sm">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-secondary-container bg-secondary-container/20 px-2 py-0.5 rounded-full">
-                Software Engineering 2026
+        {/* Access Denied Notice if Student attempted to visit /admin */}
+        {accessDeniedAlert && (
+          <div className="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-center justify-between gap-3 animate-slideDown">
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-amber-600 dark:text-amber-400 text-xl shrink-0">
+                admin_panel_settings
               </span>
+              <div>
+                <strong>Administrator Access Restricted:</strong> Your current account is a Student account. The Admin Console requires Administrator credentials. You are currently viewing the <strong>Student Dashboard</strong>.
+              </div>
             </div>
-            <h1 className="font-headline text-xl md:text-2xl font-bold text-white mt-1">
-              Welcome back, {currentUser.name}! 🚀
-            </h1>
-            <p className="text-xs md:text-sm text-primary-fixed mt-1">
-              Connect, collaborate, and celebrate senior milestones with your 50 SE classmates.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 mt-2 sm:mt-0">
-            <Link
-              href="/directory"
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold backdrop-blur-sm transition-colors"
-            >
-              Classmates
-            </Link>
             <button
-              onClick={() => setIsNewPostModalOpen(true)}
-              className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:brightness-95 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
+              onClick={() => setAccessDeniedAlert(false)}
+              className="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg text-[11px] font-bold shrink-0 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-base">add</span>
-              New Post
+              Dismiss
             </button>
           </div>
+        )}
+
+        {/* Administrator Quick Switch Banner */}
+        {currentUser?.role === "ADMIN" && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-violet-950/40 via-purple-900/30 to-indigo-950/40 border border-violet-500/40 rounded-2xl text-xs backdrop-blur-md">
+            <div className="flex items-center gap-2.5 text-violet-200">
+              <span className="material-symbols-outlined text-violet-400 text-lg">admin_panel_settings</span>
+              <span>
+                <strong>Administrator View:</strong> You are currently viewing the live <strong>Student Lounge (User Dashboard)</strong>.
+              </span>
+            </div>
+            <Link
+              href="/admin"
+              className="px-3.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-xs shadow-sm transition-all text-center shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>Return to Admin Console</span>
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+          </div>
+        )}
+
+        {/* Welcome Header */}
+        <div className="bg-gradient-to-r from-primary-container to-primary text-on-primary rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-secondary-container bg-secondary-container/20 px-2.5 py-0.5 rounded-full">
+              {currentUser?.role === "ADMIN" ? "👑 Administrator Access" : "🎓 Student Dashboard"}
+            </span>
+            <span className="text-[11px] text-white/80 font-medium">
+              • {currentUser?.track || "Software Engineering"}
+            </span>
+          </div>
+          <h1 className="font-headline text-xl md:text-2xl font-bold text-white mt-2">
+            Welcome back, {currentUser?.name || "Classmate"}! 🚀
+          </h1>
+          <p className="text-xs md:text-sm text-primary-fixed mt-1">
+            Connect, collaborate, and celebrate senior milestones with your 50 SE classmates.
+          </p>
         </div>
 
         {/* Quick Composer Card */}
@@ -102,8 +138,8 @@ export default function FeedPage() {
             <Link href="/profile" className="shrink-0">
               <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30 hover:scale-105 transition-transform">
                 <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
+                  src={currentUser?.avatar || "/phoenix-logo.png"}
+                  alt={currentUser?.name || "Classmate"}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -327,8 +363,8 @@ export default function FeedPage() {
                     {/* Add Comment Input */}
                     <form onSubmit={(e) => handleCommentSubmit(post.id, e)} className="flex items-center gap-2.5 pt-1">
                       <img
-                        src={currentUser.avatar}
-                        alt={currentUser.name}
+                        src={currentUser?.avatar || "/phoenix-logo.png"}
+                        alt={currentUser?.name || "User"}
                         className="w-8 h-8 rounded-full object-cover border border-outline-variant/30 shrink-0"
                       />
                       <input

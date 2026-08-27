@@ -45,7 +45,8 @@ interface AppContextType {
   theme: "light" | "dark";
   toggleTheme: () => void;
   setTheme: (t: "light" | "dark") => void;
-  currentUser: ExtendedUser;
+  currentUser: ExtendedUser | null;
+  isAuthLoading: boolean;
   updateCurrentUser: (updated: Partial<ExtendedUser>) => void;
   students: Student[];
   toggleConnect: (studentId: string) => void;
@@ -95,12 +96,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Theme State
   const [theme, setThemeState] = useState<"light" | "dark">("light");
 
-  const [currentUser, setCurrentUser] = useState<ExtendedUser>({
-    ...CURRENT_USER,
-    username: "admin",
-    role: "ADMIN",
-    isActive: true,
-  });
+  const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
@@ -187,12 +184,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         if (data.user) {
           setCurrentUser(data.user);
-          return;
+          setIsAuthLoading(false);
+          return data.user;
         }
       }
+      setCurrentUser(null);
     } catch {
-      // Fallback
+      setCurrentUser(null);
+    } finally {
+      setIsAuthLoading(false);
     }
+    return null;
   };
 
   // Restore Admin Authority
@@ -209,13 +211,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Fallback
     }
 
-    setCurrentUser((prev) => ({
-      ...prev,
-      role: "ADMIN",
-      isActive: true,
-    }));
-    showToast("👑 Admin Authority Restored!", "success");
-    return true;
+    showToast("Failed to restore admin authority.", "info");
+    return false;
   };
 
   // Fetch live database records for directory and posts
@@ -249,15 +246,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logoutUser = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
-      showToast("Signed out successfully.", "info");
+      showToast("Signed out successfully. See you soon!", "info");
+      setCurrentUser(null);
       window.location.href = "/login";
     } catch {
+      setCurrentUser(null);
       window.location.href = "/login";
     }
   };
 
   const updateCurrentUser = (updated: Partial<ExtendedUser>) => {
-    setCurrentUser((prev) => ({ ...prev, ...updated }));
+    setCurrentUser((prev) => (prev ? { ...prev, ...updated } : null));
     showToast("Profile updated successfully!", "success");
   };
 
@@ -297,10 +296,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const newPost: Post = {
       id: `post-${Date.now()}`,
-      authorId: currentUser.id,
-      authorName: currentUser.name,
-      authorAvatar: currentUser.avatar,
-      authorTrack: currentUser.track,
+      authorId: currentUser?.id || "guest",
+      authorName: currentUser?.name || "Phoenix Classmate",
+      authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
+      authorTrack: currentUser?.track || "Software Engineering",
       timeAgo: "Just now",
       content,
       image,
@@ -345,9 +344,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const optimisticComment = {
       id: `c-${Date.now()}`,
-      authorName: currentUser.name,
-      authorAvatar: currentUser.avatar,
-      authorTrack: currentUser.track,
+      authorName: currentUser?.name || "Phoenix Classmate",
+      authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
+      authorTrack: currentUser?.track || "Software Engineering",
       timeAgo: "Just now",
       content,
     };
@@ -433,9 +432,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const newComment = {
       id: `mc-${Date.now()}`,
-      authorName: currentUser.name,
-      authorAvatar: currentUser.avatar,
-      authorTrack: currentUser.track,
+      authorName: currentUser?.name || "Phoenix Classmate",
+      authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
+      authorTrack: currentUser?.track || "Software Engineering",
       timeAgo: "Just now",
       content,
     };
@@ -535,6 +534,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleMessageReaction = (conversationId: string, messageId: string, emoji: string) => {
+    if (!currentUser) return;
+
     setConversations((prev) =>
       prev.map((conv) => {
         if (conv.id !== conversationId) return conv;
@@ -622,9 +623,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!message.trim()) return;
     const newSig: YearbookSignature = {
       id: `sig-${Date.now()}`,
-      authorName: currentUser.name,
-      authorAvatar: currentUser.avatar,
-      authorTrack: currentUser.track,
+      authorName: currentUser?.name || "Phoenix Classmate",
+      authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
+      authorTrack: currentUser?.track || "Software Engineering",
       date: "Today",
       message,
     };
@@ -648,6 +649,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         toggleTheme,
         setTheme,
         currentUser,
+        isAuthLoading,
         updateCurrentUser,
         students,
         toggleConnect,

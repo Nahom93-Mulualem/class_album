@@ -129,9 +129,9 @@ export default function NewMemoryModal() {
       image: finalImage,
       video: uploadedVideo || undefined,
       aspect,
-      authorId: currentUser.id,
-      authorName: currentUser.name,
-      authorAvatar: currentUser.avatar,
+      authorId: currentUser?.id || "student-guest",
+      authorName: currentUser?.name || "Phoenix Classmate",
+      authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
       taggedClassmates,
     });
 

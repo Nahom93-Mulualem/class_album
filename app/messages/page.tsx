@@ -374,7 +374,7 @@ function MessagesContent() {
                       {hasReactions && (
                         <div className={`flex flex-wrap gap-1 ${isCurrentUser ? "justify-end" : "justify-start"}`}>
                           {msg.reactions!.map((reaction) => {
-                            const userReacted = reaction.users.includes(currentUser.id);
+                            const userReacted = currentUser ? reaction.users.includes(currentUser.id) : false;
                             return (
                               <button
                                 key={reaction.emoji}

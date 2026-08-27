@@ -6,16 +6,16 @@ import { useApp } from "../context/AppContext";
 export default function EditProfileModal() {
   const { isEditProfileModalOpen, setIsEditProfileModalOpen, currentUser, updateCurrentUser } = useApp();
 
-  const [name, setName] = useState(currentUser.name);
-  const [track, setTrack] = useState(currentUser.track);
-  const [statusQuote, setStatusQuote] = useState(currentUser.statusQuote);
-  const [bio, setBio] = useState(currentUser.bio);
-  const [dorm, setDorm] = useState(currentUser.dorm);
-  const [skillsStr, setSkillsStr] = useState(currentUser.skills.join(", "));
-  const [github, setGithub] = useState(currentUser.github || "");
-  const [linkedin, setLinkedin] = useState(currentUser.linkedin || "");
+  const [name, setName] = useState(currentUser?.name || "");
+  const [track, setTrack] = useState(currentUser?.track || "");
+  const [statusQuote, setStatusQuote] = useState(currentUser?.statusQuote || "");
+  const [bio, setBio] = useState(currentUser?.bio || "");
+  const [dorm, setDorm] = useState(currentUser?.dorm || "");
+  const [skillsStr, setSkillsStr] = useState(currentUser?.skills ? currentUser.skills.join(", ") : "");
+  const [github, setGithub] = useState(currentUser?.github || "");
+  const [linkedin, setLinkedin] = useState(currentUser?.linkedin || "");
 
-  if (!isEditProfileModalOpen) return null;
+  if (!isEditProfileModalOpen || !currentUser) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -140,13 +140,13 @@ export default function NewPostModal() {
         <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4">
           <div className="flex items-center gap-3">
             <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
+              src={currentUser?.avatar || "/phoenix-logo.png"}
+              alt={currentUser?.name || "User"}
               className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-sm"
             />
             <div>
-              <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
-              <p className="text-xs text-on-surface-variant">{currentUser.track} • Phoenix &apos;26</p>
+              <p className="font-headline font-bold text-sm text-primary">{currentUser?.name || "Phoenix Classmate"}</p>
+              <p className="text-xs text-on-surface-variant">{currentUser?.track || "Software Engineering"} • Phoenix &apos;26</p>
             </div>
           </div>
 

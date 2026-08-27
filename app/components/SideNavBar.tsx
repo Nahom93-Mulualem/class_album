@@ -7,14 +7,26 @@ import { useApp } from "../context/AppContext";
 
 export default function SideNavBar() {
   const pathname = usePathname();
-  const { setIsNewPostModalOpen, setIsNewMemoryModalOpen, conversations, currentUser, memories } = useApp();
+  const { conversations, currentUser } = useApp();
 
   const totalUnreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const navItems = [
+    ...(isAdmin
+      ? [
+          {
+            href: "/admin",
+            label: "Admin Dashboard",
+            icon: "admin_panel_settings",
+            isActive: pathname.startsWith("/admin"),
+            isAdminSpecial: true,
+          },
+        ]
+      : []),
     {
       href: "/",
-      label: "Feed",
+      label: isAdmin ? "Student Lounge (Feed)" : "Student Dashboard",
       icon: "dynamic_feed",
       isActive: pathname === "/",
     },
@@ -45,17 +57,6 @@ export default function SideNavBar() {
       icon: "person",
       isActive: pathname === "/profile",
     },
-    ...(currentUser.role === "ADMIN"
-      ? [
-        {
-          href: "/admin",
-          label: "Admin Console",
-          icon: "admin_panel_settings",
-          isActive: pathname.startsWith("/admin"),
-          isAdminSpecial: true,
-        },
-      ]
-      : []),
   ];
 
   return (
@@ -71,27 +72,8 @@ export default function SideNavBar() {
         </div>
         <div>
           <h2 className="font-headline text-sm font-bold text-primary leading-tight">Phoenix Lounge</h2>
-
+          <p className="text-[11px] text-on-surface-variant">Class of 2020 - 2026</p>
         </div>
-      </div>
-
-      {/* Quick Action Buttons */}
-      <div className="space-y-2">
-        <button
-          onClick={() => setIsNewPostModalOpen(true)}
-          className="w-full py-2.5 px-4 bg-secondary-container text-on-secondary-container rounded-xl font-headline font-bold text-xs shadow-sm hover:brightness-95 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-lg">add_circle</span>
-          <span>New Feed Post</span>
-        </button>
-
-        <button
-          onClick={() => setIsNewMemoryModalOpen(true)}
-          className="w-full py-2.5 px-4 bg-surface-container-low hover:bg-surface-container-high text-primary border border-outline-variant/30 rounded-xl font-headline font-bold text-xs shadow-xs transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-lg text-secondary">photo_camera</span>
-          <span>Add to Yearbook</span>
-        </button>
       </div>
 
       {/* Navigation Items */}
@@ -137,7 +119,7 @@ export default function SideNavBar() {
       </nav>
 
       {/* Phoenix Batch Tagline */}
-      <div className="px-2 py-3 text-center mt-auto border-t border-outline-variant/20">
+      <div className="px-2 py-3 text-center mt-auto border-t border-outline-variant/15">
         <p className="text-[11px] font-semibold text-primary">Phoenix • Class of 2026</p>
         <p className="text-[10px] text-on-surface-variant">Software Engineering Vault</p>
       </div>

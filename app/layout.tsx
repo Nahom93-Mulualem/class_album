@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppProvider } from "./context/AppContext";
-import TopNavBar from "./components/TopNavBar";
-import SideNavBar from "./components/SideNavBar";
-import MobileBottomNav from "./components/MobileBottomNav";
-import NewPostModal from "./components/NewPostModal";
-import EditProfileModal from "./components/EditProfileModal";
-import ImageLightboxModal from "./components/ImageLightboxModal";
-import NewMemoryModal from "./components/NewMemoryModal";
-import MemoryDetailModal from "./components/MemoryDetailModal";
-import ToastContainer from "./components/ToastContainer";
+import AppLayoutShell from "./components/AppLayoutShell";
 
 export const metadata: Metadata = {
   title: "Phoenix • Software Engineering Class of 2026 Digital Yearbook & Lounge",
@@ -37,30 +29,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col font-body bg-background text-on-background antialiased selection:bg-secondary-container selection:text-on-secondary-container">
         <AppProvider>
-          {/* Top Shared Navbar with Theme Toggle */}
-          <TopNavBar />
-
-          {/* Main App Layout Container */}
-          <div className="flex-1 w-full max-w-7xl mx-auto pt-16 flex">
-            {/* Desktop Side Navigation */}
-            <SideNavBar />
-
-            {/* Page Content Container */}
-            <div className="flex-1 md:ml-64 w-full min-h-[calc(100vh-64px)] flex flex-col">
-              {children}
-            </div>
-          </div>
-
-          {/* Mobile Bottom Navigation */}
-          <MobileBottomNav />
-
-          {/* Global Modals & Notifications */}
-          <NewPostModal />
-          <EditProfileModal />
-          <NewMemoryModal />
-          <MemoryDetailModal />
-          <ImageLightboxModal />
-          <ToastContainer />
+          <AppLayoutShell>{children}</AppLayoutShell>
         </AppProvider>
       </body>
     </html>

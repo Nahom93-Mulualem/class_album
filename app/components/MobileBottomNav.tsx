@@ -7,11 +7,22 @@ import { useApp } from "../context/AppContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { conversations } = useApp();
+  const { conversations, currentUser } = useApp();
 
   const totalUnreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const navItems = [
+    ...(isAdmin
+      ? [
+          {
+            href: "/admin",
+            label: "Admin",
+            icon: "admin_panel_settings",
+            isActive: pathname.startsWith("/admin"),
+          },
+        ]
+      : []),
     {
       href: "/",
       label: "Feed",

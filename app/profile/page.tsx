@@ -17,6 +17,15 @@ export default function CurrentUserProfilePage() {
   const [activeTab, setActiveTab] = useState<"about" | "gallery" | "yearbook">("about");
   const [newSignature, setNewSignature] = useState("");
 
+  if (!currentUser) {
+    return (
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-16 flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin mb-3"></div>
+        <p className="text-xs text-on-surface-variant">Loading cohort profile...</p>
+      </main>
+    );
+  }
+
   const handleAddSignature = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSignature.trim()) return;

@@ -72,7 +72,7 @@ interface AdminStats {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { currentUser, showToast, refreshAuthSession } = useApp();
+  const { currentUser, showToast, refreshAuthSession, logoutUser } = useApp();
 
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "logs">("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -411,16 +411,16 @@ export default function AdminDashboardPage() {
             </div>
             <div className="space-y-2">
               <h1 className="font-headline text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-violet-200">
-                Phoenix Cohort Control Center
+                Phoenix Admin Dashboard & Control Console
               </h1>
               <p className="text-sm text-slate-300 max-w-2xl">
-                Real-time oversight for the Software Engineering Class of 2020 - 2026.
+                Real-time oversight, user management, and moderation for the Software Engineering Class of 2020 - 2026.
               </p>
             </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setIsCreateUserModalOpen(true)}
               className="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-violet-900/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
@@ -432,8 +432,8 @@ export default function AdminDashboardPage() {
               href="/"
               className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold backdrop-blur-md border border-white/10 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
             >
-              <span className="material-symbols-outlined text-base">arrow_back</span>
-              Back to Lounge
+              <span className="material-symbols-outlined text-base">visibility</span>
+              <span>View Student Dashboard</span>
             </Link>
           </div>
         </div>

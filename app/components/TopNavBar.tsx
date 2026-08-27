@@ -16,7 +16,7 @@ export default function TopNavBar() {
     markAllNotificationsRead,
     theme,
     toggleTheme,
-    restoreAdminAuthority,
+    logoutUser,
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -306,28 +306,36 @@ export default function TopNavBar() {
             >
               <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-surface-container-high shrink-0 shadow-sm">
                 <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
+                  src={currentUser?.avatar || "/phoenix-logo.png"}
+                  alt={currentUser?.name || "User"}
                   className="w-full h-full object-cover"
                 />
               </div>
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-60 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2 z-50 animate-modal-entry">
-                <div className="px-3 py-2 border-b border-outline-variant/20 mb-1">
-                  <div className="flex items-center justify-between">
-                    <p className="font-headline font-bold text-sm text-primary">{currentUser.name}</p>
-                    {currentUser.role === "ADMIN" && (
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 rounded-full border border-fuchsia-400/40">
+              <div className="absolute right-0 mt-2 w-64 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2.5 z-50 animate-modal-entry">
+                <div className="px-3 py-2 border-b border-outline-variant/20 mb-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-headline font-bold text-sm text-primary truncate">
+                      {currentUser?.name || "Phoenix User"}
+                    </p>
+                    {currentUser?.role === "ADMIN" ? (
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-fuchsia-500/20 text-fuchsia-700 dark:text-fuchsia-300 rounded-full border border-fuchsia-400/40 shrink-0">
                         ADMIN
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 bg-sky-500/20 text-sky-700 dark:text-sky-300 rounded-full border border-sky-400/40 shrink-0">
+                        STUDENT
                       </span>
                     )}
                   </div>
-
+                  <p className="text-[11px] text-on-surface-variant truncate mt-0.5">
+                    {currentUser?.track || "Class of 2026"}
+                  </p>
                 </div>
 
-                {currentUser.role === "ADMIN" && (
+                {currentUser?.role === "ADMIN" && (
                   <Link
                     href="/admin"
                     onClick={() => setIsUserMenuOpen(false)}
@@ -338,34 +346,35 @@ export default function TopNavBar() {
                   </Link>
                 )}
 
+                <Link
+                  href="/"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">dashboard</span>
+                  {currentUser?.role === "ADMIN" ? "Student Lounge (Feed)" : "Student Dashboard"}
+                </Link>
 
                 <Link
                   href="/profile"
                   onClick={() => setIsUserMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
                 >
-                  <span className="material-symbols-outlined text-lg">person</span>
+                  <span className="material-symbols-outlined text-base">person</span>
                   My Profile
                 </Link>
-                <div className="border-t border-outline-variant/20 mt-1 pt-1 space-y-0.5">
+
+                <div className="border-t border-outline-variant/20 mt-1 pt-1.5 space-y-1">
                   <button
                     onClick={async () => {
-                      await restoreAdminAuthority();
                       setIsUserMenuOpen(false);
+                      await logoutUser();
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-xl transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl transition-colors cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-base">verified_user</span>
-                    <span>Restore Admin Authority</span>
+                    <span className="material-symbols-outlined text-base">logout</span>
+                    <span>Sign Out</span>
                   </button>
-                  <Link
-                    href="/login"
-                    onClick={() => setIsUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-primary hover:bg-surface-container-low rounded-xl transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-base">switch_account</span>
-                    Switch / Login Account
-                  </Link>
                 </div>
               </div>
             )}
