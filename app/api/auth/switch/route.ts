@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionToken, AUTH_COOKIE_NAME } from "@/lib/auth";
 
+import { getCurrentUserFromCookie } from "@/lib/auth";
+
 export async function POST(req: NextRequest) {
   try {
+    const requester = await getCurrentUserFromCookie();
+    if (!requester || requester.role !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Unauthorized. Admin authority required to switch accounts." },
+        { status: 403 }
+      );
+    }
     const { username } = await req.json();
 
     if (!username) {

@@ -194,6 +194,19 @@ export default function DirectoryPage() {
                   <span className="material-symbols-outlined text-base">chat_bubble</span>
                   Message
                 </button>
+                <button
+                  onClick={() => toggleConnect(student.id)}
+                  className={`px-3 py-2 rounded-xl text-xs font-headline font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                    student.connected
+                      ? "bg-secondary-container text-on-secondary-container shadow-sm"
+                      : "border border-outline-variant/40 text-on-surface hover:bg-surface-container-high"
+                  }`}
+                  title={student.connected ? "Connected" : "Connect with classmate"}
+                >
+                  <span className="material-symbols-outlined text-base">
+                    {student.connected ? "check" : "person_add"}
+                  </span>
+                </button>
                 <Link
                   href={`/profile/${student.id}`}
                   className="px-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline text-xs font-bold py-2 rounded-xl transition-colors flex items-center justify-center"

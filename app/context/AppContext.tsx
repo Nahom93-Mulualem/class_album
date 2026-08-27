@@ -47,9 +47,9 @@ interface AppContextType {
   setTheme: (t: "light" | "dark") => void;
   currentUser: ExtendedUser | null;
   isAuthLoading: boolean;
-  updateCurrentUser: (updated: Partial<ExtendedUser>) => void;
+  updateCurrentUser: (updated: Partial<ExtendedUser>) => Promise<boolean>;
   students: Student[];
-  toggleConnect: (studentId: string) => void;
+  toggleConnect: (studentId: string) => Promise<void>;
   posts: Post[];
   createPost: (content: string, tag: Post["tag"], image?: string, video?: string) => Promise<void>;
   toggleLikePost: (postId: string) => Promise<void>;
@@ -107,7 +107,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [gallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [yearbookSignatures, setYearbookSignatures] = useState<YearbookSignature[]>(INITIAL_SIGNATURES);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
-  const [memories, setMemories] = useState<MemoryItem[]>(INITIAL_MEMORIES);
+  const [memories, setMemories] = useState<MemoryItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("phoenix_custom_memories");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return [...parsed, ...INITIAL_MEMORIES];
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return INITIAL_MEMORIES;
+  });
 
   // Modals & UI States
   const [isNewPostModalOpen, setIsNewPostModalOpen] = useState(false);
@@ -215,7 +230,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
-  // Fetch live database records for directory and posts
+  // Fetch live database records for directory, posts, events, and signatures
   const fetchLiveDatabaseData = async () => {
     try {
       const usersRes = await fetch("/api/users");
@@ -231,6 +246,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const data = await postsRes.json();
         if (data.posts && data.posts.length > 0) {
           setPosts(data.posts);
+        }
+      }
+
+      const eventsRes = await fetch("/api/events");
+      if (eventsRes.ok) {
+        const data = await eventsRes.json();
+        if (data.events && data.events.length > 0) {
+          setEvents(data.events);
+        }
+      }
+
+      const sigsRes = await fetch("/api/signatures");
+      if (sigsRes.ok) {
+        const data = await sigsRes.json();
+        if (data.signatures && data.signatures.length > 0) {
+          setYearbookSignatures(data.signatures);
         }
       }
     } catch {
@@ -255,12 +286,38 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const updateCurrentUser = (updated: Partial<ExtendedUser>) => {
+  const updateCurrentUser = async (updated: Partial<ExtendedUser>): Promise<boolean> => {
     setCurrentUser((prev) => (prev ? { ...prev, ...updated } : null));
-    showToast("Profile updated successfully!", "success");
+
+    try {
+      const res = await fetch("/api/users/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          setCurrentUser(data.user);
+          setStudents((prev) =>
+            prev.map((s) => (s.id === data.user.id ? { ...s, ...data.user } : s))
+          );
+        }
+        showToast("Profile updated successfully in database! ✨", "success");
+        return true;
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Failed to update profile.", "info");
+        return false;
+      }
+    } catch {
+      showToast("Profile saved locally (offline mode).", "info");
+      return true;
+    }
   };
 
-  const toggleConnect = (studentId: string) => {
+  const toggleConnect = async (studentId: string) => {
     setStudents((prev) =>
       prev.map((s) => {
         if (s.id === studentId) {
@@ -271,6 +328,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return s;
       })
     );
+
+    try {
+      await fetch(`/api/users/${studentId}/connect`, { method: "POST" });
+    } catch {
+      // Keep optimistic
+    }
   };
 
   const createPost = async (content: string, tag: Post["tag"], image?: string, video?: string) => {
@@ -390,7 +453,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Memories methods
+  // Memories methods with persistent storage
   const addMemory = (memoryData: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => {
     const newMemory: MemoryItem = {
       ...memoryData,
@@ -399,7 +462,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       isLiked: true,
       comments: [],
     };
-    setMemories([newMemory, ...memories]);
+    setMemories((prev) => {
+      const updated = [newMemory, ...prev];
+      try {
+        const custom = updated.filter((m) => m.id.startsWith("mem-"));
+        localStorage.setItem("phoenix_custom_memories", JSON.stringify(custom));
+      } catch {
+        // Fallback
+      }
+      return updated;
+    });
     setIsNewMemoryModalOpen(false);
     showToast(`Memory added to Digital Yearbook! 🎓📸`, "success");
   };
@@ -468,7 +540,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const newMessage = {
       id: `msg-${Date.now()}`,
-      senderId: "current-user",
+      senderId: currentUser?.id || "current-user",
       text,
       time: timeNow,
       isRead: true,
@@ -606,7 +678,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return newConvId;
   };
 
-  const toggleRSVP = (eventId: string) => {
+  const toggleRSVP = async (eventId: string) => {
     setEvents((prev) =>
       prev.map((e) => {
         if (e.id === eventId) {
@@ -617,20 +689,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return e;
       })
     );
+
+    try {
+      await fetch(`/api/events/${eventId}/rsvp`, { method: "POST" });
+    } catch {
+      // Keep optimistic
+    }
   };
 
-  const addYearbookSignature = (message: string) => {
+  const addYearbookSignature = async (message: string) => {
     if (!message.trim()) return;
-    const newSig: YearbookSignature = {
+
+    const nowFormatted = new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date());
+
+    const optimisticSig: YearbookSignature = {
       id: `sig-${Date.now()}`,
       authorName: currentUser?.name || "Phoenix Classmate",
       authorAvatar: currentUser?.avatar || "/phoenix-logo.png",
       authorTrack: currentUser?.track || "Software Engineering",
-      date: "Today",
-      message,
+      date: nowFormatted,
+      message: message.trim(),
     };
-    setYearbookSignatures([newSig, ...yearbookSignatures]);
+    setYearbookSignatures((prev) => [optimisticSig, ...prev]);
     showToast("Yearbook memory signed! 🎓✍️", "success");
+
+    try {
+      const res = await fetch("/api/signatures", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.signature) {
+          setYearbookSignatures((prev) =>
+            prev.map((s) => (s.id === optimisticSig.id ? data.signature : s))
+          );
+        }
+      }
+    } catch {
+      // Keep optimistic
+    }
   };
 
   const markNotificationAsRead = (id: string) => {

@@ -283,7 +283,9 @@ function MessagesContent() {
 
               {/* Messages List */}
               {activeConv?.messages.map((msg) => {
-                const isCurrentUser = msg.senderId === "current-user";
+                const isCurrentUser =
+                  msg.senderId === "current-user" ||
+                  (currentUser && msg.senderId === currentUser.id);
                 const hasReactions = msg.reactions && msg.reactions.length > 0;
                 const isReactionMenuOpen = activeReactionMessageId === msg.id;
 

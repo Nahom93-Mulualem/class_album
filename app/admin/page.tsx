@@ -70,14 +70,27 @@ interface AdminStats {
   dbStatus: string;
 }
 
+interface AdminEvent {
+  id: string;
+  title: string;
+  month: string;
+  day: string;
+  location: string;
+  time: string;
+  description: string;
+  rsvpsCount: number;
+  createdAt: string;
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
   const { currentUser, showToast, refreshAuthSession, logoutUser } = useApp();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "events" | "logs">("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
+  const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filters for Users
@@ -88,6 +101,9 @@ export default function AdminDashboardPage() {
   // Search & Filters for Posts
   const [postSearch, setPostSearch] = useState("");
   const [postTagFilter, setPostTagFilter] = useState<string>("All");
+
+  // Search & Filters for Events
+  const [eventSearch, setEventSearch] = useState("");
 
   // Modals & Selected items
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
@@ -112,14 +128,43 @@ export default function AdminDashboardPage() {
 
   const [inspectPost, setInspectPost] = useState<AdminPost | null>(null);
 
+  // Event Modals & States
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [newEventForm, setNewEventForm] = useState({
+    title: "",
+    month: "MAY",
+    day: "28",
+    location: "Main Auditorium & Quad",
+    time: "2:00 PM - 5:00 PM",
+    description: "",
+  });
+  const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+
+  const [isEditEventModalOpen, setIsEditEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<AdminEvent | null>(null);
+  const [editEventForm, setEditEventForm] = useState({
+    title: "",
+    month: "MAY",
+    day: "28",
+    location: "",
+    time: "",
+    description: "",
+  });
+  const [isUpdatingEvent, setIsUpdatingEvent] = useState(false);
+
+  const [isDeleteEventModalOpen, setIsDeleteEventModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<AdminEvent | null>(null);
+  const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+
   // Fetch Admin Data
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes, postsRes] = await Promise.all([
+      const [statsRes, usersRes, postsRes, eventsRes] = await Promise.all([
         fetch("/api/admin/stats"),
         fetch("/api/admin/users"),
         fetch("/api/admin/posts"),
+        fetch("/api/admin/events"),
       ]);
 
       if (statsRes.status === 403 || usersRes.status === 403) {
@@ -141,6 +186,11 @@ export default function AdminDashboardPage() {
       if (postsRes.ok) {
         const data = await postsRes.json();
         setPosts(data.posts || []);
+      }
+
+      if (eventsRes.ok) {
+        const data = await eventsRes.json();
+        setEvents(data.events || []);
       }
     } catch (error) {
       console.error("Error fetching admin data:", error);
@@ -362,6 +412,97 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // 7. Event Handlers
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEventForm.title.trim() || !newEventForm.month.trim() || !newEventForm.day.trim()) {
+      showToast("Please fill in event title, month, and day.");
+      return;
+    }
+
+    try {
+      setIsCreatingEvent(true);
+      const res = await fetch("/api/admin/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newEventForm),
+      });
+      const data = await res.json();
+      if (res.ok && data.event) {
+        setEvents((prev) => [data.event, ...prev]);
+        showToast(data.message || `📅 Event "${data.event.title}" posted!`);
+        setIsCreateEventModalOpen(false);
+        setNewEventForm({
+          title: "",
+          month: "MAY",
+          day: "28",
+          location: "Main Auditorium & Quad",
+          time: "2:00 PM - 5:00 PM",
+          description: "",
+        });
+      } else {
+        showToast(data.error || "Failed to post event.");
+      }
+    } catch {
+      showToast("Error creating event.");
+    } finally {
+      setIsCreatingEvent(false);
+    }
+  };
+
+  const handleEditEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent || !editEventForm.title.trim()) return;
+
+    try {
+      setIsUpdatingEvent(true);
+      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editEventForm),
+      });
+      const data = await res.json();
+      if (res.ok && data.event) {
+        setEvents((prev) =>
+          prev.map((evt) => (evt.id === editingEvent.id ? { ...evt, ...data.event } : evt))
+        );
+        showToast(data.message || `✏️ Event updated!`);
+        setIsEditEventModalOpen(false);
+        setEditingEvent(null);
+      } else {
+        showToast(data.error || "Failed to update event.");
+      }
+    } catch {
+      showToast("Error updating event.");
+    } finally {
+      setIsUpdatingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+
+    try {
+      setIsDeletingEvent(true);
+      const res = await fetch(`/api/admin/events/${eventToDelete.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+        showToast(data.message || `Event "${eventToDelete.title}" deleted.`);
+        setIsDeleteEventModalOpen(false);
+        setEventToDelete(null);
+      } else {
+        showToast(data.error || "Failed to delete event.");
+      }
+    } catch {
+      showToast("Error deleting event.");
+    } finally {
+      setIsDeletingEvent(false);
+    }
+  };
+
   // Filtered Users
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -390,6 +531,17 @@ export default function AdminDashboardPage() {
     const matchesTag = postTagFilter === "All" || p.tag === postTagFilter;
 
     return matchesSearch && matchesTag;
+  });
+
+  // Filtered Events
+  const filteredEvents = events.filter((e) => {
+    return (
+      e.title.toLowerCase().includes(eventSearch.toLowerCase()) ||
+      e.location.toLowerCase().includes(eventSearch.toLowerCase()) ||
+      e.description.toLowerCase().includes(eventSearch.toLowerCase()) ||
+      e.month.toLowerCase().includes(eventSearch.toLowerCase()) ||
+      e.day.includes(eventSearch)
+    );
   });
 
   return (
@@ -571,6 +723,17 @@ export default function AdminDashboardPage() {
         >
           <span className="material-symbols-outlined text-lg">post_add</span>
           <span>Moderate Posts ({posts.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("events")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-headline font-bold text-xs md:text-sm transition-all cursor-pointer ${activeTab === "events"
+            ? "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md scale-102"
+            : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+            }`}
+        >
+          <span className="material-symbols-outlined text-lg">calendar_month</span>
+          <span>Events & Reminders ({events.length})</span>
         </button>
 
         <button
@@ -1041,6 +1204,140 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* TAB 4: EVENTS & REMINDERS */}
+      {activeTab === "events" && (
+        <div className="space-y-6">
+          {/* Header Bar */}
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-5 flex flex-col md:flex-row items-center justify-between gap-4 ambient-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white flex items-center justify-center shadow-md">
+                <span className="material-symbols-outlined text-xl">calendar_month</span>
+              </div>
+              <div>
+                <h3 className="font-headline font-bold text-base text-on-surface">
+                  Senior Class Events & Reminders
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  Publish milestone events, deadline reminders, and capstone updates for the cohort.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="relative w-full sm:w-64">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">
+                  search
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search events, locations..."
+                  value={eventSearch}
+                  onChange={(e) => setEventSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-surface-container-low rounded-xl text-xs font-body text-on-surface outline-none border border-transparent focus:border-amber-500/40"
+                />
+              </div>
+
+              <button
+                onClick={() => setIsCreateEventModalOpen(true)}
+                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:brightness-105 text-white rounded-xl text-xs font-bold font-headline flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer whitespace-nowrap"
+              >
+                <span className="material-symbols-outlined text-base">add_circle</span>
+                <span>Post New Event / Reminder</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Events Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredEvents.map((evt) => (
+              <div
+                key={evt.id}
+                className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-5 ambient-shadow flex flex-col justify-between hover:border-amber-500/30 transition-all group relative overflow-hidden"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-800 dark:text-amber-300 flex flex-col items-center justify-center shrink-0">
+                        <span className="font-headline text-[10px] font-extrabold uppercase tracking-wider leading-none">
+                          {evt.month}
+                        </span>
+                        <span className="font-headline text-lg font-black leading-tight mt-0.5">
+                          {evt.day}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-headline font-bold text-sm text-primary group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
+                          {evt.title}
+                        </h4>
+                        <p className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+                          <span className="material-symbols-outlined text-xs text-outline">schedule</span>
+                          <span>{evt.time}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-on-surface-variant flex items-center gap-1">
+                    <span className="material-symbols-outlined text-xs text-outline">location_on</span>
+                    <span className="truncate">{evt.location}</span>
+                  </p>
+
+                  <p className="text-xs text-on-surface leading-relaxed bg-surface-container-low/60 rounded-xl p-2.5 line-clamp-3">
+                    {evt.description}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-outline-variant/20 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">how_to_reg</span>
+                    <span>{evt.rsvpsCount} RSVP&apos;d</span>
+                  </span>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => {
+                        setEditingEvent(evt);
+                        setEditEventForm({
+                          title: evt.title,
+                          month: evt.month,
+                          day: evt.day,
+                          location: evt.location,
+                          time: evt.time,
+                          description: evt.description,
+                        });
+                        setIsEditEventModalOpen(true);
+                      }}
+                      className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Edit Event"
+                    >
+                      <span className="material-symbols-outlined text-sm">edit</span>
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setEventToDelete(evt);
+                        setIsDeleteEventModalOpen(true);
+                      }}
+                      className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      title="Delete Event"
+                    >
+                      <span className="material-symbols-outlined text-base">delete</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredEvents.length === 0 && (
+            <div className="p-12 text-center text-xs text-on-surface-variant bg-surface-container-lowest rounded-3xl border border-outline-variant/30">
+              No senior class events matching the search. Click &quot;Post New Event / Reminder&quot; to publish one.
+            </div>
+          )}
+        </div>
+      )}
+
       {/* TAB 4: SECURITY & AUDIT */}
       {activeTab === "logs" && (
         <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 ambient-shadow space-y-5">
@@ -1378,6 +1675,340 @@ export default function AdminDashboardPage() {
                 className="px-4 py-2 bg-surface-container hover:bg-surface-container-high rounded-xl text-xs font-bold text-on-surface transition-colors"
               >
                 Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: POST NEW EVENT / REMINDER */}
+      {isCreateEventModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">calendar_month</span>
+                </div>
+                <div>
+                  <h3 className="font-headline font-bold text-base text-on-surface">
+                    Post Senior Event / Reminder
+                  </h3>
+                  <p className="text-xs text-on-surface-variant">
+                    Announce upcoming milestone or deadline to all graduates
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsCreateEventModalOpen(false)}
+                className="p-1 rounded-lg text-outline hover:text-on-surface"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-on-surface block mb-1">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Senior Capstone Live Demo, Graduation Gala..."
+                  value={newEventForm.title}
+                  onChange={(e) => setNewEventForm((prev) => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Month *
+                  </label>
+                  <select
+                    value={newEventForm.month}
+                    onChange={(e) => setNewEventForm((prev) => ({ ...prev, month: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"].map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Day *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. 28"
+                    value={newEventForm.day}
+                    onChange={(e) => setNewEventForm((prev) => ({ ...prev, day: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 2:00 PM - 5:00 PM"
+                    value={newEventForm.time}
+                    onChange={(e) => setNewEventForm((prev) => ({ ...prev, time: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Campus Location
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Main Auditorium"
+                    value={newEventForm.location}
+                    onChange={(e) => setNewEventForm((prev) => ({ ...prev, location: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-on-surface block mb-1">
+                  Description / Reminder Details
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Share details, required materials, or notes for the graduating class..."
+                  value={newEventForm.description}
+                  onChange={(e) => setNewEventForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateEventModalOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-on-surface transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingEvent}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold transition-all shadow-sm hover:brightness-105 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  {isCreatingEvent ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Posting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-sm">send</span>
+                      <span>Publish Event Reminder</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 6: EDIT EVENT */}
+      {isEditEventModalOpen && editingEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-lg shadow-2xl space-y-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-xl">edit_calendar</span>
+                </div>
+                <div>
+                  <h3 className="font-headline font-bold text-base text-on-surface">
+                    Edit Senior Event
+                  </h3>
+                  <p className="text-xs text-on-surface-variant">
+                    Update timing, venue, or reminder notes
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsEditEventModalOpen(false);
+                  setEditingEvent(null);
+                }}
+                className="p-1 rounded-lg text-outline hover:text-on-surface"
+              >
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleEditEvent} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-on-surface block mb-1">
+                  Event Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editEventForm.title}
+                  onChange={(e) => setEditEventForm((prev) => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Month *
+                  </label>
+                  <select
+                    value={editEventForm.month}
+                    onChange={(e) => setEditEventForm((prev) => ({ ...prev, month: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500 cursor-pointer"
+                  >
+                    {["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"].map((m) => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Day *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editEventForm.day}
+                    onChange={(e) => setEditEventForm((prev) => ({ ...prev, day: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    value={editEventForm.time}
+                    onChange={(e) => setEditEventForm((prev) => ({ ...prev, time: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">
+                    Campus Location
+                  </label>
+                  <input
+                    type="text"
+                    value={editEventForm.location}
+                    onChange={(e) => setEditEventForm((prev) => ({ ...prev, location: e.target.value }))}
+                    className="w-full px-3.5 py-2 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-on-surface block mb-1">
+                  Description / Reminder Details
+                </label>
+                <textarea
+                  rows={3}
+                  value={editEventForm.description}
+                  onChange={(e) => setEditEventForm((prev) => ({ ...prev, description: e.target.value }))}
+                  className="w-full p-3 rounded-xl bg-surface-container-low border border-outline-variant/40 text-xs font-body text-on-surface outline-none focus:border-amber-500 resize-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditEventModalOpen(false);
+                    setEditingEvent(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-on-surface transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingEvent}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 text-white text-xs font-bold transition-all shadow-sm hover:brightness-105 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                >
+                  {isUpdatingEvent ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-sm">check</span>
+                      <span>Save Event Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 7: DELETE EVENT CONFIRMATION */}
+      {isDeleteEventModalOpen && eventToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">event_busy</span>
+              </div>
+              <div>
+                <h3 className="font-headline font-bold text-base text-on-surface">
+                  Delete Senior Event?
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  This action will permanently delete this event and remove all student RSVPs.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/20 text-xs">
+              <p className="font-bold text-primary">{eventToDelete.title}</p>
+              <p className="text-[11px] text-on-surface-variant mt-1">
+                📅 {eventToDelete.month} {eventToDelete.day} • {eventToDelete.location}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteEventModalOpen(false);
+                  setEventToDelete(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-on-surface transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteEvent}
+                disabled={isDeletingEvent}
+                className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold transition-all shadow-sm hover:bg-rose-700 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              >
+                {isDeletingEvent ? "Deleting..." : "Confirm Delete"}
               </button>
             </div>
           </div>

@@ -15,16 +15,19 @@ export default function EditProfileModal() {
   const [github, setGithub] = useState(currentUser?.github || "");
   const [linkedin, setLinkedin] = useState(currentUser?.linkedin || "");
 
+  const [isSaving, setIsSaving] = useState(false);
+
   if (!isEditProfileModalOpen || !currentUser) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const skills = skillsStr
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
 
-    updateCurrentUser({
+    setIsSaving(true);
+    await updateCurrentUser({
       name,
       track,
       statusQuote,
@@ -34,6 +37,7 @@ export default function EditProfileModal() {
       github,
       linkedin,
     });
+    setIsSaving(false);
     setIsEditProfileModalOpen(false);
   };
 
@@ -173,9 +177,11 @@ export default function EditProfileModal() {
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-primary-container text-on-primary rounded-xl font-headline font-bold text-xs shadow-sm hover:opacity-90 transition-all cursor-pointer"
+              disabled={isSaving}
+              className="px-6 py-2 bg-primary-container text-on-primary rounded-xl font-headline font-bold text-xs shadow-sm hover:opacity-90 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
-              Save Profile Changes
+              {isSaving && <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>}
+              <span>{isSaving ? "Saving..." : "Save Profile Changes"}</span>
             </button>
           </div>
         </form>

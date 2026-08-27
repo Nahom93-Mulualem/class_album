@@ -4,14 +4,18 @@ import { verifySessionToken, AUTH_COOKIE_NAME } from "./lib/session";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 1. Allow public static assets and files
+  // 1. Allow public static assets
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
     pathname === "/favicon.ico" ||
     pathname === "/phoenix-logo.png" ||
     /\.(?:svg|png|jpg|jpeg|gif|webp|ico|json)$/.test(pathname)
   ) {
+    return NextResponse.next();
+  }
+
+  // 2. Handle API routes
+  if (pathname.startsWith("/api")) {
     // Ensure /api/admin is protected with JSON 403
     if (pathname.startsWith("/api/admin")) {
       const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
