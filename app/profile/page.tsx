@@ -219,17 +219,7 @@ export default function CurrentUserProfilePage() {
               ))}
             </div>
 
-            <div className="border-t border-outline-variant/20 pt-4">
-              <h4 className="font-headline text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
-                Senior Capstone
-              </h4>
-              <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20">
-                <p className="font-headline text-xs font-bold text-primary">Autonomous DevPulse Tooling</p>
-                <p className="text-[11px] text-on-surface-variant mt-0.5">
-                  High-throughput distributed AI development runtime built with Rust & Next.js.
-                </p>
-              </div>
-            </div>
+
           </div>
         </div>
       )}

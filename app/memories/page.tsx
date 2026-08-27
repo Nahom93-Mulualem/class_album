@@ -143,10 +143,7 @@ export default function MemoriesPage() {
                 Software Engineering Memory Vault
               </h1>
 
-              <p className="font-body text-xs md:text-sm text-primary-fixed leading-relaxed">
-                Celebrating our entire 6-year journey (2020–2026) from our very first freshman Hello World to
-                Senior Capstone and Commencement.
-              </p>
+
 
             </div>
           </div>
@@ -178,11 +175,7 @@ export default function MemoriesPage() {
       <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
         {/* Category Pills Bar */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider px-1">
-            <span className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-base text-secondary">category</span>
-              Filter by Category
-            </span>
+          <div className="flex items-center justify-end text-xs font-bold text-primary uppercase tracking-wider px-1">
             <span className="text-on-surface-variant font-medium lowercase">
               {filteredMemories.length} memories matching
             </span>

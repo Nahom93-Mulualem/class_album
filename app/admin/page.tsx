@@ -721,20 +721,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Database Status Alert */}
-              <div className="mt-4 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0">
-                  <span className="material-symbols-outlined text-lg">database</span>
-                </div>
-                <div className="text-xs">
-                  <p className="font-bold text-emerald-800 dark:text-emerald-300">
-                    PostgreSQL 100% Operational
-                  </p>
-                  <p className="text-on-surface-variant">
-                    Cascading deletes actively enforce relational integrity.
-                  </p>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>

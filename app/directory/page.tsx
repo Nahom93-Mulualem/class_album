@@ -59,9 +59,7 @@ export default function DirectoryPage() {
             <span className="text-xs font-semibold text-on-surface-variant">Software Engineering Roster</span>
           </div>
           <h1 className="font-headline text-2xl md:text-3xl font-bold text-primary">Class Directory</h1>
-          <p className="font-body text-xs md:text-sm text-on-surface-variant mt-1">
-            Connect with your 50 fellow Software Engineering graduates, discover their tech stacks, and start collaborating.
-          </p>
+
         </div>
 
         {/* Quick Stats Pill */}
@@ -154,11 +152,7 @@ export default function DirectoryPage() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-secondary-container to-primary-container px-3 py-0.5 rounded-full border-2 border-surface shadow-sm">
-                  <span className="font-headline text-[10px] text-on-primary font-bold tracking-wider">
-                    SE &apos;26
-                  </span>
-                </div>
+
               </Link>
 
               {/* Name & SE Specialization */}

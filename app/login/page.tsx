@@ -154,40 +154,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Credentials helper hint */}
-        <div className="p-3.5 rounded-2xl bg-surface-container-high/60 border border-outline-variant/20 space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-amber-500 text-sm">info</span>
-            <span className="text-[11px] font-bold text-on-surface">Credentials Guide</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-on-surface-variant font-mono">
-            <div
-              onClick={() => {
-                setUsername("admin");
-                setPassword("Admin@2026!");
-              }}
-              className="p-2 rounded-lg bg-surface hover:bg-surface-container-highest cursor-pointer transition-colors border border-outline-variant/20"
-              title="Click to fill"
-            >
-              <strong className="text-primary block font-sans">👑 Admin:</strong>
-              admin<br />
-              Admin@2026!
-            </div>
 
-            <div
-              onClick={() => {
-                setUsername("alex.chen");
-                setPassword("Student@2026!");
-              }}
-              className="p-2 rounded-lg bg-surface hover:bg-surface-container-highest cursor-pointer transition-colors border border-outline-variant/20"
-              title="Click to fill"
-            >
-              <strong className="text-primary block font-sans">🎓 Student:</strong>
-              alex.chen<br />
-              Student@2026!
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
