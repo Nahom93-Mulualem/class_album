@@ -25,7 +25,7 @@ export default function SideNavBar() {
         ]
       : []),
     {
-      href: "/",
+      href: "/feed",
       label: isAdmin ? "Student Lounge (Feed)" : "Class Feed",
       icon: "dynamic_feed",
       isActive: pathname === "/" || pathname === "/feed",

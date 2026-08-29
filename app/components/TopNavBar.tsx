@@ -31,24 +31,24 @@ export default function TopNavBar() {
   // Filter students and memories based on search query
   const filteredStudents = searchQuery.trim()
     ? students
-        .filter(
-          (s) =>
-            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
-        )
-        .slice(0, 4)
+      .filter(
+        (s) =>
+          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+      .slice(0, 4)
     : [];
 
   const filteredMemories = searchQuery.trim()
     ? memories
-        .filter(
-          (m) =>
-            m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.story.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 3)
+      .filter(
+        (m) =>
+          m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          m.story.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .slice(0, 3)
     : [];
 
   // Close dropdowns on outside click
@@ -73,7 +73,7 @@ export default function TopNavBar() {
       <div className="flex justify-between items-center px-4 md:px-8 h-16 w-full max-w-7xl mx-auto">
         {/* Brand & Digital Yearbook Crest */}
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href={currentUser?.role === "ADMIN" ? "/admin" : "/feed"} className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform border border-secondary/50 p-0.5 bg-black/40 shrink-0 relative">
               <img
                 src="/phoenix-logo.png"
@@ -269,11 +269,10 @@ export default function TopNavBar() {
                     <div
                       key={notif.id}
                       onClick={() => markNotificationAsRead(notif.id)}
-                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${
-                        notif.read
+                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${notif.read
                           ? "bg-surface hover:bg-surface-container-low"
                           : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
-                      }`}
+                        }`}
                     >
                       <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 text-sm font-bold">
                         {notif.type === "message" && "💬"}
@@ -347,7 +346,7 @@ export default function TopNavBar() {
                 )}
 
                 <Link
-                  href="/"
+                  href="/feed"
                   onClick={() => setIsUserMenuOpen(false)}
                   className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-on-surface hover:bg-surface-container-low rounded-xl transition-colors"
                 >

@@ -14,21 +14,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Quick fill helper for testing/evaluating accounts
-  const handleQuickFill = (user: "student" | "admin") => {
-    if (user === "student") {
-      setUsername("alex.chen");
-      setPassword("Student@2026!");
-      setError(null);
-      showToast("Selected Student account (Alex Chen) 🎓", "info");
-    } else {
-      setUsername("admin");
-      setPassword("Admin@2026!");
-      setError(null);
-      showToast("Selected Administrator account 👑", "info");
-    }
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {
@@ -55,12 +40,12 @@ export default function LoginPage() {
         if (typeof window !== "undefined") {
           const params = new URLSearchParams(window.location.search);
           const redirect = params.get("redirect");
-          if (redirect && redirect.startsWith("/")) {
+          if (redirect && redirect.startsWith("/") && redirect !== "/") {
             if (role === "ADMIN") return redirect;
             if (!redirect.startsWith("/admin")) return redirect;
           }
         }
-        return role === "ADMIN" ? "/admin" : "/";
+        return role === "ADMIN" ? "/admin" : "/feed";
       };
 
       if (res.ok && data.user) {

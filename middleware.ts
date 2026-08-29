@@ -27,15 +27,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Read session token from cookie
+  // 3. Read session token from cookie
   const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
   const isLoginPage = pathname === "/login";
 
-  // 3. Handle unauthenticated visitors
+  // 4. Handle unauthenticated visitors: STRICT /login entry point
   if (!session) {
-    // If not logged in and trying to access any protected route (including '/') -> redirect to /login immediately
+    // If not logged in and trying to access any protected route (including root '/') -> redirect to /login immediately
     if (!isLoginPage) {
       const loginUrl = req.nextUrl.clone();
       loginUrl.pathname = "/login";
@@ -50,20 +50,28 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 4. Handle authenticated users visiting /login
+  // 5. Handle authenticated users visiting /login
   if (isLoginPage) {
-    // If already logged in, redirect to appropriate destination
+    // If already logged in, redirect to role destination
     const destination = req.nextUrl.clone();
-    destination.pathname = session.role === "ADMIN" ? "/admin" : "/";
+    destination.pathname = session.role === "ADMIN" ? "/admin" : "/feed";
     destination.search = "";
     return NextResponse.redirect(destination);
   }
 
-  // 5. Restrict /admin to ADMIN role only
+  // 6. Handle authenticated users visiting root '/'
+  if (pathname === "/") {
+    const destination = req.nextUrl.clone();
+    destination.pathname = session.role === "ADMIN" ? "/admin" : "/feed";
+    destination.search = "";
+    return NextResponse.redirect(destination);
+  }
+
+  // 7. Restrict /admin to ADMIN role only
   if (pathname.startsWith("/admin")) {
     if (session.role !== "ADMIN") {
       const deniedUrl = req.nextUrl.clone();
-      deniedUrl.pathname = "/";
+      deniedUrl.pathname = "/feed";
       deniedUrl.searchParams.set("error", "access_denied_admin_only");
       return NextResponse.redirect(deniedUrl);
     }
@@ -75,10 +83,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * Match all request paths including root '/' except for static assets:
      */
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],

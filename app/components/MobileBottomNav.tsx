@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
         ]
       : []),
     {
-      href: "/",
+      href: "/feed",
       label: "Feed",
       icon: "dynamic_feed",
       isActive: pathname === "/" || pathname === "/feed",
