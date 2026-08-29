@@ -47,9 +47,9 @@ export default function MemoriesPage() {
       particleCount: 90,
       spread: 80,
       origin: { y: 0.6 },
-      colors: ["#fcd400", "#002e7a", "#82a8ff", "#ffd700", "#ffffff"],
+      colors: ["#fcd400", "#002875", "#8ab4f8", "#ffd700", "#ffffff"],
     });
-    showToast("🎓 Celebrating Phoenix Software Engineering Class of 2020 - 2026!", "success");
+    showToast("🎓 Celebrating Phoenix Software Engineering Class of 2020 – 2026!", "success");
   };
 
   // Filter change with brief smooth transition
@@ -109,7 +109,6 @@ export default function MemoriesPage() {
     } else if (sortBy === "oldest") {
       result = [...result].sort((a, b) => a.year.localeCompare(b.year));
     } else {
-      // Default newest
       result = [...result].sort((a, b) => b.year.localeCompare(a.year));
     }
 
@@ -119,32 +118,32 @@ export default function MemoriesPage() {
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6 pb-24 md:pb-12 animate-page-entry">
       {/* 1. Digital Yearbook Hero Banner with Official Logo */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-container via-primary to-[#00102e] text-on-primary p-6 md:p-10 shadow-xl border border-secondary-container/30">
-        {/* Background decorative watermark */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-container via-primary to-[#00102e] text-on-primary p-6 md:p-10 shadow-2xl border border-secondary-container/30">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-secondary-container/10 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/3 -mb-20 w-96 h-96 rounded-full bg-primary-fixed-dim/10 blur-3xl pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Logo & Headline */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 max-w-3xl">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden shadow-2xl shrink-0 border-2 border-secondary-container/50 bg-black/40 p-0.5 group-hover:scale-105 transition-transform">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl overflow-hidden shadow-2xl shrink-0 border-2 border-secondary-container/50 bg-black/40 p-0.5">
               <img
                 src="/phoenix-logo.png"
-                alt="Phoenix Batch 2026 Official Logo"
+                alt="Phoenix Batch Official Logo"
                 className="w-full h-full object-cover rounded-[22px]"
               />
             </div>
 
             <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/20 border border-secondary-container/40 text-secondary-container text-xs font-headline font-bold uppercase tracking-wider">
+                <span>🎓</span>
+                <span>Commencement & Memory Vault • 2020 – 2026</span>
               </div>
-
               <h1 className="font-headline text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
                 Software Engineering Memory Vault
               </h1>
-
-
-
+              <p className="text-xs sm:text-sm text-primary-fixed leading-relaxed">
+                Relive our 4-year journey from freshman year to graduation commencement, capstones, and lifelong friendships.
+              </p>
             </div>
           </div>
 
@@ -175,7 +174,11 @@ export default function MemoriesPage() {
       <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
         {/* Category Pills Bar */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-end text-xs font-bold text-primary uppercase tracking-wider px-1">
+          <div className="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider px-1">
+            <span className="flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-base text-secondary">collections</span>
+              Categories
+            </span>
             <span className="text-on-surface-variant font-medium lowercase">
               {filteredMemories.length} memories matching
             </span>
@@ -189,18 +192,20 @@ export default function MemoriesPage() {
                 <button
                   key={cat.value}
                   onClick={() => handleCategoryChange(cat.value)}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-headline font-semibold whitespace-nowrap transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 border ${isSelected
-                    ? "bg-secondary-container text-on-secondary-container border-secondary-container shadow-sm font-bold scale-102"
-                    : "bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-outline-variant/20"
-                    }`}
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-headline font-semibold whitespace-nowrap transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 border ${
+                    isSelected
+                      ? "bg-secondary-container text-on-secondary-container border-secondary-container shadow-xs font-bold scale-102"
+                      : "bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-outline-variant/20"
+                  }`}
                 >
                   <span className="material-symbols-outlined text-base">{cat.icon}</span>
                   <span>{cat.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected
-                      ? "bg-primary-container text-on-primary-container"
-                      : "bg-surface-container-high text-on-surface-variant"
-                      }`}
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                      isSelected
+                        ? "bg-primary-container text-on-primary-container"
+                        : "bg-surface-container-high text-on-surface-variant"
+                    }`}
                   >
                     {count}
                   </span>
@@ -224,12 +229,13 @@ export default function MemoriesPage() {
                 <button
                   key={yr}
                   onClick={() => handleYearChange(yr)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 cursor-pointer ${isSelected
-                    ? "bg-primary text-on-primary shadow-sm"
-                    : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/20"
-                    }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 cursor-pointer ${
+                    isSelected
+                      ? "bg-primary text-on-primary shadow-xs"
+                      : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/20"
+                  }`}
                 >
-                  {yr === "All" ? "All (2020-2026)" : `'${yr.slice(2)}`}
+                  {yr === "All" ? "All (2020–2026)" : `'${yr.slice(2)}`}
                 </button>
               );
             })}
@@ -244,10 +250,10 @@ export default function MemoriesPage() {
               </span>
               <input
                 type="text"
-                placeholder="Search memories, stories, people..."
+                placeholder="Search memories, stories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-surface-container-low border border-outline-variant/30 focus:border-primary rounded-xl text-xs font-body text-on-surface outline-none transition-all"
+                className="w-full pl-9 pr-7 py-1.5 bg-surface-container-low border border-outline-variant/30 focus:border-primary rounded-xl text-xs font-body text-on-surface outline-none transition-all"
               />
               {searchQuery && (
                 <button
@@ -275,30 +281,33 @@ export default function MemoriesPage() {
               <button
                 onClick={() => setViewMode("masonry")}
                 title="Masonry Gallery View"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${viewMode === "masonry"
-                  ? "bg-surface-container-lowest text-primary shadow-xs"
-                  : "text-outline hover:text-on-surface"
-                  }`}
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
+                  viewMode === "masonry"
+                    ? "bg-surface text-primary shadow-xs"
+                    : "text-outline hover:text-on-surface"
+                }`}
               >
                 <span className="material-symbols-outlined text-lg">dashboard</span>
               </button>
               <button
                 onClick={() => setViewMode("grid")}
                 title="Yearbook Scrapbook Grid"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${viewMode === "grid"
-                  ? "bg-surface-container-lowest text-primary shadow-xs"
-                  : "text-outline hover:text-on-surface"
-                  }`}
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
+                  viewMode === "grid"
+                    ? "bg-surface text-primary shadow-xs"
+                    : "text-outline hover:text-on-surface"
+                }`}
               >
                 <span className="material-symbols-outlined text-lg">grid_view</span>
               </button>
               <button
                 onClick={() => setViewMode("timeline")}
                 title="Story Timeline View"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center ${viewMode === "timeline"
-                  ? "bg-surface-container-lowest text-primary shadow-xs"
-                  : "text-outline hover:text-on-surface"
-                  }`}
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
+                  viewMode === "timeline"
+                    ? "bg-surface text-primary shadow-xs"
+                    : "text-outline hover:text-on-surface"
+                }`}
               >
                 <span className="material-symbols-outlined text-lg">view_timeline</span>
               </button>
@@ -338,13 +347,13 @@ export default function MemoriesPage() {
                 setSelectedYear("All");
                 setSearchQuery("");
               }}
-              className="px-4 py-2 bg-surface-container-low hover:bg-surface-container-high text-primary rounded-xl text-xs font-bold transition-colors"
+              className="px-4 py-2 bg-surface-container-low hover:bg-surface-container-high text-primary rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
             <button
               onClick={() => setIsNewMemoryModalOpen(true)}
-              className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:brightness-95 transition-all shadow-sm"
+              className="px-4 py-2 bg-secondary-container text-on-secondary-container rounded-xl text-xs font-bold hover:brightness-95 transition-all shadow-xs cursor-pointer"
             >
               Upload First Memory
             </button>
@@ -358,8 +367,9 @@ export default function MemoriesPage() {
             return (
               <div
                 key={mem.id}
-                className={`relative flex flex-col md:flex-row items-start md:items-center ${isEven ? "md:flex-row-reverse" : ""
-                  } gap-6 pl-10 md:pl-0`}
+                className={`relative flex flex-col md:flex-row items-start md:items-center ${
+                  isEven ? "md:flex-row-reverse" : ""
+                } gap-6 pl-10 md:pl-0`}
               >
                 {/* Center Node */}
                 <div className="absolute left-2.5 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-secondary-container border-4 border-surface-container-lowest shadow-md z-10"></div>
@@ -411,11 +421,12 @@ export default function MemoriesPage() {
 
                         <button
                           onClick={(e) => handleLikeClick(e, mem.id)}
-                          className="flex items-center gap-1 text-xs font-bold text-red-500 hover:scale-110 active:scale-90 transition-transform"
+                          className="flex items-center gap-1 text-xs font-bold text-red-500 hover:scale-110 active:scale-90 transition-transform cursor-pointer"
                         >
                           <span
-                            className={`material-symbols-outlined text-base ${animatingHeartId === mem.id ? "animate-heart-burst" : ""
-                              }`}
+                            className={`material-symbols-outlined text-base ${
+                              animatingHeartId === mem.id ? "animate-heart-burst" : ""
+                            }`}
                             style={{
                               fontVariationSettings: mem.isLiked ? "'FILL' 1" : "'FILL' 0",
                             }}
@@ -450,17 +461,19 @@ export default function MemoriesPage() {
               <article
                 key={mem.id}
                 onClick={() => setActiveMemoryForDetail(mem)}
-                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between ${isFeatured ? "ring-2 ring-secondary-container/50" : ""
-                  }`}
+                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between ${
+                  isFeatured ? "ring-2 ring-secondary-container/50" : ""
+                }`}
               >
                 {/* Media Container with Polaroid Styling */}
                 <div
-                  className={`relative rounded-2xl overflow-hidden bg-black/40 ${isTall
-                    ? "aspect-[3/4]"
-                    : isFeatured
+                  className={`relative rounded-2xl overflow-hidden bg-black/40 ${
+                    isTall
+                      ? "aspect-[3/4]"
+                      : isFeatured
                       ? "aspect-[16/10]"
                       : "aspect-[4/3]"
-                    }`}
+                  }`}
                 >
                   <img
                     src={mem.image}
@@ -498,7 +511,7 @@ export default function MemoriesPage() {
                       e.stopPropagation();
                       openLightbox(mem.image, mem.video ? "video" : "image", mem.title);
                     }}
-                    className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm shadow-md"
+                    className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm shadow-md cursor-pointer"
                     title="Zoom Photo"
                   >
                     <span className="material-symbols-outlined text-base">zoom_in</span>
@@ -551,7 +564,7 @@ export default function MemoriesPage() {
                     </div>
                   )}
 
-                  {/* Card Bottom Footer: Author & Interactive Like Button */}
+                  {/* Card Bottom Footer */}
                   <div className="flex items-center justify-between pt-3 border-t border-outline-variant/15 mt-2">
                     <Link
                       href={`/profile/${mem.authorId}`}
@@ -580,14 +593,16 @@ export default function MemoriesPage() {
                       {/* Animated Like Button */}
                       <button
                         onClick={(e) => handleLikeClick(e, mem.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all active:scale-80 cursor-pointer ${isLiked
-                          ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
-                          : "bg-surface-container-low text-on-surface-variant hover:text-red-500 border border-outline-variant/20"
-                          }`}
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all active:scale-80 cursor-pointer ${
+                          isLiked
+                            ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
+                            : "bg-surface-container-low text-on-surface-variant hover:text-red-500 border border-outline-variant/20"
+                        }`}
                       >
                         <span
-                          className={`material-symbols-outlined text-base ${animatingHeartId === mem.id ? "animate-heart-burst" : ""
-                            }`}
+                          className={`material-symbols-outlined text-base ${
+                            animatingHeartId === mem.id ? "animate-heart-burst" : ""
+                          }`}
                           style={{
                             fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0",
                           }}

@@ -1,33 +1,35 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useApp } from "../context/AppContext";
 
 export default function ImageLightboxModal() {
   const { lightboxMedia, closeLightbox, showToast } = useApp();
   const [zoomLevel, setZoomLevel] = useState(1);
 
+  const handleClose = useCallback(() => {
+    setZoomLevel(1);
+    closeLightbox();
+  }, [closeLightbox]);
+
   useEffect(() => {
-    if (!lightboxMedia) {
-      setZoomLevel(1);
-      return;
-    }
+    if (!lightboxMedia) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        closeLightbox();
+        handleClose();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lightboxMedia, closeLightbox]);
+  }, [lightboxMedia, handleClose]);
 
   if (!lightboxMedia) return null;
 
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (navigator.clipboard) {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(lightboxMedia.url);
       showToast("Media link copied to clipboard! 📋", "copy");
     }
@@ -40,7 +42,7 @@ export default function ImageLightboxModal() {
 
   return (
     <div
-      onClick={closeLightbox}
+      onClick={handleClose}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 md:p-8 bg-black/90 backdrop-blur-xl animate-modal-entry transition-all cursor-zoom-out"
     >
       {/* Top Action Bar */}
@@ -59,7 +61,7 @@ export default function ImageLightboxModal() {
           {lightboxMedia.type !== "video" && (
             <button
               onClick={handleZoom}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all active:scale-95 flex items-center justify-center"
+              className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all active:scale-95 flex items-center justify-center cursor-pointer"
               title={zoomLevel === 1 ? "Zoom in" : "Reset zoom"}
             >
               <span className="material-symbols-outlined text-xl">
@@ -70,15 +72,15 @@ export default function ImageLightboxModal() {
 
           <button
             onClick={handleCopyLink}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all active:scale-95 flex items-center justify-center"
+            className="p-2 rounded-full bg-white/10 hover:bg-white/25 text-white transition-all active:scale-95 flex items-center justify-center cursor-pointer"
             title="Copy media URL"
           >
             <span className="material-symbols-outlined text-xl">link</span>
           </button>
 
           <button
-            onClick={closeLightbox}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/35 text-white transition-all active:scale-95 flex items-center justify-center"
+            onClick={handleClose}
+            className="p-2 rounded-full bg-white/20 hover:bg-white/35 text-white transition-all active:scale-95 flex items-center justify-center cursor-pointer"
             title="Close (Esc)"
           >
             <span className="material-symbols-outlined text-2xl">close</span>

@@ -35,11 +35,14 @@ export async function middleware(req: NextRequest) {
 
   // 3. Handle unauthenticated visitors
   if (!session) {
-    // If not logged in and trying to access protected route -> redirect to login
+    // If not logged in and trying to access any protected route (including '/') -> redirect to /login immediately
     if (!isLoginPage) {
-      const loginUrl = new URL("/login", req.url);
+      const loginUrl = req.nextUrl.clone();
+      loginUrl.pathname = "/login";
       if (pathname !== "/") {
         loginUrl.searchParams.set("redirect", pathname);
+      } else {
+        loginUrl.search = "";
       }
       return NextResponse.redirect(loginUrl);
     }
@@ -49,15 +52,18 @@ export async function middleware(req: NextRequest) {
 
   // 4. Handle authenticated users visiting /login
   if (isLoginPage) {
-    // If already logged in, redirect to appropriate dashboard
-    const destination = session.role === "ADMIN" ? "/admin" : "/";
-    return NextResponse.redirect(new URL(destination, req.url));
+    // If already logged in, redirect to appropriate destination
+    const destination = req.nextUrl.clone();
+    destination.pathname = session.role === "ADMIN" ? "/admin" : "/";
+    destination.search = "";
+    return NextResponse.redirect(destination);
   }
 
   // 5. Restrict /admin to ADMIN role only
   if (pathname.startsWith("/admin")) {
     if (session.role !== "ADMIN") {
-      const deniedUrl = new URL("/", req.url);
+      const deniedUrl = req.nextUrl.clone();
+      deniedUrl.pathname = "/";
       deniedUrl.searchParams.set("error", "access_denied_admin_only");
       return NextResponse.redirect(deniedUrl);
     }

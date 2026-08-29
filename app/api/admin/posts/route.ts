@@ -13,7 +13,13 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get("search")?.trim() || "";
     const tag = searchParams.get("tag") || "";
 
-    const where: any = {};
+    const where: {
+      OR?: Array<
+        | { content: { contains: string; mode: "insensitive" } }
+        | { authorName: { contains: string; mode: "insensitive" } }
+      >;
+      tag?: string;
+    } = {};
 
     if (search) {
       where.OR = [

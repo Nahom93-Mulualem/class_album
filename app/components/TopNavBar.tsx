@@ -2,11 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useApp } from "../context/AppContext";
 
 export default function TopNavBar() {
-  const router = useRouter();
   const {
     currentUser,
     students,
@@ -33,24 +31,24 @@ export default function TopNavBar() {
   // Filter students and memories based on search query
   const filteredStudents = searchQuery.trim()
     ? students
-      .filter(
-        (s) =>
-          s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
-      )
-      .slice(0, 4)
+        .filter(
+          (s) =>
+            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
+        )
+        .slice(0, 4)
     : [];
 
   const filteredMemories = searchQuery.trim()
     ? memories
-      .filter(
-        (m) =>
-          m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          m.story.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-      .slice(0, 3)
+        .filter(
+          (m) =>
+            m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            m.story.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .slice(0, 3)
     : [];
 
   // Close dropdowns on outside click
@@ -71,16 +69,16 @@ export default function TopNavBar() {
   }, []);
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm backdrop-blur-xl transition-colors duration-250">
+    <nav className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/30 shadow-sm backdrop-blur-xl transition-colors duration-300">
       <div className="flex justify-between items-center px-4 md:px-8 h-16 w-full max-w-7xl mx-auto">
-        {/* Brand & Digital Yearbook Logo */}
+        {/* Brand & Digital Yearbook Crest */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-full overflow-hidden shadow-md group-hover:scale-105 transition-transform border border-secondary-container/40 p-0.5 bg-black/40 shrink-0">
+            <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform border border-secondary/50 p-0.5 bg-black/40 shrink-0 relative">
               <img
                 src="/phoenix-logo.png"
-                alt="Phoenix Batch 2026 Crest"
-                className="w-full h-full object-cover rounded-full"
+                alt="Phoenix Batch Crest"
+                className="w-full h-full object-cover rounded-xl"
               />
             </div>
             <div>
@@ -88,7 +86,13 @@ export default function TopNavBar() {
                 <span className="font-headline text-lg md:text-xl font-bold text-primary tracking-tight group-hover:text-primary-container transition-colors">
                   Phoenix
                 </span>
+                <span className="px-2 py-0.2 bg-secondary-container/30 text-secondary border border-secondary/20 text-[10px] font-headline font-bold rounded-full uppercase tracking-wider">
+                  &apos;26
+                </span>
               </div>
+              <p className="text-[10px] text-on-surface-variant/80 font-medium hidden sm:block">
+                Software Engineering Lounge
+              </p>
             </div>
           </Link>
         </div>
@@ -96,7 +100,7 @@ export default function TopNavBar() {
         {/* Global Live Search (Desktop) */}
         <div className="hidden md:flex flex-1 max-w-md mx-6 relative" ref={searchRef}>
           <div className="relative w-full group">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors text-xl">
               search
             </span>
             <input
@@ -108,13 +112,13 @@ export default function TopNavBar() {
                 setIsSearchOpen(true);
               }}
               onFocus={() => setIsSearchOpen(true)}
-              className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-transparent focus:border-primary/40 focus:bg-surface-container-lowest rounded-full text-sm font-body text-on-surface outline-none transition-all placeholder:text-on-surface-variant/70 shadow-inner"
+              className="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-transparent focus:border-primary/40 focus:bg-surface rounded-full text-xs sm:text-sm font-body text-on-surface outline-none transition-all placeholder:text-on-surface-variant/70 shadow-inner"
             />
           </div>
 
           {/* Search Results Dropdown */}
           {isSearchOpen && searchQuery.trim() && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-3 z-50 max-h-80 overflow-y-auto hide-scrollbar animate-modal-entry">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl p-3 z-50 max-h-80 overflow-y-auto hide-scrollbar animate-modal-entry">
               {/* Classmates */}
               {filteredStudents.length > 0 && (
                 <div className="mb-3">
@@ -138,7 +142,7 @@ export default function TopNavBar() {
                       />
                       <div className="flex-1 min-w-0 text-left">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-sm text-primary group-hover:text-primary-container truncate">
+                          <span className="font-semibold text-xs sm:text-sm text-primary group-hover:text-primary-container truncate">
                             {student.name}
                           </span>
                           <span className="text-[10px] bg-secondary-container/30 text-secondary font-bold px-1.5 py-0.2 rounded">
@@ -219,9 +223,9 @@ export default function TopNavBar() {
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
             title={`Current: ${theme === "light" ? "Sunlight Warm" : "Midnight Obsidian"} — Click to switch`}
-            className="relative p-2.5 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all active:scale-90 flex items-center justify-center group shadow-xs cursor-pointer"
+            className="p-2.5 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all active:scale-90 flex items-center justify-center group shadow-xs cursor-pointer"
           >
-            <div className="relative w-5 h-5 flex items-center justify-center">
+            <div className="w-5 h-5 flex items-center justify-center">
               {theme === "light" ? (
                 <span className="material-symbols-outlined text-amber-500 text-xl transition-transform duration-300 group-hover:rotate-45">
                   light_mode
@@ -232,11 +236,6 @@ export default function TopNavBar() {
                 </span>
               )}
             </div>
-            {/* Subtle glow indicator */}
-            <span
-              className={`absolute -bottom-0.5 w-1.5 h-1.5 rounded-full ${theme === "light" ? "bg-amber-400" : "bg-indigo-400"
-                }`}
-            ></span>
           </button>
 
           {/* Notifications Popover */}
@@ -255,7 +254,7 @@ export default function TopNavBar() {
             </button>
 
             {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-4 z-50 animate-modal-entry">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl p-4 z-50 animate-modal-entry">
                 <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-2">
                   <h4 className="font-headline font-bold text-sm text-primary">Notifications</h4>
                   <button
@@ -270,10 +269,11 @@ export default function TopNavBar() {
                     <div
                       key={notif.id}
                       onClick={() => markNotificationAsRead(notif.id)}
-                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${notif.read
-                        ? "bg-surface hover:bg-surface-container-low"
-                        : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
-                        }`}
+                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${
+                        notif.read
+                          ? "bg-surface hover:bg-surface-container-low"
+                          : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
+                      }`}
                     >
                       <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 text-sm font-bold">
                         {notif.type === "message" && "💬"}
@@ -314,7 +314,7 @@ export default function TopNavBar() {
             </button>
 
             {isUserMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-xl p-2.5 z-50 animate-modal-entry">
+              <div className="absolute right-0 mt-2 w-64 bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl p-2.5 z-50 animate-modal-entry">
                 <div className="px-3 py-2 border-b border-outline-variant/20 mb-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-headline font-bold text-sm text-primary truncate">
@@ -339,7 +339,7 @@ export default function TopNavBar() {
                   <Link
                     href="/admin"
                     onClick={() => setIsUserMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 rounded-xl transition-colors mb-1"
+                    className="flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-bold text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 rounded-xl transition-colors mb-1"
                   >
                     <span className="material-symbols-outlined text-lg">admin_panel_settings</span>
                     Admin Dashboard

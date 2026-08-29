@@ -98,7 +98,7 @@ export default function NewPostModal() {
           spread: 70,
           origin: { y: 0.6 },
         });
-      } catch (err) {
+      } catch {
         // ignore if not supported
       }
     }

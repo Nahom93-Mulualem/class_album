@@ -84,7 +84,7 @@ interface AdminEvent {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { currentUser, showToast, refreshAuthSession, logoutUser } = useApp();
+  const { showToast } = useApp();
 
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "events" | "logs">("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
 
   // Fetch Admin Data
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true);
       const [statsRes, usersRes, postsRes, eventsRes] = await Promise.all([
@@ -198,11 +198,59 @@ export default function AdminDashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router, showToast]);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    let mounted = true;
+    const init = async () => {
+      try {
+        const [statsRes, usersRes, postsRes, eventsRes] = await Promise.all([
+          fetch("/api/admin/stats"),
+          fetch("/api/admin/users"),
+          fetch("/api/admin/posts"),
+          fetch("/api/admin/events"),
+        ]);
+
+        if (!mounted) return;
+
+        if (statsRes.status === 403 || usersRes.status === 403) {
+          showToast("Access Denied: You must be an Administrator.");
+          router.push("/");
+          return;
+        }
+
+        if (statsRes.ok) {
+          const data = await statsRes.json();
+          if (mounted) setStats(data.stats);
+        }
+
+        if (usersRes.ok) {
+          const data = await usersRes.json();
+          if (mounted) setUsers(data.users || []);
+        }
+
+        if (postsRes.ok) {
+          const data = await postsRes.json();
+          if (mounted) setPosts(data.posts || []);
+        }
+
+        if (eventsRes.ok) {
+          const data = await eventsRes.json();
+          if (mounted) setEvents(data.events || []);
+        }
+      } catch (error) {
+        console.error("Error loading admin dashboard:", error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router, showToast]);
 
   // 1. Toggle User Active / Deactivate
   const handleToggleUserActive = async (user: AdminUser) => {

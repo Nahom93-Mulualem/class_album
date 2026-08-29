@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useApp } from "../context/AppContext";
 
@@ -13,11 +13,25 @@ export default function MemoryDetailModal() {
     addMemoryComment,
     openLightbox,
     showToast,
-    currentUser,
   } = useApp();
 
   const [commentInput, setCommentInput] = useState("");
   const [isLiking, setIsLiking] = useState(false);
+
+  const currentIndex = activeMemoryForDetail
+    ? memories.findIndex((m) => m.id === activeMemoryForDetail.id)
+    : -1;
+
+  const navigateMemory = useCallback(
+    (direction: "next" | "prev") => {
+      if (currentIndex === -1 || memories.length === 0) return;
+      let nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
+      if (nextIndex >= memories.length) nextIndex = 0;
+      if (nextIndex < 0) nextIndex = memories.length - 1;
+      setActiveMemoryForDetail(memories[nextIndex]);
+    },
+    [currentIndex, memories, setActiveMemoryForDetail]
+  );
 
   // Keyboard navigation for digital yearbook flipping
   useEffect(() => {
@@ -35,19 +49,9 @@ export default function MemoryDetailModal() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeMemoryForDetail, memories]);
+  }, [activeMemoryForDetail, navigateMemory, setActiveMemoryForDetail]);
 
   if (!activeMemoryForDetail) return null;
-
-  const currentIndex = memories.findIndex((m) => m.id === activeMemoryForDetail.id);
-
-  const navigateMemory = (direction: "next" | "prev") => {
-    if (currentIndex === -1) return;
-    let nextIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
-    if (nextIndex >= memories.length) nextIndex = 0;
-    if (nextIndex < 0) nextIndex = memories.length - 1;
-    setActiveMemoryForDetail(memories[nextIndex]);
-  };
 
   const handleLike = () => {
     setIsLiking(true);
@@ -63,7 +67,7 @@ export default function MemoryDetailModal() {
   };
 
   const handleShare = () => {
-    if (navigator.clipboard) {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       showToast(`Link to "${activeMemoryForDetail.title}" copied! 📋`, "copy");
     } else {
@@ -83,7 +87,7 @@ export default function MemoryDetailModal() {
         {/* Navigation Arrow Left (Desktop) */}
         <button
           onClick={() => navigateMemory("prev")}
-          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-110 active:scale-95"
+          className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-110 active:scale-95 cursor-pointer"
           title="Previous Memory (← Arrow Key)"
         >
           <span className="material-symbols-outlined text-2xl">arrow_back</span>
@@ -92,7 +96,7 @@ export default function MemoryDetailModal() {
         {/* Navigation Arrow Right (Desktop) */}
         <button
           onClick={() => navigateMemory("next")}
-          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-110 active:scale-95"
+          className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/50 hover:bg-black/80 text-white items-center justify-center backdrop-blur-md shadow-lg transition-transform hover:scale-110 active:scale-95 cursor-pointer"
           title="Next Memory (→ Arrow Key)"
         >
           <span className="material-symbols-outlined text-2xl">arrow_forward</span>
@@ -101,7 +105,7 @@ export default function MemoryDetailModal() {
         {/* Close Button */}
         <button
           onClick={() => setActiveMemoryForDetail(null)}
-          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition-all active:scale-95"
+          className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center backdrop-blur-md transition-all active:scale-95 cursor-pointer"
           title="Close (Esc)"
         >
           <span className="material-symbols-outlined text-xl">close</span>
@@ -137,8 +141,6 @@ export default function MemoryDetailModal() {
               </div>
             </div>
           )}
-
-
         </div>
 
         {/* Right Half: Story, Author, Tagged Classmates, & Comments */}
@@ -170,7 +172,7 @@ export default function MemoryDetailModal() {
             <h3 className="font-headline font-bold text-lg md:text-xl text-primary leading-snug">
               {activeMemoryForDetail.title}
             </h3>
-            <p className="font-body text-sm text-on-surface leading-relaxed whitespace-pre-line bg-surface-container-low/60 p-4 rounded-2xl border border-outline-variant/15 font-normal">
+            <p className="font-body text-xs sm:text-sm text-on-surface leading-relaxed whitespace-pre-line bg-surface-container-low/60 p-4 rounded-2xl border border-outline-variant/15 font-normal">
               &quot;{activeMemoryForDetail.story}&quot;
             </p>
 
@@ -203,14 +205,16 @@ export default function MemoryDetailModal() {
             <div className="flex items-center justify-between pt-4 border-t border-outline-variant/20">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs transition-all active:scale-90 ${activeMemoryForDetail.isLiked
-                  ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
-                  : "bg-surface-container-low text-on-surface-variant hover:text-red-500 border border-outline-variant/20"
-                  }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs transition-all active:scale-90 cursor-pointer ${
+                  activeMemoryForDetail.isLiked
+                    ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
+                    : "bg-surface-container-low text-on-surface-variant hover:text-red-500 border border-outline-variant/20"
+                }`}
               >
                 <span
-                  className={`material-symbols-outlined text-lg ${isLiking ? "animate-heart-burst" : ""
-                    }`}
+                  className={`material-symbols-outlined text-lg ${
+                    isLiking ? "animate-heart-burst" : ""
+                  }`}
                   style={{
                     fontVariationSettings: activeMemoryForDetail.isLiked ? "'FILL' 1" : "'FILL' 0",
                   }}
@@ -222,7 +226,7 @@ export default function MemoryDetailModal() {
 
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant text-xs font-semibold transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant text-xs font-semibold transition-colors cursor-pointer"
               >
                 <span className="material-symbols-outlined text-base">share</span>
                 <span>Share</span>
@@ -284,14 +288,14 @@ export default function MemoryDetailModal() {
             <div className="flex gap-2">
               <button
                 onClick={() => navigateMemory("prev")}
-                className="px-3 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors flex items-center gap-1"
+                className="px-3 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <span>←</span>
                 <span>Prev</span>
               </button>
               <button
                 onClick={() => navigateMemory("next")}
-                className="px-3 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors flex items-center gap-1"
+                className="px-3 py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-xs font-semibold text-primary transition-colors flex items-center gap-1 cursor-pointer"
               >
                 <span>Next</span>
                 <span>→</span>

@@ -36,9 +36,10 @@ function MessagesContent() {
     if (targetUserParam) {
       const convId = startConversationWithStudent(targetUserParam);
       setActiveConversationId(convId);
-      setShowMobileChatPane(true);
+      const timer = setTimeout(() => setShowMobileChatPane(true), 50);
+      return () => clearTimeout(timer);
     }
-  }, [targetUserParam]);
+  }, [targetUserParam, startConversationWithStudent, setActiveConversationId]);
 
   const activeConv = conversations.find((c) => c.id === activeConversationId) || conversations[0];
   const activeStudent = students.find((s) => s.id === activeConv?.studentId);
@@ -109,7 +110,7 @@ function MessagesContent() {
   });
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto flex h-[calc(100vh-64px)] overflow-hidden bg-surface-container-lowest border-l border-r border-outline-variant/30">
+    <main className="flex-1 w-full max-w-7xl mx-auto flex h-[calc(100vh-64px)] overflow-hidden bg-surface-container-lowest border-l border-r border-outline-variant/30 animate-page-entry">
       {/* Conversations List (Left Pane) */}
       <aside
         className={`w-full md:w-80 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest h-full z-10 transition-transform duration-300 md:relative absolute inset-0 ${
@@ -121,7 +122,7 @@ function MessagesContent() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-headline text-lg font-bold text-primary">Direct Messages</h1>
-              <p className="text-[11px] text-on-surface-variant font-medium">Phoenix • 1-on-1 Chats</p>
+              <p className="text-[11px] text-on-surface-variant font-medium">Phoenix • 1-on-1 Cohort Chats</p>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 bg-primary-fixed text-primary rounded-full">
               {conversations.length} Active
@@ -137,7 +138,7 @@ function MessagesContent() {
               placeholder="Search conversations..."
               value={chatSearch}
               onChange={(e) => setChatSearch(e.target.value)}
-              className="w-full bg-surface-container-low border border-transparent focus:border-primary/30 rounded-full py-2 pl-9 pr-4 text-xs font-body text-on-surface outline-none transition-all"
+              className="w-full bg-surface-container-low border border-transparent focus:border-primary/30 rounded-full py-2 pl-9 pr-4 text-xs font-body text-on-surface outline-none transition-all shadow-inner"
             />
           </div>
         </div>
@@ -158,8 +159,8 @@ function MessagesContent() {
                 }}
                 className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all text-left cursor-pointer ${
                   isActive
-                    ? "bg-secondary-container/30 border border-secondary-container/50 shadow-sm"
-                    : "hover:bg-surface-container-low"
+                    ? "bg-secondary-container/30 border border-secondary-container/50 shadow-xs"
+                    : "hover:bg-surface-container-low border border-transparent"
                 }`}
               >
                 {/* Avatar with Online indicator */}
@@ -167,7 +168,7 @@ function MessagesContent() {
                   <img
                     src={student.avatar}
                     alt={student.name}
-                    className="w-11 h-11 rounded-full object-cover border border-outline-variant/30 shadow-sm"
+                    className="w-11 h-11 rounded-full object-cover border border-outline-variant/30 shadow-xs"
                   />
                   {student.online && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-surface-container-lowest rounded-full"></div>
@@ -195,7 +196,7 @@ function MessagesContent() {
                 {/* Unread Counter Badge */}
                 {conv.unreadCount > 0 && (
                   <div className="shrink-0 self-center">
-                    <span className="w-5 h-5 bg-error text-on-error font-headline text-[10px] font-bold flex items-center justify-center rounded-full shadow-sm">
+                    <span className="w-5 h-5 bg-error text-on-error font-headline text-[10px] font-bold flex items-center justify-center rounded-full shadow-xs">
                       {conv.unreadCount}
                     </span>
                   </div>
@@ -230,7 +231,7 @@ function MessagesContent() {
                   <img
                     src={activeStudent.avatar}
                     alt={activeStudent.name}
-                    className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-sm group-hover:scale-105 transition-transform"
+                    className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-xs group-hover:scale-105 transition-transform"
                   />
                   {activeStudent.online && (
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-surface-container-lowest rounded-full"></div>
@@ -245,13 +246,13 @@ function MessagesContent() {
                     >
                       {activeStudent.name}
                     </Link>
-                    <span className="px-2 py-0.2 bg-gradient-to-r from-secondary-container to-primary-container text-on-primary font-headline text-[9px] font-bold rounded-full">
+                    <span className="px-2 py-0.2 bg-gradient-to-r from-secondary-container to-primary-container text-on-primary font-headline text-[9px] font-bold rounded-full shadow-xs">
                       Phoenix &apos;26
                     </span>
                   </div>
                   <p className="text-[11px] text-on-surface-variant font-medium">
                     {activeStudent.online ? (
-                      <span className="text-emerald-600 font-semibold">Active now</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Active now</span>
                     ) : (
                       "Offline"
                     )}{" "}
@@ -264,7 +265,7 @@ function MessagesContent() {
               <div className="flex items-center gap-2">
                 <Link
                   href={`/profile/${activeStudent.id}`}
-                  className="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container-high rounded-xl text-xs font-bold text-primary flex items-center gap-1 transition-colors"
+                  className="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container-high rounded-xl text-xs font-bold text-primary flex items-center gap-1 transition-colors shadow-xs"
                 >
                   <span className="material-symbols-outlined text-base">person</span>
                   <span className="hidden sm:inline">Profile</span>
@@ -276,7 +277,7 @@ function MessagesContent() {
             <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 hide-scrollbar">
               {/* Date Divider */}
               <div className="flex justify-center my-2">
-                <span className="px-3 py-1 bg-surface-container-low/90 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+                <span className="px-3 py-1 bg-surface-container-low/90 border border-outline-variant/20 rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider shadow-xs">
                   Direct Messages • Phoenix Batch 2026
                 </span>
               </div>
@@ -300,7 +301,7 @@ function MessagesContent() {
                       <img
                         src={activeStudent.avatar}
                         alt={activeStudent.name}
-                        className="w-7 h-7 rounded-full object-cover shrink-0 mt-auto shadow-sm"
+                        className="w-7 h-7 rounded-full object-cover shrink-0 mt-auto shadow-xs"
                       />
                     )}
 
@@ -325,7 +326,7 @@ function MessagesContent() {
 
                         {/* Text Bubble */}
                         <div
-                          className={`px-4 py-2.5 rounded-2xl text-xs font-body leading-relaxed shadow-sm relative ${
+                          className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-body leading-relaxed shadow-sm relative ${
                             isCurrentUser
                               ? "bg-primary text-on-primary rounded-br-none"
                               : "bg-surface-container-lowest text-on-surface rounded-bl-none border border-outline-variant/20"
@@ -354,7 +355,7 @@ function MessagesContent() {
                         {isReactionMenuOpen && (
                           <div
                             ref={reactionMenuRef}
-                            className={`absolute z-30 bottom-full mb-1 flex items-center gap-1 bg-surface-container-lowest border border-outline-variant/30 rounded-full px-2 py-1 shadow-xl animate-fadeIn ${
+                            className={`absolute z-30 bottom-full mb-1 flex items-center gap-1 bg-surface-container-lowest border border-outline-variant/30 rounded-full px-2 py-1 shadow-2xl animate-fadeIn ${
                               isCurrentUser ? "right-0" : "left-0"
                             }`}
                           >
@@ -462,7 +463,7 @@ function MessagesContent() {
               )}
 
               <form onSubmit={handleSendMessage} className="flex items-center gap-2">
-                <div className="flex-1 flex items-center bg-surface-container-low rounded-2xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary/30 border border-transparent focus-within:border-primary/20 transition-all">
+                <div className="flex-1 flex items-center bg-surface-container-low rounded-2xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-primary/30 border border-transparent focus-within:border-primary/20 transition-all shadow-inner">
                   {/* Emoji Trigger in Input */}
                   <button
                     type="button"
@@ -479,14 +480,14 @@ function MessagesContent() {
                     placeholder={`Message ${activeStudent.name}...`}
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
-                    className="flex-1 bg-transparent border-none text-xs font-body text-on-surface outline-none py-1.5"
+                    className="flex-1 bg-transparent border-none text-xs sm:text-sm font-body text-on-surface outline-none py-1.5"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={!messageText.trim()}
-                  className="p-2.5 bg-secondary-container text-on-secondary-container rounded-full hover:brightness-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm flex items-center justify-center shrink-0 cursor-pointer"
+                  className="p-2.5 bg-secondary-container text-on-secondary-container rounded-full hover:brightness-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-xs flex items-center justify-center shrink-0 cursor-pointer"
                   aria-label="Send message"
                 >
                   <span className="material-symbols-outlined text-base">send</span>

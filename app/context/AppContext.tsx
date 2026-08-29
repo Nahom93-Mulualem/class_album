@@ -1,18 +1,16 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import {
   Student,
   Post,
   Conversation,
-  MessageItem,
   ReactionItem,
   TechEvent,
   GalleryItem,
   YearbookSignature,
   NotificationItem,
   MemoryItem,
-  CURRENT_USER,
   INITIAL_STUDENTS,
   INITIAL_POSTS,
   INITIAL_CONVERSATIONS,
@@ -85,16 +83,45 @@ interface AppContextType {
   closeLightbox: () => void;
   toast: ToastItem | null;
   showToast: (msg: string, type?: ToastItem["type"]) => void;
-  refreshAuthSession: () => Promise<void>;
+  refreshAuthSession: () => Promise<ExtendedUser | null>;
   restoreAdminAuthority: () => Promise<boolean>;
   logoutUser: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+function applyThemeClass(t: "light" | "dark") {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  if (t === "dark") {
+    root.classList.add("dark");
+    root.classList.remove("light");
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.classList.remove("dark");
+    root.classList.add("light");
+    root.setAttribute("data-theme", "light");
+  }
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Theme State
-  const [theme, setThemeState] = useState<"light" | "dark">("light");
+  // Theme State with lazy initial state
+  const [theme, setThemeState] = useState<"light" | "dark">(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedTheme = localStorage.getItem("phoenix_theme") as "light" | "dark" | null;
+        if (savedTheme === "dark" || savedTheme === "light") {
+          return savedTheme;
+        }
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          return "dark";
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    return "light";
+  });
 
   const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -132,36 +159,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lightboxMedia, setLightboxMedia] = useState<LightboxData | null>(null);
   const [toast, setToast] = useState<ToastItem | null>(null);
 
-  // Initialize theme from localStorage or system preference
+  // Synchronize theme attribute with root document
   useEffect(() => {
-    try {
-      const savedTheme = localStorage.getItem("phoenix_theme") as "light" | "dark" | null;
-      if (savedTheme === "dark" || savedTheme === "light") {
-        setThemeState(savedTheme);
-        applyThemeClass(savedTheme);
-      } else {
-        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const initial = prefersDark ? "dark" : "light";
-        setThemeState(initial);
-        applyThemeClass(initial);
-      }
-    } catch {
-      // Fallback
-    }
-  }, []);
-
-  const applyThemeClass = (t: "light" | "dark") => {
-    const root = document.documentElement;
-    if (t === "dark") {
-      root.classList.add("dark");
-      root.classList.remove("light");
-      root.setAttribute("data-theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      root.classList.add("light");
-      root.setAttribute("data-theme", "light");
-    }
-  };
+    applyThemeClass(theme);
+  }, [theme]);
 
   const setTheme = (newTheme: "light" | "dark") => {
     setThemeState(newTheme);
@@ -173,17 +174,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    showToast(next === "dark" ? "Switched to Midnight Obsidian Theme 🌙" : "Switched to Sunlight Warm Theme ☀️", "info");
-  };
-
-  const showToast = (msg: string, type: ToastItem["type"] = "info") => {
+  const showToast = useCallback((msg: string, type: ToastItem["type"] = "info") => {
     setToast({ message: msg, type });
     setTimeout(() => {
       setToast((prev) => (prev?.message === msg ? null : prev));
     }, 3200);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    showToast(
+      next === "dark" ? "Switched to Midnight Obsidian Theme 🌙" : "Switched to Sunlight Warm Theme ☀️",
+      "info"
+    );
   };
 
   const openLightbox = (url: string, type: "image" | "video" = "image", title?: string) => {
@@ -192,7 +196,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const closeLightbox = () => setLightboxMedia(null);
 
   // Refresh current session from server cookie
-  const refreshAuthSession = async () => {
+  const refreshAuthSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
       if (res.ok) {
@@ -210,7 +214,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsAuthLoading(false);
     }
     return null;
-  };
+  }, []);
 
   // Restore Admin Authority
   const restoreAdminAuthority = async (): Promise<boolean> => {
@@ -231,9 +235,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Fetch live database records for directory, posts, events, and signatures
-  const fetchLiveDatabaseData = async () => {
+  const fetchLiveDatabaseData = useCallback(async () => {
     try {
-      const usersRes = await fetch("/api/users");
+      const [usersRes, postsRes, eventsRes, sigsRes] = await Promise.all([
+        fetch("/api/users"),
+        fetch("/api/posts"),
+        fetch("/api/events"),
+        fetch("/api/signatures"),
+      ]);
+
       if (usersRes.ok) {
         const data = await usersRes.json();
         if (data.users && data.users.length > 0) {
@@ -241,7 +251,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      const postsRes = await fetch("/api/posts");
       if (postsRes.ok) {
         const data = await postsRes.json();
         if (data.posts && data.posts.length > 0) {
@@ -249,7 +258,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      const eventsRes = await fetch("/api/events");
       if (eventsRes.ok) {
         const data = await eventsRes.json();
         if (data.events && data.events.length > 0) {
@@ -257,7 +265,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      const sigsRes = await fetch("/api/signatures");
       if (sigsRes.ok) {
         const data = await sigsRes.json();
         if (data.signatures && data.signatures.length > 0) {
@@ -267,12 +274,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // Offline fallback
     }
-  };
+  }, []);
 
   useEffect(() => {
-    refreshAuthSession();
-    fetchLiveDatabaseData();
-  }, []);
+    let mounted = true;
+    const initialize = async () => {
+      if (mounted) {
+        await refreshAuthSession();
+        await fetchLiveDatabaseData();
+      }
+    };
+    initialize();
+    return () => {
+      mounted = false;
+    };
+  }, [refreshAuthSession, fetchLiveDatabaseData]);
 
   const logoutUser = async () => {
     try {

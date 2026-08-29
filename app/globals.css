@@ -2,81 +2,88 @@
 
 @layer base {
   :root {
-    --primary: #001f5c;
-    --primary-container: #002e7a;
-    --primary-fixed: #dbe1ff;
-    --primary-fixed-dim: #b3c5ff;
+    /* Phoenix Brand - Light / Sunlight Warm Palette */
+    --primary: #002875;
+    --primary-container: #0a3a9c;
+    --primary-fixed: #dbe4ff;
+    --primary-fixed-dim: #b8ccff;
     --on-primary: #ffffff;
-    --on-primary-container: #758dd5;
+    --on-primary-container: #ffffff;
 
-    --secondary: #705d00;
+    --secondary: #b45309;
     --secondary-container: #fcd400;
-    --secondary-fixed: #ffe16d;
-    --secondary-fixed-dim: #e9c400;
+    --secondary-fixed: #fef08a;
+    --secondary-fixed-dim: #fde047;
     --on-secondary: #ffffff;
-    --on-secondary-container: #6e5c00;
+    --on-secondary-container: #451a03;
 
-    --tertiary: #00171e;
-    --tertiary-container: #002d38;
+    --tertiary: #0369a1;
+    --tertiary-container: #e0f2fe;
 
-    --background: #f8f9fa;
-    --surface: #f8f9fa;
+    --background: #f6f8fc;
+    --surface: #ffffff;
     --surface-bright: #ffffff;
-    --surface-dim: #d9dadb;
+    --surface-dim: #eceff5;
     --surface-container-lowest: #ffffff;
-    --surface-container-low: #f3f4f5;
-    --surface-container: #edeeef;
-    --surface-container-high: #e7e8e9;
-    --surface-container-highest: #e1e3e4;
-    --surface-variant: #e1e3e4;
+    --surface-container-low: #f1f4f9;
+    --surface-container: #e8ecf4;
+    --surface-container-high: #dfe4ef;
+    --surface-container-highest: #d6dce9;
+    --surface-variant: #e2e7f0;
 
-    --outline: #757682;
-    --outline-variant: #c5c6d2;
-    --on-surface: #191c1d;
-    --on-surface-variant: #444650;
-    --on-background: #191c1d;
+    --outline: #64748b;
+    --outline-variant: #cbd5e1;
+    --on-surface: #0f172a;
+    --on-surface-variant: #334155;
+    --on-background: #0f172a;
 
-    --error: #ba1a1a;
-    --error-container: #ffdad6;
+    --error: #dc2626;
+    --error-container: #fee2e2;
     --on-error: #ffffff;
 
-    --card-border: rgba(197, 198, 210, 0.4);
-    --glass-bg: rgba(248, 249, 250, 0.85);
-    --gold-glow: rgba(252, 212, 0, 0.25);
+    --card-border: rgba(203, 213, 225, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.88);
+    --glass-card: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(203, 213, 225, 0.6);
+    --gold-glow: rgba(252, 212, 0, 0.35);
+    --gold-accent: #f59e0b;
+    --aurora-gradient: radial-gradient(circle at 50% -20%, rgba(252, 212, 0, 0.15), transparent 70%),
+      radial-gradient(circle at 100% 40%, rgba(0, 40, 117, 0.08), transparent 60%);
   }
 
   .dark {
-    --primary: #82a8ff;
-    --primary-container: #1b3a8c;
+    /* Phoenix Brand - Dark / Midnight Obsidian Palette */
+    --primary: #8ab4f8;
+    --primary-container: #1d4ed8;
     --primary-fixed: #1e293b;
     --primary-fixed-dim: #334155;
-    --on-primary: #00113a;
-    --on-primary-container: #dbeafe;
+    --on-primary: #051336;
+    --on-primary-container: #e0e7ff;
 
     --secondary: #fcd400;
     --secondary-container: #fbbf24;
     --secondary-fixed: #78350f;
     --secondary-fixed-dim: #451a03;
-    --on-secondary: #1a1600;
-    --on-secondary-container: #1a1600;
+    --on-secondary: #1a1400;
+    --on-secondary-container: #1a1400;
 
-    --tertiary: #80d5f2;
-    --tertiary-container: #003643;
+    --tertiary: #38bdf8;
+    --tertiary-container: #082f49;
 
-    --background: #090d16;
-    --surface: #0f1523;
-    --surface-bright: #172033;
-    --surface-dim: #070a12;
-    --surface-container-lowest: #121a2d;
-    --surface-container-low: #162036;
-    --surface-container: #1c2842;
-    --surface-container-high: #233152;
-    --surface-container-highest: #2b3c62;
-    --surface-variant: #263450;
+    --background: #080c16;
+    --surface: #0e1626;
+    --surface-bright: #152238;
+    --surface-dim: #050810;
+    --surface-container-lowest: #0d1424;
+    --surface-container-low: #121c32;
+    --surface-container: #17243e;
+    --surface-container-high: #1e2e4e;
+    --surface-container-highest: #26395e;
+    --surface-variant: #223252;
 
     --outline: #94a3b8;
-    --outline-variant: #334155;
-    --on-surface: #f1f5f9;
+    --outline-variant: #283750;
+    --on-surface: #f8fafc;
     --on-surface-variant: #cbd5e1;
     --on-background: #f8fafc;
 
@@ -84,9 +91,15 @@
     --error-container: #450a0a;
     --on-error: #ffffff;
 
-    --card-border: rgba(51, 65, 85, 0.6);
-    --glass-bg: rgba(15, 21, 35, 0.85);
+    --card-border: rgba(51, 65, 85, 0.55);
+    --glass-bg: rgba(14, 22, 38, 0.88);
+    --glass-card: rgba(14, 22, 38, 0.78);
+    --glass-border: rgba(148, 163, 184, 0.16);
     --gold-glow: rgba(251, 191, 36, 0.3);
+    --gold-accent: #fbbf24;
+    --aurora-gradient: radial-gradient(circle at 50% -20%, rgba(251, 191, 36, 0.12), transparent 70%),
+      radial-gradient(circle at 90% 30%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(circle at 10% 80%, rgba(139, 92, 246, 0.08), transparent 60%);
   }
 }
 
@@ -133,6 +146,14 @@
   --font-headline: "Montserrat", sans-serif;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--background);
   color: var(--on-surface);
@@ -141,7 +162,8 @@ body {
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.25s ease, color 0.25s ease;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 h1,
@@ -151,56 +173,55 @@ h4,
 h5,
 h6 {
   font-family: "Montserrat", sans-serif;
+  letter-spacing: -0.015em;
 }
 
-/* Depth & Elevation Tokens */
+/* Glassmorphism & Elevation */
+.glass-nav {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-card {
+  background: var(--glass-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
 .ambient-shadow {
-  box-shadow: 0px 4px 20px rgba(0, 17, 58, 0.06);
+  box-shadow: 0 4px 20px -2px rgba(0, 15, 45, 0.06), 0 2px 6px -1px rgba(0, 15, 45, 0.04);
 }
 
 .dark .ambient-shadow {
-  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.45), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
 }
 
 .ambient-shadow-lg {
-  box-shadow: 0px 12px 36px rgba(0, 17, 58, 0.12);
+  box-shadow: 0 16px 40px -4px rgba(0, 20, 60, 0.09), 0 4px 12px -2px rgba(0, 20, 60, 0.05);
 }
 
 .dark .ambient-shadow-lg {
-  box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.65), 0 6px 16px -2px rgba(0, 0, 0, 0.45);
 }
 
-.elevation-1 {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.elevation-2 {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-}
-
-.elevation-3 {
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 4px 8px rgba(0, 0, 0, 0.08);
+.gold-glow {
+  box-shadow: 0 0 32px var(--gold-glow);
 }
 
 /* Card Hover micro-interaction */
 .card-hover {
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.24s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0px 12px 28px rgba(0, 35, 102, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -4px rgba(0, 32, 96, 0.12);
 }
 
 .dark .card-hover:hover {
-  box-shadow: 0px 14px 32px rgba(0, 0, 0, 0.6);
-}
-
-/* Glass Navigation & Surfaces */
-.glass-nav {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65);
 }
 
 /* Button & Interactive Press Feedback */
@@ -221,19 +242,15 @@ textarea {
   0% {
     transform: scale(1);
   }
-
   30% {
     transform: scale(1.45) rotate(-8deg);
   }
-
   60% {
     transform: scale(0.92) rotate(4deg);
   }
-
   80% {
     transform: scale(1.15) rotate(-2deg);
   }
-
   100% {
     transform: scale(1) rotate(0deg);
   }
@@ -248,17 +265,18 @@ textarea {
   0% {
     background-position: -200% 0;
   }
-
   100% {
     background-position: 200% 0;
   }
 }
 
 .skeleton-shimmer {
-  background: linear-gradient(90deg,
-      var(--surface-container-low) 0%,
-      var(--surface-container-high) 50%,
-      var(--surface-container-low) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--surface-container-low) 0%,
+    var(--surface-container-high) 50%,
+    var(--surface-container-low) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }
@@ -267,9 +285,8 @@ textarea {
 @keyframes modalEntry {
   0% {
     opacity: 0;
-    transform: scale(0.93) translateY(8px);
+    transform: scale(0.94) translateY(10px);
   }
-
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -286,7 +303,6 @@ textarea {
     opacity: 0;
     transform: translateY(16px) scale(0.95);
   }
-
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -301,9 +317,8 @@ textarea {
 @keyframes pageFade {
   0% {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
   }
-
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -311,24 +326,65 @@ textarea {
 }
 
 .animate-page-entry {
-  animation: pageFade 0.22s ease-out forwards;
+  animation: pageFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shaking Error Animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+/* Floating animation for crests and badges */
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float {
+  animation: floatGentle 4s ease-in-out infinite;
+}
+
+/* Pulse glow animation */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.08);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 5s ease-in-out infinite;
 }
 
 /* Polaroid & Digital Yearbook Style */
 .yearbook-polaroid {
   background-color: var(--surface-container-lowest);
   border: 1px solid var(--card-border);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
-  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  transition: all 0.26s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .yearbook-polaroid:hover {
   transform: translateY(-5px) rotate(0.4deg);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.13), 0 0 0 1px var(--gold-glow);
+  box-shadow: 0 16px 32px rgba(0, 20, 60, 0.12), 0 0 0 1px var(--gold-glow);
 }
 
 .dark .yearbook-polaroid:hover {
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--gold-glow);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px var(--gold-glow);
 }
 
 /* Material Symbols font helper */

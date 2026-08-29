@@ -27,11 +27,11 @@ export default function MobileBottomNav() {
       href: "/",
       label: "Feed",
       icon: "dynamic_feed",
-      isActive: pathname === "/",
+      isActive: pathname === "/" || pathname === "/feed",
     },
     {
       href: "/memories",
-      label: "Memories",
+      label: "Vault",
       icon: "auto_awesome",
       isActive: pathname.startsWith("/memories"),
     },
@@ -57,7 +57,7 @@ export default function MobileBottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full glass-nav border-t border-outline-variant/30 z-50 px-1 py-1 shadow-lg transition-colors duration-250">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 w-full glass-nav border-t border-outline-variant/30 z-50 px-1 py-1 shadow-lg transition-colors duration-300">
       <div className="flex justify-around items-center h-14">
         {navItems.map((item) => (
           <Link
@@ -69,7 +69,7 @@ export default function MobileBottomNav() {
           >
             <div
               className={`px-3 py-0.5 rounded-full transition-all ${
-                item.isActive ? "bg-primary-fixed" : "bg-transparent"
+                item.isActive ? "bg-secondary-container/40 text-primary shadow-xs" : "bg-transparent"
               }`}
             >
               <span
@@ -79,7 +79,7 @@ export default function MobileBottomNav() {
                 {item.icon}
               </span>
             </div>
-            <span className="text-[10px] mt-0.5 font-body">{item.label}</span>
+            <span className="text-[10px] mt-0.5 font-body font-medium">{item.label}</span>
             {item.badge !== undefined && (
               <span className="absolute top-0 right-3 w-4 h-4 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center">
                 {item.badge}
