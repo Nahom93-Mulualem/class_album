@@ -18,12 +18,12 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
   const router = useRouter();
   const { currentUser, isAuthLoading, theme, toggleTheme } = useApp();
 
-  const isLoginPage = pathname === "/login";
+  const isLoginPage = pathname === "/login" || pathname === "/";
 
-  // Strict client-side authentication guard
+  // Strict client-side authentication guard for protected routes
   useEffect(() => {
     if (!isAuthLoading && !currentUser && !isLoginPage) {
-      const redirectParam = pathname !== "/" ? `?redirect=${encodeURIComponent(pathname)}` : "";
+      const redirectParam = `?redirect=${encodeURIComponent(pathname)}`;
       router.replace(`/login${redirectParam}`);
     }
   }, [isAuthLoading, currentUser, isLoginPage, pathname, router]);

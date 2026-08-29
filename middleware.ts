@@ -31,43 +31,23 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
-  const isLoginPage = pathname === "/login";
+  const isPublicAuthPage = pathname === "/login" || pathname === "/";
 
-  // 4. Handle unauthenticated visitors: STRICT /login entry point
-  if (!session) {
-    // If not logged in and trying to access any protected route (including root '/') -> redirect to /login immediately
-    if (!isLoginPage) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      if (pathname !== "/") {
-        loginUrl.searchParams.set("redirect", pathname);
-      } else {
-        loginUrl.search = "";
-      }
-      return NextResponse.redirect(loginUrl);
-    }
-    // If already on login page -> allow access
+  // 4. If visitor is on public login entry points (/ or /login), NEVER auto-redirect to /admin or /feed
+  // The Login page must always be displayed as the entry point!
+  if (isPublicAuthPage) {
     return NextResponse.next();
   }
 
-  // 5. Handle authenticated users visiting /login
-  if (isLoginPage) {
-    // If already logged in, redirect to role destination
-    const destination = req.nextUrl.clone();
-    destination.pathname = session.role === "ADMIN" ? "/admin" : "/feed";
-    destination.search = "";
-    return NextResponse.redirect(destination);
+  // 5. Handle unauthenticated visitors attempting to access any protected route directly
+  if (!session) {
+    const loginUrl = req.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // 6. Handle authenticated users visiting root '/'
-  if (pathname === "/") {
-    const destination = req.nextUrl.clone();
-    destination.pathname = session.role === "ADMIN" ? "/admin" : "/feed";
-    destination.search = "";
-    return NextResponse.redirect(destination);
-  }
-
-  // 7. Restrict /admin to ADMIN role only
+  // 6. Restrict /admin to ADMIN role only
   if (pathname.startsWith("/admin")) {
     if (session.role !== "ADMIN") {
       const deniedUrl = req.nextUrl.clone();
@@ -83,7 +63,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths including root '/' except for static assets:
+     * Match all request paths including root '/' except for static assets
      */
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],

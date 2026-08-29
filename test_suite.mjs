@@ -23,7 +23,7 @@ async function request(options, postData = null) {
 
 async function runTests() {
   console.log("==================================================");
-  console.log("🎓 Phoenix Class Album - Strict /login Entry Test");
+  console.log("🎓 Phoenix Class Album - Mandatory Login Entry Tests");
   console.log("==================================================\n");
 
   let passed = 0;
@@ -39,19 +39,31 @@ async function runTests() {
     }
   }
 
-  // 1. Test strictly that visiting website root '/' while unauthenticated goes to /login
-  const unauthRoot = await request({
+  // 1. Test strictly that visiting root 'http://localhost:3000/' renders the Login Page (200 OK) without auto-redirecting to /admin or /feed
+  const rootRes = await request({
     hostname: 'localhost',
     port: 3000,
     path: '/',
     method: 'GET',
   });
   assert(
-    unauthRoot.statusCode === 307 && unauthRoot.headers.location?.includes('/login'),
-    "Root URL '/' strictly redirects unauthenticated visitors to /login"
+    rootRes.statusCode === 200,
+    "http://localhost:3000/ directly opens the Login Page (200 OK) without auto-redirecting to /admin or /feed"
   );
 
-  // 2. Test strictly that visiting /feed while unauthenticated redirects to /login
+  // 2. Test strictly that visiting 'http://localhost:3000/login' opens the Login Page (200 OK)
+  const loginPageRes = await request({
+    hostname: 'localhost',
+    port: 3000,
+    path: '/login',
+    method: 'GET',
+  });
+  assert(
+    loginPageRes.statusCode === 200,
+    "http://localhost:3000/login opens the Login Page (200 OK)"
+  );
+
+  // 3. Test that an unauthenticated user attempting /feed is redirected to /login
   const unauthFeed = await request({
     hostname: 'localhost',
     port: 3000,
@@ -60,10 +72,10 @@ async function runTests() {
   });
   assert(
     unauthFeed.statusCode === 307 && unauthFeed.headers.location?.includes('/login?redirect=%2Ffeed'),
-    "Protected '/feed' strictly redirects unauthenticated visitors to /login?redirect=%2Ffeed"
+    "Unauthenticated access to '/feed' is protected and redirects to /login?redirect=%2Ffeed"
   );
 
-  // 3. Test strictly that visiting /directory while unauthenticated redirects to /login
+  // 4. Test that an unauthenticated user attempting /directory is redirected to /login
   const unauthDir = await request({
     hostname: 'localhost',
     port: 3000,
@@ -72,10 +84,10 @@ async function runTests() {
   });
   assert(
     unauthDir.statusCode === 307 && unauthDir.headers.location?.includes('/login?redirect=%2Fdirectory'),
-    "Protected '/directory' strictly redirects unauthenticated visitors to /login?redirect=%2Fdirectory"
+    "Unauthenticated access to '/directory' is protected and redirects to /login?redirect=%2Fdirectory"
   );
 
-  // 4. Test strictly that visiting /admin while unauthenticated redirects to /login
+  // 5. Test that an unauthenticated user attempting /admin is redirected to /login
   const unauthAdmin = await request({
     hostname: 'localhost',
     port: 3000,
@@ -84,19 +96,10 @@ async function runTests() {
   });
   assert(
     unauthAdmin.statusCode === 307 && unauthAdmin.headers.location?.includes('/login?redirect=%2Fadmin'),
-    "Protected '/admin' strictly redirects unauthenticated visitors to /login?redirect=%2Fadmin"
+    "Unauthenticated access to '/admin' is protected and redirects to /login?redirect=%2Fadmin"
   );
 
-  // 5. Test login page loads with 200 OK
-  const loginPage = await request({
-    hostname: 'localhost',
-    port: 3000,
-    path: '/login',
-    method: 'GET',
-  });
-  assert(loginPage.statusCode === 200, "Login page is the public entry point (200 OK)");
-
-  // 6. Test Student Authentication
+  // 6. Test Student Authentication via Login Form
   const studentLoginPayload = JSON.stringify({
     username: "alex.chen",
     password: "Student@2026!",
@@ -128,26 +131,11 @@ async function runTests() {
     studentLoginRes.statusCode === 200 &&
       studentData.user?.role === "STUDENT" &&
       studentCookieStr.length > 0,
-    "Student authentication succeeds with role STUDENT and sets session cookie"
+    "Student authentication succeeds with role STUDENT and receives session token"
   );
 
-  // 7. Test Authenticated Student visiting / redirects to /feed
-  const studentRootRes = await request({
-    hostname: 'localhost',
-    port: 3000,
-    path: '/',
-    method: 'GET',
-    headers: {
-      Cookie: studentCookieStr,
-    },
-  });
-  assert(
-    studentRootRes.statusCode === 307 && studentRootRes.headers.location?.endsWith('/feed'),
-    "Authenticated Student visiting '/' is automatically routed to '/feed'"
-  );
-
-  // 8. Test Authenticated Student visiting /feed directly loads 200 OK
-  const studentFeedDirectRes = await request({
+  // 7. Test Authenticated Student accessing /feed (200 OK)
+  const studentFeedRes = await request({
     hostname: 'localhost',
     port: 3000,
     path: '/feed',
@@ -157,11 +145,11 @@ async function runTests() {
     },
   });
   assert(
-    studentFeedDirectRes.statusCode === 200,
+    studentFeedRes.statusCode === 200,
     "Authenticated Student has full access to Class Feed '/feed' (200 OK)"
   );
 
-  // 9. Test Student attempting to access /admin is blocked and redirected to /feed
+  // 8. Test Authenticated Student attempting /admin is blocked and redirected to /feed
   const studentAdminAttempt = await request({
     hostname: 'localhost',
     port: 3000,
@@ -177,7 +165,7 @@ async function runTests() {
     "Student attempting '/admin' is blocked and redirected to '/feed?error=access_denied_admin_only'"
   );
 
-  // 10. Test Admin Authentication
+  // 9. Test Admin Authentication via Login Form
   const adminLoginPayload = JSON.stringify({
     username: "admin",
     password: "Admin@2026!",
@@ -209,25 +197,10 @@ async function runTests() {
     adminLoginRes.statusCode === 200 &&
       adminData.user?.role === "ADMIN" &&
       adminCookieStr.length > 0,
-    "Admin authentication succeeds with role ADMIN and sets session cookie"
+    "Admin authentication succeeds with role ADMIN and receives session token"
   );
 
-  // 11. Test Authenticated Admin visiting '/' is routed to /admin
-  const adminRootRes = await request({
-    hostname: 'localhost',
-    port: 3000,
-    path: '/',
-    method: 'GET',
-    headers: {
-      Cookie: adminCookieStr,
-    },
-  });
-  assert(
-    adminRootRes.statusCode === 307 && adminRootRes.headers.location?.endsWith('/admin'),
-    "Authenticated Admin visiting '/' is automatically routed to '/admin'"
-  );
-
-  // 12. Test Authenticated Admin has access to /admin (200 OK)
+  // 10. Test Authenticated Admin accessing /admin (200 OK)
   const adminDashboardRes = await request({
     hostname: 'localhost',
     port: 3000,
@@ -242,7 +215,22 @@ async function runTests() {
     "Authenticated Admin has full access to Admin Dashboard '/admin' (200 OK)"
   );
 
-  // 13. Test Logout API
+  // 11. Test that even with an Admin Cookie, visiting root '/' still opens the Login Page without auto-bypassing
+  const adminVisitingRoot = await request({
+    hostname: 'localhost',
+    port: 3000,
+    path: '/',
+    method: 'GET',
+    headers: {
+      Cookie: adminCookieStr,
+    },
+  });
+  assert(
+    adminVisitingRoot.statusCode === 200,
+    "Root URL 'http://localhost:3000/' does NOT auto-redirect to /admin even when an admin session cookie exists"
+  );
+
+  // 12. Test Logout Endpoint
   const logoutRes = await request(
     {
       hostname: 'localhost',
