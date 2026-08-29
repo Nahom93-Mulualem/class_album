@@ -142,7 +142,7 @@ export default function MemoriesPage() {
                 Software Engineering Memory Vault
               </h1>
               <p className="text-xs sm:text-sm text-primary-fixed leading-relaxed">
-                Relive our 4-year journey from freshman year to graduation commencement, capstones, and lifelong friendships.
+                A curated digital archive of senior capstone milestones, hackathons, and lifelong memories.
               </p>
             </div>
           </div>

@@ -166,6 +166,15 @@ body {
   transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.dark body {
+  background-color: #060913;
+  background-image: 
+    radial-gradient(ellipse at 12% 10%, rgba(59, 130, 246, 0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 88% 18%, rgba(251, 191, 36, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 85%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
 h1,
 h2,
 h3,
@@ -195,7 +204,7 @@ h6 {
 }
 
 .dark .ambient-shadow {
-  box-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.45), 0 2px 8px -2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.065), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
 }
 
 .ambient-shadow-lg {
@@ -203,11 +212,19 @@ h6 {
 }
 
 .dark .ambient-shadow-lg {
-  box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.65), 0 6px 16px -2px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 20px 48px -4px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
 .gold-glow {
   box-shadow: 0 0 32px var(--gold-glow);
+}
+
+.dark .obsidian-glow-blue {
+  box-shadow: 0 0 24px -4px rgba(59, 130, 246, 0.25);
+}
+
+.dark .obsidian-glow-gold {
+  box-shadow: 0 0 24px -4px rgba(251, 191, 36, 0.25);
 }
 
 /* Card Hover micro-interaction */
@@ -221,7 +238,7 @@ h6 {
 }
 
 .dark .card-hover:hover {
-  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(138, 180, 248, 0.28), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
 }
 
 /* Button & Interactive Press Feedback */
@@ -231,6 +248,33 @@ input,
 select,
 textarea {
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sleek custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .btn-press:active {

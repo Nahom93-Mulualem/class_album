@@ -136,7 +136,7 @@ export default function FeedPage() {
               Welcome to Phoenix Lounge, {currentUser?.name || "Classmate"}! 🚀
             </h1>
             <p className="text-xs sm:text-sm text-primary-fixed mt-1.5 max-w-xl leading-relaxed">
-              Connect with your 50 software engineering cohort peers, share capstone milestones, hackathon wins, and graduation memories.
+              Share capstone milestones, technical triumphs, project updates, and senior highlights with your cohort peers.
             </p>
           </div>
         </div>
@@ -207,11 +207,10 @@ export default function FeedPage() {
             <button
               key={tag}
               onClick={() => setActiveFilter(tag)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === tag
-                  ? "bg-primary text-on-primary shadow-sm scale-102 font-bold"
-                  : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-              }`}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${activeFilter === tag
+                ? "bg-primary text-on-primary shadow-sm scale-102 font-bold"
+                : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
+                }`}
             >
               {tag === "Projects" && "💻 "}
               {tag === "Career & Offers" && "🎉 "}
@@ -311,14 +310,12 @@ export default function FeedPage() {
                     {/* Like Button */}
                     <button
                       onClick={() => toggleLikePost(post.id)}
-                      className={`flex items-center gap-1.5 text-xs font-semibold transition-all active:scale-90 cursor-pointer group ${
-                        post.isLiked ? "text-error font-bold" : "hover:text-error"
-                      }`}
+                      className={`flex items-center gap-1.5 text-xs font-semibold transition-all active:scale-90 cursor-pointer group ${post.isLiked ? "text-error font-bold" : "hover:text-error"
+                        }`}
                     >
                       <span
-                        className={`material-symbols-outlined text-xl group-hover:scale-125 transition-transform ${
-                          post.isLiked ? "text-error animate-heart-burst" : ""
-                        }`}
+                        className={`material-symbols-outlined text-xl group-hover:scale-125 transition-transform ${post.isLiked ? "text-error animate-heart-burst" : ""
+                          }`}
                         style={{ fontVariationSettings: post.isLiked ? "'FILL' 1" : "'FILL' 0" }}
                       >
                         favorite
@@ -478,11 +475,10 @@ export default function FeedPage() {
                   <span className="text-[10px] text-on-surface-variant line-clamp-1">{evt.description}</span>
                   <button
                     onClick={() => toggleRSVP(evt.id)}
-                    className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${
-                      evt.isRSVPed
-                        ? "bg-secondary-container text-on-secondary-container shadow-xs"
-                        : "bg-surface text-primary border border-primary/30 hover:bg-primary-fixed/30"
-                    }`}
+                    className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all cursor-pointer ${evt.isRSVPed
+                      ? "bg-secondary-container text-on-secondary-container shadow-xs"
+                      : "bg-surface text-primary border border-primary/30 hover:bg-primary-fixed/30"
+                      }`}
                   >
                     {evt.isRSVPed ? "✓ Going" : "RSVP"}
                   </button>
