@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import {
   Student,
   Post,
@@ -41,6 +48,7 @@ export interface LightboxData {
 
 interface AppContextType {
   theme: "light" | "dark";
+  isThemeMounted: boolean;
   toggleTheme: () => void;
   setTheme: (t: "light" | "dark") => void;
   currentUser: ExtendedUser | null;
@@ -104,24 +112,56 @@ function applyThemeClass(t: "light" | "dark") {
   }
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  // Theme State with lazy initial state
-  const [theme, setThemeState] = useState<"light" | "dark">(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const savedTheme = localStorage.getItem("phoenix_theme") as "light" | "dark" | null;
-        if (savedTheme === "dark" || savedTheme === "light") {
-          return savedTheme;
-        }
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-          return "dark";
-        }
-      } catch {
-        // Fallback
-      }
+function subscribeTheme(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  window.addEventListener("phoenix_theme_change", callback);
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("phoenix_theme_change", callback);
+    media.removeEventListener("change", callback);
+  };
+}
+
+function getThemeSnapshot(): "light" | "dark" {
+  if (typeof window === "undefined") return "light";
+  try {
+    const savedTheme = localStorage.getItem("phoenix_theme") as "light" | "dark" | null;
+    if (savedTheme === "dark" || savedTheme === "light") {
+      return savedTheme;
     }
-    return "light";
-  });
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+  } catch {
+    // Fallback
+  }
+  return "light";
+}
+
+function getThemeServerSnapshot(): "light" | "dark" {
+  return "light";
+}
+
+function subscribeMounted(callback: () => void) {
+  callback();
+  return () => {};
+}
+
+function getMountedSnapshot(): boolean {
+  return true;
+}
+
+function getMountedServerSnapshot(): boolean {
+  return false;
+}
+
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  // Theme State: Synchronized with client store via React 18/19 useSyncExternalStore (100% SSR & Hydration safe)
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const isThemeMounted = useSyncExternalStore(subscribeMounted, getMountedSnapshot, getMountedServerSnapshot);
 
   const [currentUser, setCurrentUser] = useState<ExtendedUser | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -159,20 +199,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [lightboxMedia, setLightboxMedia] = useState<LightboxData | null>(null);
   const [toast, setToast] = useState<ToastItem | null>(null);
 
-  // Synchronize theme attribute with root document
+  // Synchronize document classes when theme changes on client
   useEffect(() => {
     applyThemeClass(theme);
   }, [theme]);
 
-  const setTheme = (newTheme: "light" | "dark") => {
-    setThemeState(newTheme);
-    applyThemeClass(newTheme);
+  const setTheme = useCallback((newTheme: "light" | "dark") => {
     try {
       localStorage.setItem("phoenix_theme", newTheme);
+      window.dispatchEvent(new Event("phoenix_theme_change"));
     } catch {
       // ignore
     }
-  };
+    applyThemeClass(newTheme);
+  }, []);
 
   const showToast = useCallback((msg: string, type: ToastItem["type"] = "info") => {
     setToast({ message: msg, type });
@@ -181,14 +221,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }, 3200);
   }, []);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
     showToast(
       next === "dark" ? "Switched to Midnight Obsidian Theme 🌙" : "Switched to Sunlight Warm Theme ☀️",
       "info"
     );
-  };
+  }, [theme, setTheme, showToast]);
 
   const openLightbox = (url: string, type: "image" | "video" = "image", title?: string) => {
     setLightboxMedia({ url, type, title });
@@ -765,6 +805,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <AppContext.Provider
       value={{
         theme,
+        isThemeMounted,
         toggleTheme,
         setTheme,
         currentUser,

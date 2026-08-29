@@ -13,6 +13,7 @@ export default function TopNavBar() {
     markNotificationAsRead,
     markAllNotificationsRead,
     theme,
+    isThemeMounted,
     toggleTheme,
     logoutUser,
   } = useApp();
@@ -221,12 +222,20 @@ export default function TopNavBar() {
           {/* Prominent Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "Dark" : "Light"} mode`}
-            title={`Current: ${theme === "light" ? "Sunlight Warm" : "Midnight Obsidian"} — Click to switch`}
+            aria-label="Switch theme mode"
+            title={
+              isThemeMounted
+                ? `Current: ${theme === "light" ? "Sunlight Warm (Light)" : "Midnight Obsidian (Dark)"} — Click to switch`
+                : "Switch theme mode"
+            }
             className="p-2.5 rounded-full bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/30 text-on-surface transition-all active:scale-90 flex items-center justify-center group shadow-xs cursor-pointer"
           >
             <div className="w-5 h-5 flex items-center justify-center">
-              {theme === "light" ? (
+              {!isThemeMounted ? (
+                <span className="material-symbols-outlined text-amber-500 text-xl">
+                  light_mode
+                </span>
+              ) : theme === "light" ? (
                 <span className="material-symbols-outlined text-amber-500 text-xl transition-transform duration-300 group-hover:rotate-45">
                   light_mode
                 </span>

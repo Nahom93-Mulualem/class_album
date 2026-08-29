@@ -16,7 +16,7 @@ import ToastContainer from "./ToastContainer";
 export default function AppLayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, isAuthLoading, theme, toggleTheme } = useApp();
+  const { currentUser, isAuthLoading, theme, toggleTheme, isThemeMounted } = useApp();
 
   const isLoginPage = pathname === "/login" || pathname === "/";
 
@@ -38,10 +38,14 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
             onClick={toggleTheme}
             aria-label="Toggle Theme"
             className="p-3 rounded-2xl bg-surface/80 hover:bg-surface border border-outline-variant/30 text-on-surface shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center backdrop-blur-md group"
-            title={`Switch to ${theme === "light" ? "Midnight Obsidian (Dark)" : "Sunlight Warm (Light)"} mode`}
+            title={
+              isThemeMounted
+                ? `Switch to ${theme === "light" ? "Midnight Obsidian (Dark)" : "Sunlight Warm (Light)"} mode`
+                : "Switch theme mode"
+            }
           >
             <span className="material-symbols-outlined text-xl text-amber-500 dark:text-indigo-300 transition-transform group-hover:rotate-45">
-              {theme === "light" ? "light_mode" : "dark_mode"}
+              {!isThemeMounted ? "light_mode" : theme === "light" ? "light_mode" : "dark_mode"}
             </span>
           </button>
         </div>
