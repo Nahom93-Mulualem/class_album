@@ -122,6 +122,10 @@ export default function AdminDashboardPage() {
     bio: "",
   });
 
+  const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<AdminUser | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+
   const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<AdminPost | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
@@ -343,6 +347,15 @@ export default function AdminDashboardPage() {
           prev.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
         );
         showToast(`👑 ${user.name} is now a ${newRole}!`);
+        if (stats) {
+          setStats({
+            ...stats,
+            totalStudents:
+              newRole === "STUDENT" ? stats.totalStudents + 1 : Math.max(0, stats.totalStudents - 1),
+            totalAdmins:
+              newRole === "ADMIN" ? stats.totalAdmins + 1 : Math.max(0, stats.totalAdmins - 1),
+          });
+        }
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to change user role.");
@@ -371,6 +384,21 @@ export default function AdminDashboardPage() {
       if (res.ok) {
         showToast(`🎉 Created new account for ${newUserForm.name}!`);
         setIsCreateUserModalOpen(false);
+        if (data.user) {
+          setUsers((prev) => [data.user, ...prev]);
+        }
+        // Instantly increase user stats counters
+        if (stats) {
+          setStats({
+            ...stats,
+            totalUsers: stats.totalUsers + 1,
+            activeUsers: stats.activeUsers + 1,
+            totalStudents:
+              newUserForm.role === "STUDENT" ? stats.totalStudents + 1 : stats.totalStudents,
+            totalAdmins:
+              newUserForm.role === "ADMIN" ? stats.totalAdmins + 1 : stats.totalAdmins,
+          });
+        }
         setNewUserForm({
           name: "",
           username: "",
@@ -386,6 +414,48 @@ export default function AdminDashboardPage() {
       }
     } catch {
       showToast("Network error creating user.");
+    }
+  };
+
+  // 4b. Delete User
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      setIsDeletingUser(true);
+      const res = await fetch(`/api/admin/users?userId=${userToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message || `🗑️ User "${userToDelete.name}" deleted successfully.`);
+        const deleted = userToDelete;
+        setUsers((prev) => prev.filter((u) => u.id !== deleted.id));
+        setIsDeleteUserModalOpen(false);
+        setUserToDelete(null);
+
+        // Instantly decrease user stats counters
+        if (stats) {
+          setStats({
+            ...stats,
+            totalUsers: Math.max(0, stats.totalUsers - 1),
+            activeUsers: deleted.isActive ? Math.max(0, stats.activeUsers - 1) : stats.activeUsers,
+            deactivatedUsers: !deleted.isActive ? Math.max(0, stats.deactivatedUsers - 1) : stats.deactivatedUsers,
+            totalStudents:
+              deleted.role === "STUDENT" ? Math.max(0, stats.totalStudents - 1) : stats.totalStudents,
+            totalAdmins:
+              deleted.role === "ADMIN" ? Math.max(0, stats.totalAdmins - 1) : stats.totalAdmins,
+          });
+        }
+        fetchData();
+      } else {
+        showToast(data.error || "Failed to delete user.");
+      }
+    } catch {
+      showToast("Error deleting user.");
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -732,7 +802,7 @@ export default function AdminDashboardPage() {
               <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">
                 Active Lounge Chat
               </span>
-              <span className="text-[11px] opacity-90">50 Cohort peers</span>
+              <span className="text-[11px] opacity-90">{stats?.totalStudents || users.length} Cohort peers</span>
             </div>
           </div>
         </div>
@@ -808,7 +878,7 @@ export default function AdminDashboardPage() {
                     Recent Cohort Members
                   </h3>
                   <p className="text-xs text-on-surface-variant">
-                    50 student accounts + 1 administrator active in PostgreSQL
+                    {stats?.totalStudents || 0} student accounts + {stats?.totalAdmins || 0} administrator active in PostgreSQL
                   </p>
                 </div>
                 <button
@@ -874,6 +944,16 @@ export default function AdminDashboardPage() {
                         title="Reset Password"
                       >
                         <span className="material-symbols-outlined text-base">key</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setUserToDelete(user);
+                          setIsDeleteUserModalOpen(true);
+                        }}
+                        className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 transition-colors cursor-pointer"
+                        title="Delete User"
+                      >
+                        <span className="material-symbols-outlined text-base">delete</span>
                       </button>
                     </div>
                   </div>
@@ -1115,6 +1195,17 @@ export default function AdminDashboardPage() {
                             <span className="material-symbols-outlined text-sm">
                               {user.isActive ? "block" : "check_circle"}
                             </span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setUserToDelete(user);
+                              setIsDeleteUserModalOpen(true);
+                            }}
+                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 transition-colors cursor-pointer"
+                            title="Delete User"
+                          >
+                            <span className="material-symbols-outlined text-sm">delete</span>
                           </button>
                         </div>
                       </td>
@@ -2057,6 +2148,72 @@ export default function AdminDashboardPage() {
                 className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold transition-all shadow-sm hover:bg-rose-700 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
               >
                 {isDeletingEvent ? "Deleting..." : "Confirm Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 8: DELETE USER CONFIRMATION */}
+      {isDeleteUserModalOpen && userToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">person_remove</span>
+              </div>
+              <div>
+                <h3 className="font-headline font-bold text-base text-on-surface">
+                  Delete User Account?
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  This will permanently delete this account and remove all their associated data from PostgreSQL.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/20 flex items-center gap-3">
+              <img
+                src={userToDelete.avatar}
+                alt={userToDelete.name}
+                className="w-11 h-11 rounded-full object-cover border border-outline-variant/30"
+              />
+              <div>
+                <p className="font-bold text-primary text-sm">{userToDelete.name}</p>
+                <p className="text-xs text-on-surface-variant font-mono">
+                  @{userToDelete.username} • {userToDelete.role}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteUserModalOpen(false);
+                  setUserToDelete(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-on-surface transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteUser}
+                disabled={isDeletingUser}
+                className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold transition-all shadow-sm hover:bg-rose-700 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              >
+                {isDeletingUser ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                    <span>Confirm Delete</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

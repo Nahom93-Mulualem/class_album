@@ -381,11 +381,32 @@ export default function MemoriesPage() {
                     className="yearbook-polaroid rounded-3xl p-5 cursor-pointer group"
                   >
                     <div className="relative rounded-2xl overflow-hidden mb-3 aspect-[16/9] bg-black/40">
-                      <img
-                        src={mem.image}
-                        alt={mem.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      {mem.image ? (
+                        <img
+                          src={mem.image}
+                          alt={mem.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : mem.video ? (
+                        <video
+                          src={mem.video}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-primary font-bold">
+                          🎓 {mem.title}
+                        </div>
+                      )}
+                      {mem.video && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/25 group-hover:bg-black/15 transition-colors">
+                          <div className="w-10 h-10 rounded-full bg-secondary-container/90 text-on-secondary-container flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-xl">play_arrow</span>
+                          </div>
+                        </div>
+                      )}
                       <span className="absolute top-2 left-2 px-2.5 py-0.5 bg-secondary-container/90 text-on-secondary-container text-[10px] font-bold rounded-full backdrop-blur-sm">
                         🎓 {mem.category}
                       </span>
@@ -475,11 +496,25 @@ export default function MemoriesPage() {
                       : "aspect-[4/3]"
                   }`}
                 >
-                  <img
-                    src={mem.image}
-                    alt={mem.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
+                  {mem.image ? (
+                    <img
+                      src={mem.image}
+                      alt={mem.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : mem.video ? (
+                    <video
+                      src={mem.video}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-primary font-bold text-sm">
+                      🎓 {mem.title}
+                    </div>
+                  )}
 
                   {/* Video Icon Indicator */}
                   {mem.video && (
@@ -509,12 +544,14 @@ export default function MemoriesPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      openLightbox(mem.image, mem.video ? "video" : "image", mem.title);
+                      openLightbox(mem.video || mem.image, mem.video ? "video" : "image", mem.title);
                     }}
                     className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm shadow-md cursor-pointer"
-                    title="Zoom Photo"
+                    title={mem.video ? "Play Video" : "Zoom Photo"}
                   >
-                    <span className="material-symbols-outlined text-base">zoom_in</span>
+                    <span className="material-symbols-outlined text-base">
+                      {mem.video ? "play_circle" : "zoom_in"}
+                    </span>
                   </button>
                 </div>
 

@@ -664,6 +664,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toggleMessageReaction = (conversationId: string, messageId: string, emoji: string) => {
     if (!currentUser) return;
 
+    const currentUserId = currentUser.id || "current-user";
+
+    const isMatchUser = (userId: string) =>
+      userId === currentUserId ||
+      (currentUserId === "current-user" && userId === currentUser.id) ||
+      (userId === "current-user" && currentUserId === currentUser.id);
+
     setConversations((prev) =>
       prev.map((conv) => {
         if (conv.id !== conversationId) return conv;
@@ -672,37 +679,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           if (msg.id !== messageId) return msg;
 
           const existingReactions = msg.reactions || [];
-          const reactionIndex = existingReactions.findIndex((r) => r.emoji === emoji);
 
-          if (reactionIndex > -1) {
-            const currentReaction = existingReactions[reactionIndex];
-            const hasReacted = currentReaction.users.includes(currentUser.id);
+          // Check if user already reacted with THIS EXACT emoji
+          const existingTargetReaction = existingReactions.find((r) => r.emoji === emoji);
+          const hasReactedWithThisEmoji = existingTargetReaction
+            ? existingTargetReaction.users.some(isMatchUser)
+            : false;
 
-            let newReactions: ReactionItem[];
-            if (hasReacted) {
-              const newUsers = currentReaction.users.filter((u) => u !== currentUser.id);
-              if (newUsers.length === 0) {
-                newReactions = existingReactions.filter((_, idx) => idx !== reactionIndex);
-              } else {
-                newReactions = existingReactions.map((r, idx) =>
-                  idx === reactionIndex ? { ...r, count: r.count - 1, users: newUsers } : r
-                );
-              }
-            } else {
-              newReactions = existingReactions.map((r, idx) =>
-                idx === reactionIndex
-                  ? { ...r, count: r.count + 1, users: [...r.users, currentUser.id] }
-                  : r
-              );
-            }
+          if (hasReactedWithThisEmoji) {
+            // TOGGLE OFF: Remove user from this emoji reaction
+            const newReactions = existingReactions
+              .map((r) => {
+                if (r.emoji !== emoji) return r;
+                const newUsers = r.users.filter((u) => !isMatchUser(u));
+                return { ...r, count: newUsers.length, users: newUsers };
+              })
+              .filter((r) => r.users.length > 0);
+
             return { ...msg, reactions: newReactions };
           } else {
-            const newReaction: ReactionItem = {
-              emoji,
-              count: 1,
-              users: [currentUser.id],
-            };
-            return { ...msg, reactions: [...existingReactions, newReaction] };
+            // SWITCH / ADD: Remove user from any other emoji reactions on this message first
+            const cleanedReactions = existingReactions
+              .map((r) => {
+                const newUsers = r.users.filter((u) => !isMatchUser(u));
+                return { ...r, count: newUsers.length, users: newUsers };
+              })
+              .filter((r) => r.users.length > 0);
+
+            // Now add user to the chosen emoji
+            const targetIdx = cleanedReactions.findIndex((r) => r.emoji === emoji);
+            let finalReactions: ReactionItem[];
+
+            if (targetIdx > -1) {
+              finalReactions = cleanedReactions.map((r, idx) =>
+                idx === targetIdx
+                  ? { ...r, count: r.count + 1, users: [...r.users, currentUserId] }
+                  : r
+              );
+            } else {
+              finalReactions = [
+                ...cleanedReactions,
+                { emoji, count: 1, users: [currentUserId] },
+              ];
+            }
+
+            return { ...msg, reactions: finalReactions };
           }
         });
 

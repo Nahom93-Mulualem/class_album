@@ -4,25 +4,6 @@ import React, { useState, useRef } from "react";
 import { useApp } from "../context/AppContext";
 import { MemoryCategory } from "../data/initialData";
 
-const SAMPLE_MEMORY_PHOTOS = [
-  {
-    label: "Graduation Celebration",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDqevVO5_wHxhoQDc4KRJHtQwo3DPY1n-8I7xivRIAY-oVmzxZruRcIb3djwnzfBLgNk1jJsW-BdyWVzREJ6Mq4BVhnp1XyYvB5a5fMAHRzcSgPBeDummr6XPPXuRiIDESfaRfvQOrg87-nP2QbJd7AhuxsCiPZIiho8b2jmNCBVClqxoudmn4nH0Q0GNt0ED5H8yBNdCkFIrOkB-TMrCoUEAVXwQqIeBen-2Vb_1klmV01mZOP8H0U_A",
-  },
-  {
-    label: "Study & Hackathon Squad",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVKSi5KNEGsCkJ978c4-ItkyffXdqLQkoV9YtsZtAMwuAZn0LrFoFjc2pCWQM6dMeixLe30ykUPrz7j2XJ0AuSVE6TpQC_cf6JbwivOFctHZOhCw9LkZky8LUqCZPVaBkb7uvIY8zVMJB5Aympx1AvHKbAC7wXwWPq8zH3TpWS6G2eI4lS9d9tSosBXAZKsxFuuPVYWf_3lM20LgCkBWOCzq_0BPpoYRytLaeznmqYKUnn9bGc-d9_QA",
-  },
-  {
-    label: "Cabin / Trip Retreat",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDL89L9PaJ9NEi-lfnwJ5qTDX1cbySDaTvCeYF9k33qDbkrFRk6m8EHpKOtBPCr3Jf48aRrjdnyEorml_ONa40iQTxiUHEpBbtdH4sl66eA649UZsBaA7lXP4D3z9w40oHosCwG_DAHI4VqiuYX7Fi7X7rTqqhKJPDPbqSIAVlAz22VBTEaG82CVcc2_pPGcSxy5hjDkeI6L1jEy1NpJkOECRZIiJGQ8yZm2f2A2VhveeoJYGenEuScWg",
-  },
-  {
-    label: "Campus Quad Moments",
-    url: "https://lh3.googleusercontent.com/aida-public/AB6AXuD-8_4OIWUx9-YFYuzTuwPrDZVPig1ofbP_x4hESMcy_EhRWYmwh852WZnRZ_5QFPh6NKz-yzb8HyQHxdywfAzx3av5oxDQH0sFoHmHW5zCacywcr5VedZVcfxUpuigktGkJ8zpnuC2VEg9SbMRx9zd1xNkGlJUB0wumSe2dl90ZlKIf6b14dvHWVDcF7B7b64IVstsI2rHoOBxOvffVnXwJxVwS5v4yTLXrR71BqoKWVkqy5OAjO3hpw",
-  },
-];
-
 const CATEGORIES: MemoryCategory[] = [
   "Graduation",
   "Campus Life",
@@ -33,8 +14,6 @@ const CATEGORIES: MemoryCategory[] = [
   "Throwbacks",
   "Other",
 ];
-
-const YEARS = ["2026", "2025", "2024", "2023", "2022", "2021", "2020"] as const;
 
 export default function NewMemoryModal() {
   const { isNewMemoryModalOpen, setIsNewMemoryModalOpen, addMemory, currentUser, students, showToast } =
@@ -47,12 +26,11 @@ export default function NewMemoryModal() {
   const [date, setDate] = useState("May 2026");
   const [location, setLocation] = useState("Main Campus Quad");
 
-  // Uploaded media state
+  // Uploaded media state (can be photo only, video only, or both)
   const [uploadedImage, setUploadedImage] = useState<string>("");
   const [uploadedImageName, setUploadedImageName] = useState<string>("");
   const [uploadedVideo, setUploadedVideo] = useState<string>("");
   const [uploadedVideoName, setUploadedVideoName] = useState<string>("");
-  const [mediaUploadTab, setMediaUploadTab] = useState<"upload" | "samples">("upload");
 
   const [aspect, setAspect] = useState<"tall" | "wide" | "square" | "featured">("featured");
   const [taggedStudentIds, setTaggedStudentIds] = useState<string[]>([]);
@@ -106,12 +84,18 @@ export default function NewMemoryModal() {
     );
   };
 
+  const hasMedia = Boolean(uploadedImage || uploadedVideo);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalImage = uploadedImage || SAMPLE_MEMORY_PHOTOS[0].url;
 
-    if (!title.trim() || !story.trim() || !finalImage) {
-      showToast("Please provide a title, story, and upload a picture!", "info");
+    if (!title.trim() || !story.trim()) {
+      showToast("Please provide a title and memory story!", "info");
+      return;
+    }
+
+    if (!hasMedia) {
+      showToast("Please upload at least a picture or a video!", "info");
       return;
     }
 
@@ -126,7 +110,7 @@ export default function NewMemoryModal() {
       year,
       date: date.trim() || `${year} Semester`,
       location: location.trim() || "University Campus",
-      image: finalImage,
+      image: uploadedImage || "",
       video: uploadedVideo || undefined,
       aspect,
       authorId: currentUser?.id || "student-guest",
@@ -147,6 +131,7 @@ export default function NewMemoryModal() {
     setUploadedVideo("");
     setUploadedVideoName("");
     setTaggedStudentIds([]);
+    setIsNewMemoryModalOpen(false);
   };
 
   return (
@@ -173,7 +158,7 @@ export default function NewMemoryModal() {
                 Add to Digital Yearbook
               </h2>
               <p className="text-xs text-on-surface-variant">
-                Upload your photos, videos, and memories from our 2020–2026 journey
+                Upload your photo, video, or both to keep memories in the 2020–2026 Vault
               </p>
             </div>
           </div>
@@ -236,7 +221,7 @@ export default function NewMemoryModal() {
                 <option value="2023">2023 </option>
                 <option value="2022">2022 </option>
                 <option value="2021">2021 </option>
-                <option value="2020">2020 (Freshman Year- Meles campus  ✨)</option>
+                <option value="2020">2020 (Freshman Year - Meles Campus ✨)</option>
               </select>
             </div>
           </div>
@@ -255,172 +240,169 @@ export default function NewMemoryModal() {
                 className="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 focus:border-primary rounded-xl text-sm font-body text-on-surface outline-none transition-all"
               />
             </div>
+            <div>
+              <label className="block text-xs font-bold font-headline text-primary mb-1.5 uppercase tracking-wider">
+                Location
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="e.g. Main Campus Quad, Tech Lab 3"
+                className="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 focus:border-primary rounded-xl text-sm font-body text-on-surface outline-none transition-all"
+              />
+            </div>
           </div>
 
-          {/* Direct File Upload for Pictures & Videos */}
-          <div className="space-y-3 bg-surface-container-low/70 p-4 rounded-2xl border border-outline-variant/30">
+          {/* Media Uploads: Upload Picture, Upload Video, or Both */}
+          <div className="space-y-3.5 bg-surface-container-low/70 p-4.5 rounded-2xl border border-outline-variant/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold font-headline text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-secondary text-base">cloud_upload</span>
-                Upload Pictures & Videos *
+                Media Attachment (Photo, Video, or Both) *
               </span>
-
-              <div className="flex items-center gap-1 bg-surface-container-high rounded-xl p-0.5 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setMediaUploadTab("upload")}
-                  className={`px-3 py-1 rounded-lg font-bold transition-all ${mediaUploadTab === "upload"
-                    ? "bg-secondary-container text-on-secondary-container shadow-xs"
-                    : "text-on-surface-variant hover:text-on-surface"
-                    }`}
-                >
-                  📁 File Upload
-                </button>
-              </div>
+              <span className="text-[11px] text-on-surface-variant font-medium">
+                {uploadedImage && uploadedVideo
+                  ? "📸 Photo & 🎥 Video Attached"
+                  : uploadedImage
+                  ? "📸 Photo Attached"
+                  : uploadedVideo
+                  ? "🎥 Video Attached"
+                  : "Upload photo, video, or both"}
+              </span>
             </div>
 
-            {mediaUploadTab === "upload" ? (
-              <div className="space-y-3">
-                {/* Image Upload Dropzone */}
-                <div>
-                  <input
-                    type="file"
-                    ref={imageInputRef}
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                    className="hidden"
-                  />
+            {/* 1. Photo Upload Dropzone */}
+            <div>
+              <label className="block text-[11px] font-bold font-headline text-on-surface-variant mb-1.5 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm text-secondary">image</span>
+                Picture {uploadedVideo && !uploadedImage ? "(Optional)" : ""}
+              </label>
+              <input
+                type="file"
+                ref={imageInputRef}
+                accept="image/*"
+                onChange={handleImageFileChange}
+                className="hidden"
+              />
 
-                  {uploadedImage ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-outline-variant/40 bg-black/40 h-44 group">
-                      <img
-                        src={uploadedImage}
-                        alt="Uploaded preview"
-                        className="w-full h-full object-contain"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => imageInputRef.current?.click()}
-                          className="px-3 py-1.5 bg-white text-primary rounded-xl text-xs font-bold shadow-md hover:bg-gray-100 transition-colors"
-                        >
-                          Change Picture
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setUploadedImage("");
-                            setUploadedImageName("");
-                          }}
-                          className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-red-700 transition-colors"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <span className="absolute bottom-2 left-2 px-2.5 py-0.5 bg-black/70 text-white text-[10px] rounded-md backdrop-blur-sm truncate max-w-[200px]">
-                        📷 {uploadedImageName || "Photo uploaded"}
-                      </span>
-                    </div>
-                  ) : (
-                    <div
+              {uploadedImage ? (
+                <div className="relative rounded-2xl overflow-hidden border border-outline-variant/40 bg-black/40 h-44 group">
+                  <img
+                    src={uploadedImage}
+                    alt="Uploaded preview"
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <button
+                      type="button"
                       onClick={() => imageInputRef.current?.click()}
-                      className="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-2xl p-5 text-center cursor-pointer transition-colors bg-surface-container-lowest/60 hover:bg-surface-container-lowest group"
+                      className="px-3 py-1.5 bg-white text-primary rounded-xl text-xs font-bold shadow-md hover:bg-gray-100 transition-colors cursor-pointer"
                     >
-                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
-                        <span className="material-symbols-outlined text-2xl">add_a_photo</span>
-                      </div>
-                      <p className="text-xs font-bold text-primary">Click to select photo from your device</p>
-                      <p className="text-[10px] text-on-surface-variant mt-0.5">
-                        Supports PNG, JPG, JPEG, WEBP, GIF
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Optional Video Upload */}
-                <div>
-                  <input
-                    type="file"
-                    ref={videoInputRef}
-                    accept="video/*"
-                    onChange={handleVideoFileChange}
-                    className="hidden"
-                  />
-
-                  {uploadedVideo ? (
-                    <div className="relative rounded-2xl overflow-hidden border border-outline-variant/40 bg-black p-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-white text-xs truncate">
-                        <span className="material-symbols-outlined text-secondary-container">movie</span>
-                        <span className="truncate">{uploadedVideoName || "Video attached"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => videoInputRef.current?.click()}
-                          className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[10px] font-bold"
-                        >
-                          Replace
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setUploadedVideo("");
-                            setUploadedVideoName("");
-                          }}
-                          className="px-2.5 py-1 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-[10px] font-bold"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => videoInputRef.current?.click()}
-                      className="w-full py-2.5 px-3 rounded-xl border border-outline-variant/30 hover:border-primary/50 text-on-surface-variant hover:text-primary text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer bg-surface-container-lowest/60"
-                    >
-                      <span className="material-symbols-outlined text-lg text-secondary">videocam</span>
-                      <span>+ Upload Video Clip (MP4, WebM, MOV)</span>
+                      Change Picture
                     </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Sample Preset Photos */
-              <div className="space-y-2">
-                <p className="text-[11px] text-on-surface-variant">Choose a ready sample graduation or campus moment:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {SAMPLE_MEMORY_PHOTOS.map((sample, idx) => (
                     <button
                       type="button"
-                      key={idx}
                       onClick={() => {
-                        setUploadedImage(sample.url);
-                        setUploadedImageName(sample.label);
-                        showToast(`Selected "${sample.label}"!`, "info");
+                        setUploadedImage("");
+                        setUploadedImageName("");
                       }}
-                      className={`flex items-center gap-2 p-2 rounded-xl border text-left text-xs transition-all ${uploadedImage === sample.url
-                        ? "bg-secondary-container text-on-secondary-container border-secondary-container font-bold"
-                        : "bg-surface-container-lowest text-on-surface hover:bg-surface-container-high border-outline-variant/30"
-                        }`}
+                      className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-red-700 transition-colors cursor-pointer"
                     >
-                      <img
-                        src={sample.url}
-                        alt={sample.label}
-                        className="w-8 h-8 rounded-lg object-cover"
-                      />
-                      <span className="truncate">{sample.label}</span>
+                      Remove
                     </button>
-                  ))}
+                  </div>
+                  <span className="absolute bottom-2 left-2 px-2.5 py-0.5 bg-black/70 text-white text-[10px] rounded-md backdrop-blur-sm truncate max-w-[200px]">
+                    📷 {uploadedImageName || "Photo uploaded"}
+                  </span>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div
+                  onClick={() => imageInputRef.current?.click()}
+                  className="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-2xl p-4 text-center cursor-pointer transition-colors bg-surface-container-lowest/60 hover:bg-surface-container-lowest group"
+                >
+                  <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-1.5 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">add_a_photo</span>
+                  </div>
+                  <p className="text-xs font-bold text-primary">Click to select photo from device</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">
+                    PNG, JPG, JPEG, WEBP, GIF
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Video Upload Dropzone */}
+            <div>
+              <label className="block text-[11px] font-bold font-headline text-on-surface-variant mb-1.5 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm text-secondary">movie</span>
+                Video Clip {uploadedImage && !uploadedVideo ? "(Optional)" : ""}
+              </label>
+              <input
+                type="file"
+                ref={videoInputRef}
+                accept="video/*"
+                onChange={handleVideoFileChange}
+                className="hidden"
+              />
+
+              {uploadedVideo ? (
+                <div className="relative rounded-2xl overflow-hidden border border-outline-variant/40 bg-black p-3 flex flex-col gap-2">
+                  <div className="w-full max-h-40 rounded-xl overflow-hidden bg-black/60 flex items-center justify-center">
+                    <video
+                      src={uploadedVideo}
+                      controls
+                      playsInline
+                      className="max-h-36 w-auto rounded-lg"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2 text-white text-xs truncate max-w-[250px]">
+                      <span className="material-symbols-outlined text-secondary-container text-sm">videocam</span>
+                      <span className="truncate">{uploadedVideoName || "Video attached"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => videoInputRef.current?.click()}
+                        className="px-2.5 py-1 bg-white/20 hover:bg-white/30 text-white rounded-lg text-[11px] font-bold cursor-pointer"
+                      >
+                        Replace
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUploadedVideo("");
+                          setUploadedVideoName("");
+                        }}
+                        className="px-2.5 py-1 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-[11px] font-bold cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onClick={() => videoInputRef.current?.click()}
+                  className="border-2 border-dashed border-outline-variant/50 hover:border-secondary rounded-2xl p-4 text-center cursor-pointer transition-colors bg-surface-container-lowest/60 hover:bg-surface-container-lowest group"
+                >
+                  <div className="w-9 h-9 rounded-full bg-secondary-container/30 text-secondary flex items-center justify-center mx-auto mb-1.5 group-hover:scale-110 transition-transform">
+                    <span className="material-symbols-outlined text-xl">videocam</span>
+                  </div>
+                  <p className="text-xs font-bold text-secondary">Click to upload video clip</p>
+                  <p className="text-[10px] text-on-surface-variant mt-0.5">
+                    MP4, WebM, MOV video files
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Story Narrative */}
           <div>
             <label className="block text-xs font-bold font-headline text-primary mb-1.5 uppercase tracking-wider">
-              Story & Memory Note
+              Story & Memory Note *
             </label>
             <textarea
               required
@@ -474,7 +456,7 @@ export default function NewMemoryModal() {
             </button>
             <button
               type="submit"
-              disabled={!title.trim() || !story.trim() || (!uploadedImage && mediaUploadTab === "upload")}
+              disabled={!title.trim() || !story.trim() || !hasMedia}
               className="px-6 py-2.5 bg-gradient-to-r from-secondary-container to-secondary-fixed text-on-secondary-container font-headline font-bold text-xs rounded-xl shadow-md hover:brightness-95 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-base">save</span>

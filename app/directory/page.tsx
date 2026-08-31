@@ -60,7 +60,7 @@ export default function DirectoryPage() {
           </div>
           <h1 className="font-headline text-2xl md:text-3xl font-extrabold text-primary">Class Directory</h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
-            Browse and connect with all 50 senior cohort members across specialized engineering tracks.
+            Browse and connect with senior cohort members across specialized engineering tracks.
           </p>
         </div>
 
@@ -209,13 +209,6 @@ export default function DirectoryPage() {
                     {student.connected ? "check" : "person_add"}
                   </span>
                 </button>
-                <Link
-                  href={`/profile/${student.id}`}
-                  className="px-3 bg-surface-container-low hover:bg-surface-container-high text-on-surface font-headline text-xs font-bold py-2 rounded-xl transition-colors flex items-center justify-center"
-                  title="View full profile"
-                >
-                  <span className="material-symbols-outlined text-base">visibility</span>
-                </Link>
               </div>
             </div>
           ))}

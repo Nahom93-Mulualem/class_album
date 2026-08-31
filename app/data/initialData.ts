@@ -599,7 +599,7 @@ export const INITIAL_EVENTS: TechEvent[] = [
     day: "14",
     location: "Engineering Atrium",
     time: "2:00 PM - 6:00 PM",
-    description: "Annual project showcase where all 50 SE graduating teams present live prototypes to industry tech recruiters.",
+    description: "Annual project showcase where SE graduating teams present live prototypes to industry tech recruiters.",
     isRSVPed: true,
   },
   {
