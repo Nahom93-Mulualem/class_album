@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useApp } from "../context/AppContext";
 
 export default function EditProfileModal() {
   const { isEditProfileModalOpen, setIsEditProfileModalOpen, currentUser, updateCurrentUser } = useApp();
 
   const [name, setName] = useState(currentUser?.name || "");
+  const [avatar, setAvatar] = useState(currentUser?.avatar || "");
+  const [coverImage, setCoverImage] = useState(
+    currentUser?.coverImage ||
+      (typeof window !== "undefined" && currentUser
+        ? localStorage.getItem(`phoenix_cover_${currentUser.id}`) || ""
+        : "") ||
+      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80"
+  );
   const [track, setTrack] = useState(currentUser?.track || "");
   const [statusQuote, setStatusQuote] = useState(currentUser?.statusQuote || "");
   const [bio, setBio] = useState(currentUser?.bio || "");
@@ -16,8 +24,34 @@ export default function EditProfileModal() {
   const [linkedin, setLinkedin] = useState(currentUser?.linkedin || "");
 
   const [isSaving, setIsSaving] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   if (!isEditProfileModalOpen || !currentUser) return null;
+
+  const handleAvatarFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setAvatar(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCoverFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setCoverImage(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +63,8 @@ export default function EditProfileModal() {
     setIsSaving(true);
     await updateCurrentUser({
       name,
+      avatar,
+      coverImage,
       track,
       statusQuote,
       bio,
@@ -60,6 +96,71 @@ export default function EditProfileModal() {
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4 text-left">
+          {/* Profile Picture & Background Photos Section */}
+          <div className="p-4 bg-surface-container-low border border-outline-variant/30 rounded-2xl space-y-3">
+            <span className="text-xs font-bold text-primary uppercase tracking-wider block">
+              Profile Photos & Banner
+            </span>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Profile Picture (Avatar) */}
+              <div>
+                <label className="block text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                  Profile Picture
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-surface shadow-md bg-surface-container shrink-0 relative group">
+                    <img src={avatar} alt="Profile Preview" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      ref={avatarInputRef}
+                      onChange={handleAvatarFile}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-surface border border-outline-variant/50 hover:bg-surface-container-high text-xs font-bold rounded-xl text-primary flex items-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                    >
+                      <span className="material-symbols-outlined text-sm">photo_camera</span>
+                      <span>Change Photo</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Background Banner */}
+              <div>
+                <label className="block text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
+                  Background Banner
+                </label>
+                <div className="space-y-1.5">
+                  <div className="w-full h-16 rounded-xl overflow-hidden border border-outline-variant/30 relative">
+                    <img src={coverImage} alt="Cover Preview" className="w-full h-full object-cover" />
+                  </div>
+                  <input
+                    type="file"
+                    ref={coverInputRef}
+                    onChange={handleCoverFile}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="w-full py-1.5 bg-surface border border-outline-variant/50 hover:bg-surface-container-high text-xs font-bold rounded-xl text-primary flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-all"
+                  >
+                    <span className="material-symbols-outlined text-sm">wallpaper</span>
+                    <span>Change Background</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">

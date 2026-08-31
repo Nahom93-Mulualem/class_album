@@ -15,7 +15,20 @@ export interface SessionPayload {
 }
 
 export async function createSessionToken(payload: SessionPayload): Promise<string> {
-  return new SignJWT({ ...payload })
+  const safeAvatar =
+    payload.avatar && payload.avatar.startsWith("http") && payload.avatar.length < 250
+      ? payload.avatar
+      : "/phoenix-logo.png";
+
+  const safePayload = {
+    id: payload.id,
+    username: payload.username,
+    role: payload.role,
+    name: payload.name,
+    avatar: safeAvatar,
+  };
+
+  return new SignJWT(safePayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")

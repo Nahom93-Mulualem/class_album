@@ -17,12 +17,13 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, track, statusQuote, bio, dorm, skills, github, linkedin } = body;
+    const { name, avatar, track, statusQuote, bio, dorm, skills, github, linkedin } = body;
 
     const updatedUser = await prisma.user.update({
       where: { id: currentUser.id },
       data: {
         ...(name && typeof name === "string" ? { name: name.trim() } : {}),
+        ...(avatar && typeof avatar === "string" ? { avatar: avatar.trim() } : {}),
         ...(track && typeof track === "string" ? { track: track.trim() } : {}),
         ...(statusQuote !== undefined ? { statusQuote: typeof statusQuote === "string" ? statusQuote.trim() : null } : {}),
         ...(bio !== undefined ? { bio: typeof bio === "string" ? bio.trim() : null } : {}),
@@ -53,14 +54,17 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    // If name changed, update the JWT token with the new name
+    // If name or avatar changed, update the JWT token
     const response = NextResponse.json({
       success: true,
       message: "Profile updated successfully!",
       user: updatedUser,
     });
 
-    if (name && name.trim() !== currentUser.name) {
+    const isNameChanged = Boolean(name && name.trim() !== currentUser.name);
+    const isAvatarChanged = Boolean(avatar && avatar.trim() !== currentUser.avatar);
+
+    if (isNameChanged || isAvatarChanged) {
       const newToken = await createSessionToken({
         id: updatedUser.id,
         username: updatedUser.username,

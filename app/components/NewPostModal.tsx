@@ -10,7 +10,7 @@ export default function NewPostModal() {
   const [selectedTag, setSelectedTag] = useState<"Career & Offers" | "Campus Life" | "Hackathons & Tech" | "Projects">(
     "Projects"
   );
-  
+
   // Media Attachment State
   const [mediaType, setMediaType] = useState<"none" | "image" | "video">("none");
   const [selectedImage, setSelectedImage] = useState<string>("");
@@ -32,10 +32,6 @@ export default function NewPostModal() {
       label: "Celebration",
       url: "https://lh3.googleusercontent.com/aida-public/AB6AXuCgcOuqBJPMpAwZ7k8OfkIjFTwhRdHQX8O959hDa99ZHSZlk9xLaGKl0D1tGwRvvINb9QeMHrRrughUkT_-LTY913UKn4ZXkmkIfuultPcc6nPJs4o3I4QGgTZmfRMjp8j-nAbCnBs-Si-1UzqZhzs5bNZ9A0td6JQSNYlhCf372mVjgeijXka6P82gAw4aLSnks0lZu7OStMuMVg5xajitMnalvMePKl7qySNfG2QeuesrK83GXQNvCA",
     },
-    {
-      label: "Coffee & Architecture",
-      url: "https://lh3.googleusercontent.com/aida-public/AB6AXuDVKSi5KNEGsCkJ978c4-ItkyffXdqLQkoV9YtsZtAMwuAZn0LrFoFjc2pCWQM6dMeixLe30ykUPrz7j2XJ0AuSVE6TpQC_cf6JbwivOFctHZOhCw9LkZky8LUqCZPVaBkb7uvIY8zVMJB5Aympx1AvHKbAC7wXwWPq8zH3TpWS6G2eI4lS9d9tSosBXAZKsxFuuPVYWf_3lM20LgCkBWOCzq_0BPpoYRytLaeznmqYKUnn9bGc-d9_QA",
-    },
   ];
 
   const sampleVideos = [
@@ -46,10 +42,6 @@ export default function NewPostModal() {
     {
       label: "Autonomous Navigation Test",
       url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    },
-    {
-      label: "Campus Hackathon Walkthrough",
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
     },
   ];
 
@@ -161,11 +153,10 @@ export default function NewPostModal() {
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(tag)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${
-                    selectedTag === tag
+                  className={`px-3 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${selectedTag === tag
                       ? "bg-secondary-container text-on-secondary-container shadow-sm scale-105"
                       : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high"
-                  }`}
+                    }`}
                 >
                   {tag === "Career & Offers" && "🎉 "}
                   {tag === "Projects" && "💻 "}
@@ -238,9 +229,8 @@ export default function NewPostModal() {
                         setSelectedImage(img.url);
                         setCustomImageUrl("");
                       }}
-                      className={`relative rounded-lg overflow-hidden h-16 cursor-pointer border-2 transition-all ${
-                        selectedImage === img.url ? "border-secondary scale-105 shadow-md" : "border-transparent opacity-70 hover:opacity-100"
-                      }`}
+                      className={`relative rounded-lg overflow-hidden h-16 cursor-pointer border-2 transition-all ${selectedImage === img.url ? "border-secondary scale-105 shadow-md" : "border-transparent opacity-70 hover:opacity-100"
+                        }`}
                     >
                       <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
                       <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] px-1 py-0.5 truncate text-center">
@@ -327,11 +317,10 @@ export default function NewPostModal() {
                         setSelectedVideo(vid.url);
                         setCustomVideoUrl("");
                       }}
-                      className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${
-                        selectedVideo === vid.url
+                      className={`p-2 rounded-lg text-left border transition-all cursor-pointer ${selectedVideo === vid.url
                           ? "bg-secondary-container/40 border-secondary text-primary font-bold shadow-sm"
                           : "bg-surface-container-lowest border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-high"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-1.5 text-xs">
                         <span className="material-symbols-outlined text-sm text-secondary">play_circle</span>
@@ -380,11 +369,10 @@ export default function NewPostModal() {
               <button
                 type="button"
                 onClick={() => setMediaType(mediaType === "image" ? "none" : "image")}
-                className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  mediaType === "image"
+                className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${mediaType === "image"
                     ? "bg-primary-container text-on-primary-container font-bold"
                     : "text-primary hover:bg-surface-container-high"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-lg">image</span>
                 <span>Photo</span>
@@ -394,11 +382,10 @@ export default function NewPostModal() {
               <button
                 type="button"
                 onClick={() => setMediaType(mediaType === "video" ? "none" : "video")}
-                className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  mediaType === "video"
+                className={`p-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${mediaType === "video"
                     ? "bg-secondary-container text-on-secondary-container font-bold"
                     : "text-secondary hover:bg-surface-container-high"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-lg">videocam</span>
                 <span>Video</span>

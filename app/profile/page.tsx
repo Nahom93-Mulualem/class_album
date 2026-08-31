@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useApp } from "../context/AppContext";
 
 export default function CurrentUserProfilePage() {
   const {
     currentUser,
+    updateCurrentUser,
     setIsEditProfileModalOpen,
     gallery,
     yearbookSignatures,
@@ -16,6 +17,8 @@ export default function CurrentUserProfilePage() {
 
   const [activeTab, setActiveTab] = useState<"about" | "gallery" | "yearbook">("about");
   const [newSignature, setNewSignature] = useState("");
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   if (!currentUser) {
     return (
@@ -25,6 +28,30 @@ export default function CurrentUserProfilePage() {
       </main>
     );
   }
+
+  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        updateCurrentUser({ coverImage: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        updateCurrentUser({ avatar: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleAddSignature = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,35 +64,69 @@ export default function CurrentUserProfilePage() {
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-12 space-y-6 animate-page-entry">
       {/* Profile Header Card */}
       <section className="bg-surface-container-lowest rounded-3xl overflow-hidden ambient-shadow border border-outline-variant/30 flex flex-col relative pb-6">
-        {/* Cover Photo */}
-        <div className="w-full h-48 sm:h-64 bg-surface-container-highest relative overflow-hidden">
+        {/* Cover Photo / Background */}
+        <div className="w-full h-48 sm:h-64 bg-surface-container-highest relative overflow-hidden group">
           <img
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL89L9PaJ9NEi-lfnwJ5qTDX1cbySDaTvCeYF9k33qDbkrFRk6m8EHpKOtBPCr3Jf48aRrjdnyEorml_ONa40iQTxiUHEpBbtdH4sl66eA649UZsBaA7lXP4D3z9w40oHosCwG_DAHI4VqiuYX7Fi7X7rTqqhKJPDPbqSIAVlAz22VBTEaG82CVcc2_pPGcSxy5hjDkeI6L1jEy1NpJkOECRZIiJGQ8yZm2f2A2VhveeoJYGenEuScWg"
-            alt="Campus Cover"
-            className="w-full h-full object-cover"
+            src={
+              currentUser.coverImage ||
+              "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80"
+            }
+            alt="Profile Background Cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+          {/* Change Background Cover Button */}
+          <div className="absolute top-4 right-4 z-20">
+            <input
+              type="file"
+              ref={coverInputRef}
+              onChange={handleCoverUpload}
+              accept="image/*"
+              className="hidden"
+            />
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="px-3.5 py-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white text-xs font-headline font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md transition-all cursor-pointer border border-white/25 active:scale-95 hover:border-white/50"
+              title="Upload or change profile background banner"
+            >
+              <span className="material-symbols-outlined text-base">photo_camera</span>
+              <span>Change Background</span>
+            </button>
+          </div>
         </div>
 
         {/* Profile Info Group */}
         <div className="px-6 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end -mt-16 md:-mt-20 relative z-10 gap-4">
           <div className="flex flex-col md:flex-row items-center md:items-end gap-4 w-full md:w-auto">
-            {/* Avatar */}
-            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-surface overflow-hidden bg-surface-container relative ambient-shadow shrink-0 shadow-2xl">
+            {/* Avatar with Camera Overlay */}
+            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-surface overflow-hidden bg-surface-container relative ambient-shadow shrink-0 shadow-2xl group">
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
                 className="w-full h-full object-cover"
               />
+              <input
+                type="file"
+                ref={avatarInputRef}
+                onChange={handleAvatarUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                onClick={() => avatarInputRef.current?.click()}
+                className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
+                title="Click to change profile picture"
+              >
+                <span className="material-symbols-outlined text-2xl">photo_camera</span>
+                <span className="text-[10px] font-bold mt-0.5">Edit Photo</span>
+              </button>
             </div>
 
-            {/* Name & SE Specialization */}
+            {/* Name & Specialization */}
             <div className="text-center md:text-left mb-1">
               <h1 className="font-headline text-2xl md:text-3xl font-extrabold text-primary flex items-center justify-center md:justify-start gap-2">
                 <span>{currentUser.name}</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r from-secondary-container to-primary-container text-on-primary shadow-xs">
-                  SE &apos;26
-                </span>
               </h1>
               <p className="font-body text-sm font-semibold text-secondary mt-0.5">
                 {currentUser.degree}

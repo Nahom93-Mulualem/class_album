@@ -49,35 +49,18 @@ export default function DirectoryPage() {
 
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-12 animate-page-entry">
-      {/* Header & Stats Banner */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-container-lowest border border-outline-variant/30 ambient-shadow rounded-3xl p-6 md:p-8">
+      {/* Header Banner */}
+      <div className="mb-8 bg-surface-container-lowest border border-outline-variant/30 ambient-shadow rounded-3xl p-6 md:p-8">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[11px] font-bold text-secondary-container bg-primary-container px-3 py-0.5 rounded-full uppercase tracking-wider">
               Phoenix • Class of 2026
             </span>
-            <span className="text-xs font-semibold text-on-surface-variant">Software Engineering Roster</span>
           </div>
           <h1 className="font-headline text-2xl md:text-3xl font-extrabold text-primary">Class Directory</h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-1">
             Browse and connect with senior cohort members across specialized engineering tracks.
           </p>
-        </div>
-
-        {/* Quick Stats Pill */}
-        <div className="flex items-center gap-3 bg-surface-container-low p-3 rounded-2xl border border-outline-variant/20 self-start md:self-auto shadow-xs">
-          <div className="text-center px-3 border-r border-outline-variant/30">
-            <span className="block font-headline text-xl font-bold text-primary">{students.length}</span>
-            <span className="text-[10px] text-on-surface-variant uppercase font-bold">Classmates</span>
-          </div>
-          <div className="text-center px-3 border-r border-outline-variant/30">
-            <span className="block font-headline text-xl font-bold text-secondary">2026</span>
-            <span className="text-[10px] text-on-surface-variant uppercase font-bold">Grad Year</span>
-          </div>
-          <div className="text-center px-3">
-            <span className="block font-headline text-xl font-bold text-primary-container">100%</span>
-            <span className="text-[10px] text-on-surface-variant uppercase font-bold">SE Cohort</span>
-          </div>
         </div>
       </div>
 
@@ -164,7 +147,7 @@ export default function DirectoryPage() {
                 </h3>
               </Link>
               <p className="font-body text-xs font-semibold text-secondary mt-0.5">
-                B.S. Software Engineering &apos;26
+                B.S. Software Engineering
               </p>
               <p className="font-body text-xs text-on-surface-variant font-medium mt-1 line-clamp-1">
                 {student.track}

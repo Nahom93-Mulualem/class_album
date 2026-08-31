@@ -87,9 +87,6 @@ export default function ClassmateProfilePage() {
             <div className="text-center md:text-left mb-1">
               <h1 className="font-headline text-2xl md:text-3xl font-extrabold text-primary flex items-center justify-center md:justify-start gap-2">
                 <span>{student.name}</span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r from-secondary-container to-primary-container text-on-primary shadow-xs">
-                  SE &apos;26
-                </span>
               </h1>
               <p className="font-body text-sm font-semibold text-secondary mt-0.5">
                 {student.degree}

@@ -265,10 +265,10 @@ export default function NewMemoryModal() {
                 {uploadedImage && uploadedVideo
                   ? "📸 Photo & 🎥 Video Attached"
                   : uploadedImage
-                  ? "📸 Photo Attached"
-                  : uploadedVideo
-                  ? "🎥 Video Attached"
-                  : "Upload photo, video, or both"}
+                    ? "📸 Photo Attached"
+                    : uploadedVideo
+                      ? "🎥 Video Attached"
+                      : "Upload photo, video, or both"}
               </span>
             </div>
 
@@ -383,17 +383,43 @@ export default function NewMemoryModal() {
                   </div>
                 </div>
               ) : (
-                <div
-                  onClick={() => videoInputRef.current?.click()}
-                  className="border-2 border-dashed border-outline-variant/50 hover:border-secondary rounded-2xl p-4 text-center cursor-pointer transition-colors bg-surface-container-lowest/60 hover:bg-surface-container-lowest group"
-                >
-                  <div className="w-9 h-9 rounded-full bg-secondary-container/30 text-secondary flex items-center justify-center mx-auto mb-1.5 group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-xl">videocam</span>
+                <div className="space-y-2">
+                  <div
+                    onClick={() => videoInputRef.current?.click()}
+                    className="border-2 border-dashed border-outline-variant/50 hover:border-secondary rounded-2xl p-4 text-center cursor-pointer transition-colors bg-surface-container-lowest/60 hover:bg-surface-container-lowest group"
+                  >
+                    <div className="w-9 h-9 rounded-full bg-secondary-container/30 text-secondary flex items-center justify-center mx-auto mb-1.5 group-hover:scale-110 transition-transform">
+                      <span className="material-symbols-outlined text-xl">videocam</span>
+                    </div>
+                    <p className="text-xs font-bold text-secondary">Click to upload video clip from device</p>
+                    <p className="text-[10px] text-on-surface-variant mt-0.5">
+                      MP4, WebM, MOV video files
+                    </p>
                   </div>
-                  <p className="text-xs font-bold text-secondary">Click to upload video clip</p>
-                  <p className="text-[10px] text-on-surface-variant mt-0.5">
-                    MP4, WebM, MOV video files
-                  </p>
+
+                  {/* Preset Video Clips (Limited to exactly 2) */}
+                  <div className="pt-1">
+                    <p className="text-[10px] font-bold text-on-surface-variant mb-1">Or choose sample video clip:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        { label: "AI Drone Demo 🛸", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" },
+                        { label: "Autonomous Navigation 🤖", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },
+                      ].map((sample) => (
+                        <button
+                          key={sample.label}
+                          type="button"
+                          onClick={() => {
+                            setUploadedVideo(sample.url);
+                            setUploadedVideoName(sample.label);
+                            showToast(`Selected "${sample.label}"! 🎥`, "success");
+                          }}
+                          className="px-2.5 py-1 bg-surface-container hover:bg-secondary-container hover:text-on-secondary-container border border-outline-variant/30 text-on-surface rounded-lg text-[10px] font-semibold transition-all cursor-pointer"
+                        >
+                          {sample.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

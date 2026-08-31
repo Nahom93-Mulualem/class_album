@@ -112,7 +112,13 @@ export default function MemoriesPage() {
       result = [...result].sort((a, b) => b.year.localeCompare(a.year));
     }
 
-    return result;
+    // Defensive deduplication to ensure unique keys
+    const seen = new Set<string>();
+    return result.filter((m) => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    });
   }, [memories, selectedCategory, selectedYear, searchQuery, sortBy]);
 
   return (
@@ -134,10 +140,6 @@ export default function MemoriesPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/20 border border-secondary-container/40 text-secondary-container text-xs font-headline font-bold uppercase tracking-wider">
-                <span>🎓</span>
-                <span>Commencement & Memory Vault • 2020 – 2026</span>
-              </div>
               <h1 className="font-headline text-2xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
                 Software Engineering Memory Vault
               </h1>
@@ -192,20 +194,18 @@ export default function MemoriesPage() {
                 <button
                   key={cat.value}
                   onClick={() => handleCategoryChange(cat.value)}
-                  className={`px-3.5 py-2 rounded-2xl text-xs font-headline font-semibold whitespace-nowrap transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 border ${
-                    isSelected
+                  className={`px-3.5 py-2 rounded-2xl text-xs font-headline font-semibold whitespace-nowrap transition-all flex items-center gap-2 active:scale-95 cursor-pointer shrink-0 border ${isSelected
                       ? "bg-secondary-container text-on-secondary-container border-secondary-container shadow-xs font-bold scale-102"
                       : "bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high border-outline-variant/20"
-                  }`}
+                    }`}
                 >
                   <span className="material-symbols-outlined text-base">{cat.icon}</span>
                   <span>{cat.label}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                      isSelected
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected
                         ? "bg-primary-container text-on-primary-container"
                         : "bg-surface-container-high text-on-surface-variant"
-                    }`}
+                      }`}
                   >
                     {count}
                   </span>
@@ -229,11 +229,10 @@ export default function MemoriesPage() {
                 <button
                   key={yr}
                   onClick={() => handleYearChange(yr)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 cursor-pointer ${
-                    isSelected
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 active:scale-95 cursor-pointer ${isSelected
                       ? "bg-primary text-on-primary shadow-xs"
                       : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/20"
-                  }`}
+                    }`}
                 >
                   {yr === "All" ? "All (2020–2026)" : `'${yr.slice(2)}`}
                 </button>
@@ -281,33 +280,30 @@ export default function MemoriesPage() {
               <button
                 onClick={() => setViewMode("masonry")}
                 title="Masonry Gallery View"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
-                  viewMode === "masonry"
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${viewMode === "masonry"
                     ? "bg-surface text-primary shadow-xs"
                     : "text-outline hover:text-on-surface"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-lg">dashboard</span>
               </button>
               <button
                 onClick={() => setViewMode("grid")}
                 title="Yearbook Scrapbook Grid"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
-                  viewMode === "grid"
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${viewMode === "grid"
                     ? "bg-surface text-primary shadow-xs"
                     : "text-outline hover:text-on-surface"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-lg">grid_view</span>
               </button>
               <button
                 onClick={() => setViewMode("timeline")}
                 title="Story Timeline View"
-                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${
-                  viewMode === "timeline"
+                className={`p-1.5 rounded-lg transition-colors flex items-center justify-center cursor-pointer ${viewMode === "timeline"
                     ? "bg-surface text-primary shadow-xs"
                     : "text-outline hover:text-on-surface"
-                }`}
+                  }`}
               >
                 <span className="material-symbols-outlined text-lg">view_timeline</span>
               </button>
@@ -367,9 +363,8 @@ export default function MemoriesPage() {
             return (
               <div
                 key={mem.id}
-                className={`relative flex flex-col md:flex-row items-start md:items-center ${
-                  isEven ? "md:flex-row-reverse" : ""
-                } gap-6 pl-10 md:pl-0`}
+                className={`relative flex flex-col md:flex-row items-start md:items-center ${isEven ? "md:flex-row-reverse" : ""
+                  } gap-6 pl-10 md:pl-0`}
               >
                 {/* Center Node */}
                 <div className="absolute left-2.5 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-secondary-container border-4 border-surface-container-lowest shadow-md z-10"></div>
@@ -445,9 +440,8 @@ export default function MemoriesPage() {
                           className="flex items-center gap-1 text-xs font-bold text-red-500 hover:scale-110 active:scale-90 transition-transform cursor-pointer"
                         >
                           <span
-                            className={`material-symbols-outlined text-base ${
-                              animatingHeartId === mem.id ? "animate-heart-burst" : ""
-                            }`}
+                            className={`material-symbols-outlined text-base ${animatingHeartId === mem.id ? "animate-heart-burst" : ""
+                              }`}
                             style={{
                               fontVariationSettings: mem.isLiked ? "'FILL' 1" : "'FILL' 0",
                             }}
@@ -482,19 +476,17 @@ export default function MemoriesPage() {
               <article
                 key={mem.id}
                 onClick={() => setActiveMemoryForDetail(mem)}
-                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between ${
-                  isFeatured ? "ring-2 ring-secondary-container/50" : ""
-                }`}
+                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between ${isFeatured ? "ring-2 ring-secondary-container/50" : ""
+                  }`}
               >
                 {/* Media Container with Polaroid Styling */}
                 <div
-                  className={`relative rounded-2xl overflow-hidden bg-black/40 ${
-                    isTall
+                  className={`relative rounded-2xl overflow-hidden bg-black/40 ${isTall
                       ? "aspect-[3/4]"
                       : isFeatured
-                      ? "aspect-[16/10]"
-                      : "aspect-[4/3]"
-                  }`}
+                        ? "aspect-[16/10]"
+                        : "aspect-[4/3]"
+                    }`}
                 >
                   {mem.image ? (
                     <img
@@ -630,16 +622,14 @@ export default function MemoriesPage() {
                       {/* Animated Like Button */}
                       <button
                         onClick={(e) => handleLikeClick(e, mem.id)}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all active:scale-80 cursor-pointer ${
-                          isLiked
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all active:scale-80 cursor-pointer ${isLiked
                             ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30"
                             : "bg-surface-container-low text-on-surface-variant hover:text-red-500 border border-outline-variant/20"
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`material-symbols-outlined text-base ${
-                            animatingHeartId === mem.id ? "animate-heart-burst" : ""
-                          }`}
+                          className={`material-symbols-outlined text-base ${animatingHeartId === mem.id ? "animate-heart-burst" : ""
+                            }`}
                           style={{
                             fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0",
                           }}

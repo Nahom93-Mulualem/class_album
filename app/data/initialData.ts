@@ -2,6 +2,7 @@ export interface Student {
   id: string;
   name: string;
   avatar: string;
+  coverImage?: string;
   degree: string;
   gradYear: string;
   track: string;

@@ -113,7 +113,7 @@ function applyThemeClass(t: "light" | "dark") {
 }
 
 function subscribeTheme(callback: () => void) {
-  if (typeof window === "undefined") return () => {};
+  if (typeof window === "undefined") return () => { };
   window.addEventListener("storage", callback);
   window.addEventListener("phoenix_theme_change", callback);
   const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -147,7 +147,7 @@ function getThemeServerSnapshot(): "light" | "dark" {
 
 function subscribeMounted(callback: () => void) {
   callback();
-  return () => {};
+  return () => { };
 }
 
 function getMountedSnapshot(): boolean {
@@ -181,7 +181,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (stored) {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            return [...parsed, ...INITIAL_MEMORIES];
+            // Keep only genuine custom user memories that are not duplicates of INITIAL_MEMORIES
+            const customOnly = parsed.filter(
+              (m: MemoryItem) => m && m.id && !INITIAL_MEMORIES.some((init) => init.id === m.id)
+            );
+            // Deduplicate custom memories among themselves by ID
+            const seenIds = new Set<string>();
+            const uniqueCustom: MemoryItem[] = [];
+            for (const item of customOnly) {
+              if (!seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueCustom.push(item);
+              }
+            }
+            try {
+              localStorage.setItem("phoenix_custom_memories", JSON.stringify(uniqueCustom));
+            } catch { }
+            return [...uniqueCustom, ...INITIAL_MEMORIES];
           }
         }
       } catch {
@@ -242,9 +258,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
-          setCurrentUser(data.user);
+          const storedCover =
+            typeof window !== "undefined"
+              ? localStorage.getItem(`phoenix_cover_${data.user.id}`)
+              : null;
+          const userWithCover = {
+            ...data.user,
+            coverImage: storedCover || data.user.coverImage,
+          };
+          setCurrentUser(userWithCover);
           setIsAuthLoading(false);
-          return data.user;
+          return userWithCover;
         }
       }
       setCurrentUser(null);
@@ -343,6 +367,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateCurrentUser = async (updated: Partial<ExtendedUser>): Promise<boolean> => {
+    if (updated.coverImage && typeof window !== "undefined") {
+      try {
+        const userId = currentUser?.id || "user";
+        localStorage.setItem(`phoenix_cover_${userId}`, updated.coverImage);
+      } catch { }
+    }
+
     setCurrentUser((prev) => (prev ? { ...prev, ...updated } : null));
 
     try {
@@ -355,12 +386,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
-          setCurrentUser(data.user);
+          const cover =
+            updated.coverImage ||
+            (typeof window !== "undefined"
+              ? localStorage.getItem(`phoenix_cover_${data.user.id}`)
+              : null);
+          const merged = { ...data.user, coverImage: cover || data.user.coverImage };
+          setCurrentUser(merged);
           setStudents((prev) =>
-            prev.map((s) => (s.id === data.user.id ? { ...s, ...data.user } : s))
+            prev.map((s) => (s.id === data.user.id ? { ...s, ...merged } : s))
           );
         }
-        showToast("Profile updated successfully in database! ✨", "success");
+        showToast("Profile updated successfully! ✨", "success");
         return true;
       } else {
         const err = await res.json();
@@ -368,7 +405,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return false;
       }
     } catch {
-      showToast("Profile saved locally (offline mode).", "info");
+      showToast("Profile saved locally.", "info");
       return true;
     }
   };
@@ -513,20 +550,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const addMemory = (memoryData: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => {
     const newMemory: MemoryItem = {
       ...memoryData,
-      id: `mem-${Date.now()}`,
+      id: `user-mem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       likesCount: 1,
       isLiked: true,
       comments: [],
     };
     setMemories((prev) => {
-      const updated = [newMemory, ...prev];
+      const seenIds = new Set<string>();
+      const combined = [newMemory, ...prev];
+      const uniqueMemories: MemoryItem[] = [];
+
+      for (const item of combined) {
+        if (!seenIds.has(item.id)) {
+          seenIds.add(item.id);
+          uniqueMemories.push(item);
+        }
+      }
+
       try {
-        const custom = updated.filter((m) => m.id.startsWith("mem-"));
-        localStorage.setItem("phoenix_custom_memories", JSON.stringify(custom));
+        const customOnly = uniqueMemories.filter(
+          (m) => !INITIAL_MEMORIES.some((init) => init.id === m.id)
+        );
+        localStorage.setItem("phoenix_custom_memories", JSON.stringify(customOnly));
       } catch {
         // Fallback
       }
-      return updated;
+      return uniqueMemories;
     });
     setIsNewMemoryModalOpen(false);
     showToast(`Memory added to Digital Yearbook! 🎓📸`, "success");
@@ -625,9 +674,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const replySamples = [
         `Sounds awesome! Let's sync up after the afternoon lecture! 🚀`,
         `Got it! I'm pushing my code branch now, let me know what you think. 💻`,
-        `Awesome idea, let's grab coffee at the campus center and work through the details! ☕`,
-        `Nice! That's going to make our Senior Capstone demo so much stronger.`,
-        `Thanks for sharing! See you in the SE lab later!`,
       ];
       const randomReply = replySamples[Math.floor(Math.random() * replySamples.length)];
 
