@@ -17,7 +17,12 @@ export default function FeedPage() {
     openLightbox,
     showToast,
     setIsNewPostModalOpen,
+    refreshLiveDatabaseData,
   } = useApp();
+
+  React.useEffect(() => {
+    refreshLiveDatabaseData();
+  }, [refreshLiveDatabaseData]);
 
   const [activeFilter, setActiveFilter] = useState<string>("All");
   const [composerText, setComposerText] = useState("");

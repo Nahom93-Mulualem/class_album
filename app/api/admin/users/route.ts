@@ -89,15 +89,38 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { username, email, password, name, avatar, role, track, bio, skills } = body;
+    const {
+      username,
+      email,
+      password,
+      name,
+      avatar,
+      role,
+      track,
+      bio,
+      skills,
+      dorm,
+      github,
+      linkedin,
+      statusQuote,
+    } = body;
 
     if (!username || !email || !password || !name) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
+    const cleanUsername = username.trim().toLowerCase();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password.trim();
+
     const existing = await prisma.user.findFirst({
       where: {
-        OR: [{ username: username.trim() }, { email: email.trim() }],
+        OR: [
+          { username: cleanUsername },
+          { email: cleanEmail },
+          { username: { equals: cleanUsername, mode: "insensitive" } },
+          { email: { equals: cleanEmail, mode: "insensitive" } },
+        ],
       },
     });
 
@@ -108,24 +131,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hashPassword(cleanPassword);
 
     const newUser = await prisma.user.create({
       data: {
-        username: username.trim().toLowerCase(),
-        email: email.trim().toLowerCase(),
+        username: cleanUsername,
+        email: cleanEmail,
         password: hashedPassword,
         name: name.trim(),
         avatar:
           avatar ||
-          `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`,
+          `https://api.dicebear.com/7.x/bottts/svg?seed=${cleanUsername}`,
         role: role === "ADMIN" ? "ADMIN" : "STUDENT",
         isActive: true,
         degree: "B.S. Software Engineering",
         gradYear: "2026",
-        track: track || "General Software Engineering",
-        bio: bio || "Phoenix Class of 2026 engineer.",
-        skills: Array.isArray(skills) ? skills : ["TypeScript", "Full-Stack"],
+        track: track?.trim() || "Full-Stack & Cloud Architecture",
+        statusQuote: statusQuote?.trim() || "Excited for senior graduation! 🎓",
+        bio: bio?.trim() || "Senior Software Engineering student at Phoenix Class of 2026.",
+        dorm: dorm?.trim() || "Campus Residential",
+        skills: Array.isArray(skills) && skills.length > 0 ? skills : ["TypeScript", "Full-Stack"],
+        github: github?.trim() || cleanUsername,
+        linkedin: linkedin?.trim() || null,
         connected: true,
         online: true,
       },

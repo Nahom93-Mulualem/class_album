@@ -6,17 +6,36 @@ import { useApp } from "../context/AppContext";
 
 export default function MemoryDetailModal() {
   const {
+    currentUser,
     activeMemoryForDetail,
     setActiveMemoryForDetail,
     memories,
     toggleLikeMemory,
     addMemoryComment,
+    deleteMemory,
     openLightbox,
     showToast,
   } = useApp();
 
   const [commentInput, setCommentInput] = useState("");
   const [isLiking, setIsLiking] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const canDelete =
+    currentUser?.role === "ADMIN" ||
+    (currentUser?.id && activeMemoryForDetail?.authorId === currentUser.id);
+
+  const handleDelete = async () => {
+    if (!activeMemoryForDetail) return;
+    try {
+      setIsDeleting(true);
+      await deleteMemory(activeMemoryForDetail.id);
+    } finally {
+      setIsDeleting(false);
+      setIsConfirmingDelete(false);
+    }
+  };
 
   const currentIndex = activeMemoryForDetail
     ? memories.findIndex((m) => m.id === activeMemoryForDetail.id)
@@ -145,7 +164,7 @@ export default function MemoryDetailModal() {
 
         {/* Right Half: Story, Author, Tagged Classmates, & Comments */}
         <div className="w-full md:w-1/2 flex flex-col p-6 md:p-8 bg-surface-container-lowest overflow-y-auto max-h-[540px] hide-scrollbar">
-          {/* Top Bar: Author Info */}
+          {/* Top Bar: Author Info & Actions */}
           <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
             <Link
               href={`/profile/${activeMemoryForDetail.authorId}`}
@@ -165,6 +184,39 @@ export default function MemoryDetailModal() {
                 </div>
               </div>
             </Link>
+
+            {/* Admin / Author Delete Memory Button */}
+            {canDelete && (
+              <div className="flex items-center">
+                {isConfirmingDelete ? (
+                  <div className="flex items-center gap-1.5 bg-red-500/10 px-2.5 py-1 rounded-xl border border-red-500/30 animate-fade-in">
+                    <span className="text-[11px] font-bold text-red-600 dark:text-red-400">Delete?</span>
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="px-2 py-0.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold cursor-pointer transition-all"
+                    >
+                      {isDeleting ? "..." : "Confirm"}
+                    </button>
+                    <button
+                      onClick={() => setIsConfirmingDelete(false)}
+                      className="px-2 py-0.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-lg text-[10px] font-bold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsConfirmingDelete(true)}
+                    className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-red-600 dark:text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl transition-all cursor-pointer shadow-xs active:scale-95"
+                    title={currentUser?.role === "ADMIN" ? "Administrator: Delete Memory Post" : "Delete Memory"}
+                  >
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                    <span>{currentUser?.role === "ADMIN" ? "Delete (Admin)" : "Delete"}</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Memory Story Content */}

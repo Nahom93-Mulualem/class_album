@@ -45,6 +45,9 @@ model User {
   receivedMessages   Message[]           @relation("ReceivedMessages")
   yearbookSignatures YearbookSignature[]
   rsvps              EventRSVP[]
+  memories           Memory[]
+  memoryComments     MemoryComment[]
+  memoryLikes        MemoryLike[]
 }
 
 model Post {
@@ -139,4 +142,54 @@ model YearbookSignature {
   message      String
   date         String
   createdAt    DateTime @default(now())
+}
+
+model Memory {
+  id               String          @id @default(cuid())
+  title            String
+  story            String
+  image            String?
+  video            String?
+  category         String          @default("Graduation")
+  year             String          @default("2026")
+  date             String          @default("May 2026")
+  location         String          @default("Main Campus ")
+  authorId         String
+  author           User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorName       String
+  authorAvatar     String
+  taggedClassmates String?
+  likesCount       Int             @default(0)
+  aspect           String          @default("featured")
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  comments         MemoryComment[]
+  likes            MemoryLike[]
+}
+
+model MemoryComment {
+  id           String   @id @default(cuid())
+  memoryId     String
+  memory       Memory   @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName   String
+  authorAvatar String
+  authorTrack  String?
+  timeAgo      String   @default("Just now")
+  content      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MemoryLike {
+  id        String   @id @default(cuid())
+  memoryId  String
+  memory    Memory   @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([memoryId, userId])
 }

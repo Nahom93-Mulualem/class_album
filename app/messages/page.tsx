@@ -18,6 +18,7 @@ function MessagesContent() {
     sendMessage,
     toggleMessageReaction,
     startConversationWithStudent,
+    refreshLiveDatabaseData,
   } = useApp();
 
   const [messageText, setMessageText] = useState("");
@@ -25,6 +26,10 @@ function MessagesContent() {
   const [showMobileChatPane, setShowMobileChatPane] = useState(false);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [activeReactionMessageId, setActiveReactionMessageId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    refreshLiveDatabaseData();
+  }, [refreshLiveDatabaseData]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
@@ -102,11 +107,12 @@ function MessagesContent() {
   const filteredConversations = conversations.filter((c) => {
     const student = students.find((s) => s.id === c.studentId);
     if (!student) return true;
-    return (
-      student.name.toLowerCase().includes(chatSearch.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(chatSearch.toLowerCase()) ||
-      student.track.toLowerCase().includes(chatSearch.toLowerCase())
-    );
+    const q = chatSearch.toLowerCase().trim();
+    if (!q) return true;
+    const sName = (student.name || "").toLowerCase();
+    const sTrack = (student.track || "").toLowerCase();
+    const lastMsg = (c.lastMessage || "").toLowerCase();
+    return sName.includes(q) || lastMsg.includes(q) || sTrack.includes(q);
   });
 
   return (

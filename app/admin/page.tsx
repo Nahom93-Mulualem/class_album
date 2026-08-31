@@ -67,6 +67,7 @@ interface AdminStats {
   totalComments: number;
   totalLikes: number;
   totalMessages: number;
+  totalMemories?: number;
   dbStatus: string;
 }
 
@@ -82,15 +83,49 @@ interface AdminEvent {
   createdAt: string;
 }
 
+interface AdminMemory {
+  id: string;
+  title: string;
+  story: string;
+  image?: string | null;
+  video?: string | null;
+  category: string;
+  year: string;
+  date: string;
+  location: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  createdAt: string;
+  author?: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+    track: string;
+  };
+  comments: Array<{
+    id: string;
+    authorName: string;
+    content: string;
+    timeAgo: string;
+  }>;
+  _count?: {
+    comments: number;
+    likes: number;
+  };
+}
+
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const { showToast } = useApp();
+  const { showToast, refreshLiveDatabaseData } = useApp();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "events" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "memories" | "events" | "logs">("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
   const [events, setEvents] = useState<AdminEvent[]>([]);
+  const [adminMemories, setAdminMemories] = useState<AdminMemory[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Search & Filters for Users
@@ -105,6 +140,10 @@ export default function AdminDashboardPage() {
   // Search & Filters for Events
   const [eventSearch, setEventSearch] = useState("");
 
+  // Search & Filters for Memories
+  const [memorySearch, setMemorySearch] = useState("");
+  const [memoryCategoryFilter, setMemoryCategoryFilter] = useState("All");
+
   // Modals & Selected items
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [selectedUserForPassword, setSelectedUserForPassword] = useState<AdminUser | null>(null);
@@ -118,8 +157,10 @@ export default function AdminDashboardPage() {
     email: "",
     password: "Student@2026!",
     role: "STUDENT",
-    track: "Full-Stack & AI Systems",
-    bio: "",
+    track: "Full-Stack & Cloud Architecture",
+    bio: "Senior Software Engineering student at Phoenix Class of 2026.",
+    dorm: "Campus Residential",
+    github: "",
   });
 
   const [isDeleteUserModalOpen, setIsDeleteUserModalOpen] = useState(false);
@@ -129,6 +170,10 @@ export default function AdminDashboardPage() {
   const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<AdminPost | null>(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+
+  const [isDeleteMemoryModalOpen, setIsDeleteMemoryModalOpen] = useState(false);
+  const [memoryToDelete, setMemoryToDelete] = useState<AdminMemory | null>(null);
+  const [isDeletingMemory, setIsDeletingMemory] = useState(false);
 
   const [inspectPost, setInspectPost] = useState<AdminPost | null>(null);
 
@@ -164,11 +209,12 @@ export default function AdminDashboardPage() {
   const fetchData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const [statsRes, usersRes, postsRes, eventsRes] = await Promise.all([
+      const [statsRes, usersRes, postsRes, eventsRes, memsRes] = await Promise.all([
         fetch("/api/admin/stats"),
         fetch("/api/admin/users"),
         fetch("/api/admin/posts"),
         fetch("/api/admin/events"),
+        fetch("/api/admin/memories"),
       ]);
 
       if (statsRes.status === 403 || usersRes.status === 403) {
@@ -196,6 +242,11 @@ export default function AdminDashboardPage() {
         const data = await eventsRes.json();
         setEvents(data.events || []);
       }
+
+      if (memsRes.ok) {
+        const data = await memsRes.json();
+        setAdminMemories(data.memories || []);
+      }
     } catch (error) {
       console.error("Error fetching admin data:", error);
       showToast("Error loading dashboard data.");
@@ -208,11 +259,12 @@ export default function AdminDashboardPage() {
     let mounted = true;
     const init = async () => {
       try {
-        const [statsRes, usersRes, postsRes, eventsRes] = await Promise.all([
+        const [statsRes, usersRes, postsRes, eventsRes, memsRes] = await Promise.all([
           fetch("/api/admin/stats"),
           fetch("/api/admin/users"),
           fetch("/api/admin/posts"),
           fetch("/api/admin/events"),
+          fetch("/api/admin/memories"),
         ]);
 
         if (!mounted) return;
@@ -242,13 +294,17 @@ export default function AdminDashboardPage() {
           const data = await eventsRes.json();
           if (mounted) setEvents(data.events || []);
         }
+
+        if (memsRes.ok) {
+          const data = await memsRes.json();
+          if (mounted) setAdminMemories(data.memories || []);
+        }
       } catch (error) {
         console.error("Error loading admin dashboard:", error);
       } finally {
         if (mounted) setLoading(false);
       }
     };
-
     init();
 
     return () => {
@@ -287,6 +343,10 @@ export default function AdminDashboardPage() {
             deactivatedUsers: stats.deactivatedUsers + (nextState ? -1 : 1),
           });
         }
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to update user status.");
@@ -318,6 +378,10 @@ export default function AdminDashboardPage() {
         showToast(`🔑 Password for ${selectedUserForPassword.name} reset successfully!`);
         setIsResetPasswordModalOpen(false);
         setSelectedUserForPassword(null);
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to reset password.");
       }
@@ -356,6 +420,10 @@ export default function AdminDashboardPage() {
               newRole === "ADMIN" ? stats.totalAdmins + 1 : Math.max(0, stats.totalAdmins - 1),
           });
         }
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to change user role.");
@@ -382,7 +450,7 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       if (res.ok) {
-        showToast(`🎉 Created new account for ${newUserForm.name}!`);
+        showToast(`🎉 Created account for ${newUserForm.name}! Credentials active.`);
         setIsCreateUserModalOpen(false);
         if (data.user) {
           setUsers((prev) => [data.user, ...prev]);
@@ -405,10 +473,16 @@ export default function AdminDashboardPage() {
           email: "",
           password: "Student@2026!",
           role: "STUDENT",
-          track: "Full-Stack & AI Systems",
-          bio: "",
+          track: "Full-Stack & Cloud Architecture",
+          bio: "Senior Software Engineering student at Phoenix Class of 2026.",
+          dorm: "Campus Residential",
+          github: "",
         });
         fetchData();
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to create user.");
       }
@@ -449,6 +523,10 @@ export default function AdminDashboardPage() {
           });
         }
         fetchData();
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to delete user.");
       }
@@ -480,6 +558,10 @@ export default function AdminDashboardPage() {
         if (stats) {
           setStats({ ...stats, totalPosts: Math.max(0, stats.totalPosts - 1) });
         }
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         const data = await res.json();
         showToast(data.error || "Failed to delete post.");
@@ -491,7 +573,44 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // 6. Delete Comment
+  // 6. Delete Memory Post from Database
+  const handleConfirmDeleteMemory = async () => {
+    if (!memoryToDelete) return;
+
+    try {
+      setIsDeletingMemory(true);
+      const res = await fetch(`/api/admin/memories?memoryId=${memoryToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setAdminMemories((prev) => prev.filter((m) => m.id !== memoryToDelete.id));
+        showToast("🗑️ Memory post permanently deleted from Vault & PostgreSQL database.");
+        setIsDeleteMemoryModalOpen(false);
+        setMemoryToDelete(null);
+        if (stats) {
+          setStats({
+            ...stats,
+            totalMemories: Math.max(0, (stats.totalMemories || 1) - 1),
+          });
+        }
+        await fetchData();
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
+      } else {
+        const data = await res.json();
+        showToast(data.error || "Failed to delete memory post.");
+      }
+    } catch {
+      showToast("Error deleting memory.");
+    } finally {
+      setIsDeletingMemory(false);
+    }
+  };
+
+  // 7. Delete Comment
   const handleDeleteComment = async (postId: string, commentId: string) => {
     try {
       const res = await fetch(`/api/admin/posts/${postId}/comments/${commentId}`, {
@@ -521,6 +640,10 @@ export default function AdminDashboardPage() {
               }
               : null
           );
+        }
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
         }
       } else {
         showToast("Failed to delete comment.");
@@ -558,6 +681,10 @@ export default function AdminDashboardPage() {
           time: "2:00 PM - 5:00 PM",
           description: "",
         });
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to post event.");
       }
@@ -587,6 +714,10 @@ export default function AdminDashboardPage() {
         showToast(data.message || `✏️ Event updated!`);
         setIsEditEventModalOpen(false);
         setEditingEvent(null);
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to update event.");
       }
@@ -611,6 +742,10 @@ export default function AdminDashboardPage() {
         showToast(data.message || `Event "${eventToDelete.title}" deleted.`);
         setIsDeleteEventModalOpen(false);
         setEventToDelete(null);
+        await refreshLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
       } else {
         showToast(data.error || "Failed to delete event.");
       }
@@ -660,6 +795,21 @@ export default function AdminDashboardPage() {
       e.month.toLowerCase().includes(eventSearch.toLowerCase()) ||
       e.day.includes(eventSearch)
     );
+  });
+
+  // Filtered Memories
+  const filteredMemories = adminMemories.filter((m) => {
+    const q = memorySearch.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      m.title.toLowerCase().includes(q) ||
+      m.story.toLowerCase().includes(q) ||
+      m.authorName.toLowerCase().includes(q) ||
+      m.location.toLowerCase().includes(q);
+
+    const matchesCat = memoryCategoryFilter === "All" || m.category === memoryCategoryFilter;
+
+    return matchesSearch && matchesCat;
   });
 
   return (
@@ -715,55 +865,30 @@ export default function AdminDashboardPage() {
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 p-5 text-white shadow-lg shadow-emerald-950/20 group hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">
-              Total Cohort
+              Senior Directory
             </span>
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-xl">group</span>
+              <span className="material-symbols-outlined text-xl">school</span>
             </div>
           </div>
           <div className="mt-4">
             <div className="text-3xl font-extrabold font-headline tracking-tight">
-              {loading ? "..." : stats?.totalUsers || 0}
+              {loading ? "..." : stats?.totalUsers || 0} Registered
             </div>
             <div className="flex items-center gap-2 mt-1 text-xs text-emerald-100">
               <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                {stats?.totalStudents || 0} Students
+                {stats?.activeUsers || 0} Active
               </span>
-              <span className="bg-emerald-900/40 px-2 py-0.5 rounded-full font-bold">
-                {stats?.totalAdmins || 0} Admin
-              </span>
+              <span>{stats?.deactivatedUsers || 0} Deactivated</span>
             </div>
           </div>
         </div>
 
-        {/* Card 2: Account Status (Amber/Orange Gradient) */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-5 text-white shadow-lg shadow-amber-950/20 group hover:-translate-y-1 transition-transform">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-100">
-              Account Status
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
-              <span className="material-symbols-outlined text-xl">toggle_on</span>
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-3xl font-extrabold font-headline tracking-tight">
-              {loading ? "..." : `${stats?.activeUsers || 0} Active`}
-            </div>
-            <div className="flex items-center gap-2 mt-1 text-xs text-amber-100">
-              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">
-                {stats?.deactivatedUsers || 0} Deactivated
-              </span>
-              <span className="text-[11px] opacity-90">Instant Access Control</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Class Feed Posts (Violet/Indigo Gradient) */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 p-5 text-white shadow-lg shadow-violet-950/20 group hover:-translate-y-1 transition-transform">
+        {/* Card 2: Feed Posts (Violet/Indigo Gradient) */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-700 p-5 text-white shadow-lg shadow-indigo-950/20 group hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-violet-100">
-              Class Feed & Moderation
+              Activity & Posts
             </span>
             <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
               <span className="material-symbols-outlined text-xl">dynamic_feed</span>
@@ -771,21 +896,42 @@ export default function AdminDashboardPage() {
           </div>
           <div className="mt-4">
             <div className="text-3xl font-extrabold font-headline tracking-tight">
-              {loading ? "..." : stats?.totalPosts || 0} Posts
+              {loading ? "..." : stats?.totalPosts || 0} Feed Posts
             </div>
             <div className="flex items-center gap-2 mt-1 text-xs text-violet-100">
               <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">
                 {stats?.totalComments || 0} Comments
               </span>
-              <span className="bg-indigo-900/40 px-2 py-0.5 rounded-full font-bold">
-                {stats?.totalLikes || 0} Likes
+              <span>{stats?.totalLikes || 0} Likes</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Memory Vault (Pink/Rose Gradient) */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 p-5 text-white shadow-lg shadow-rose-950/20 group hover:-translate-y-1 transition-transform">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-pink-100">
+              Memory Vault
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+              <span className="material-symbols-outlined text-xl">auto_awesome</span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <div className="text-3xl font-extrabold font-headline tracking-tight">
+              {loading ? "..." : stats?.totalMemories ?? adminMemories.length} Memories
+            </div>
+            <div className="flex items-center gap-2 mt-1 text-xs text-pink-100">
+              <span className="bg-white/20 px-2 py-0.5 rounded-full font-bold">
+                Digital Yearbook
               </span>
+              <span>Class of 2026</span>
             </div>
           </div>
         </div>
 
         {/* Card 4: Messages & Network (Rose/Fuchsia Gradient) */}
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-fuchsia-600 p-5 text-white shadow-lg shadow-rose-950/20 group hover:-translate-y-1 transition-transform">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 p-5 text-white shadow-lg shadow-purple-950/20 group hover:-translate-y-1 transition-transform">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-100">
               Direct Messages
@@ -841,6 +987,17 @@ export default function AdminDashboardPage() {
         >
           <span className="material-symbols-outlined text-lg">post_add</span>
           <span>Moderate Posts ({posts.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("memories")}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-headline font-bold text-xs md:text-sm transition-all cursor-pointer ${activeTab === "memories"
+            ? "bg-gradient-to-r from-pink-600 to-rose-600 text-white shadow-md scale-102"
+            : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+            }`}
+        >
+          <span className="material-symbols-outlined text-lg">auto_awesome</span>
+          <span>Memory Vault ({adminMemories.length})</span>
         </button>
 
         <button
@@ -1477,7 +1634,157 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 4: SECURITY & AUDIT */}
+      {/* TAB 4: MEMORY VAULT MODERATION */}
+      {activeTab === "memories" && (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-headline text-lg md:text-xl font-bold text-on-surface flex items-center gap-2">
+                <span className="material-symbols-outlined text-rose-500">auto_awesome</span>
+                <span>Digital Yearbook Memory Vault Moderation</span>
+              </h2>
+              <p className="text-xs text-on-surface-variant">
+                Moderate, inspect, and remove senior memory posts, tagged classmates, and comments.
+              </p>
+            </div>
+            <span className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-xs border border-rose-500/20 w-fit">
+              {adminMemories.length} Total Memory Posts
+            </span>
+          </div>
+
+          {/* Search & Category Filter Bar */}
+          <div className="p-4 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+              <div className="relative flex-1 min-w-[200px]">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">
+                  search
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search memory title, story, student, location..."
+                  value={memorySearch}
+                  onChange={(e) => setMemorySearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-surface rounded-xl border border-outline-variant/40 text-xs text-on-surface outline-none focus:border-rose-500 transition-colors"
+                />
+              </div>
+
+              <select
+                value={memoryCategoryFilter}
+                onChange={(e) => setMemoryCategoryFilter(e.target.value)}
+                className="px-3 py-2 bg-surface rounded-xl border border-outline-variant/40 text-xs text-on-surface outline-none focus:border-rose-500 cursor-pointer"
+              >
+                <option value="All">All Categories</option>
+                <option value="Graduation">Graduation</option>
+                <option value="Campus Life">Campus Life</option>
+                <option value="Class Events">Class Events</option>
+                <option value="Friends">Friends</option>
+                <option value="Trips">Trips</option>
+                <option value="Funny Moments">Funny Moments</option>
+                <option value="Throwbacks">Throwbacks</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Memory Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredMemories.map((mem) => (
+              <div
+                key={mem.id}
+                className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl overflow-hidden ambient-shadow flex flex-col justify-between group hover:border-rose-500/40 transition-all"
+              >
+                <div>
+                  {/* Media Visual */}
+                  <div className="relative aspect-[16/10] bg-black/60 overflow-hidden">
+                    {mem.image ? (
+                      <img
+                        src={mem.image}
+                        alt={mem.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : mem.video ? (
+                      <video
+                        src={mem.video}
+                        className="w-full h-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-rose-400 font-headline font-bold text-sm">
+                        📸 Memory Post
+                      </div>
+                    )}
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/70 text-white font-bold text-[10px] backdrop-blur-md">
+                      🎓 {mem.category}
+                    </span>
+                    <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full bg-rose-600 text-white font-bold text-[10px]">
+                      {mem.year}
+                    </span>
+                  </div>
+
+                  {/* Body Details */}
+                  <div className="p-5 space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={mem.authorAvatar}
+                        alt={mem.authorName}
+                        className="w-7 h-7 rounded-full object-cover border border-outline-variant/30"
+                      />
+                      <div>
+                        <p className="text-xs font-bold text-primary">{mem.authorName}</p>
+                        <p className="text-[10px] text-on-surface-variant">{mem.date} • {mem.location}</p>
+                      </div>
+                    </div>
+
+                    <h4 className="font-headline font-bold text-sm text-primary group-hover:text-rose-600 transition-colors line-clamp-1">
+                      {mem.title}
+                    </h4>
+
+                    <p className="text-xs text-on-surface leading-relaxed bg-surface-container-low/60 rounded-xl p-3 line-clamp-3">
+                      &quot;{mem.story}&quot;
+                    </p>
+                  </div>
+                </div>
+
+                {/* Footer Controls */}
+                <div className="p-4 pt-0 flex items-center justify-between border-t border-outline-variant/15 mt-2">
+                  <div className="flex items-center gap-3 text-xs text-on-surface-variant font-semibold">
+                    <span className="flex items-center gap-1 text-red-500">
+                      <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                      <span>{mem._count?.likes ?? 0}</span>
+                    </span>
+                    <span className="flex items-center gap-1 text-primary">
+                      <span className="material-symbols-outlined text-sm">chat_bubble</span>
+                      <span>{mem.comments?.length || mem._count?.comments || 0}</span>
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setMemoryToDelete(mem);
+                      setIsDeleteMemoryModalOpen(true);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 border border-rose-500/20"
+                    title="Delete Memory Post"
+                  >
+                    <span className="material-symbols-outlined text-base">delete</span>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredMemories.length === 0 && (
+            <div className="p-12 text-center text-xs text-on-surface-variant bg-surface-container-lowest rounded-3xl border border-outline-variant/30">
+              No memories matching the filter criteria.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 5: SECURITY & AUDIT */}
       {activeTab === "logs" && (
         <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 ambient-shadow space-y-5">
           <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
@@ -1662,7 +1969,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-on-surface block mb-1">Track</label>
+                <label className="text-xs font-bold text-on-surface block mb-1">Track & Specialization</label>
                 <input
                   type="text"
                   placeholder="e.g. Full-Stack & Cloud Architecture"
@@ -1670,6 +1977,29 @@ export default function AdminDashboardPage() {
                   onChange={(e) => setNewUserForm({ ...newUserForm, track: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl bg-surface border border-outline-variant/40 text-xs text-on-surface outline-none focus:border-primary"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">Campus Dorm</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Waverly Hall 312"
+                    value={newUserForm.dorm}
+                    onChange={(e) => setNewUserForm({ ...newUserForm, dorm: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-surface border border-outline-variant/40 text-xs text-on-surface outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-on-surface block mb-1">GitHub Username (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. jordanmiller"
+                    value={newUserForm.github}
+                    onChange={(e) => setNewUserForm({ ...newUserForm, github: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-surface border border-outline-variant/40 text-xs text-on-surface outline-none focus:border-primary"
+                  />
+                </div>
               </div>
 
               <div>
@@ -2204,6 +2534,74 @@ export default function AdminDashboardPage() {
                 className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold transition-all shadow-sm hover:bg-rose-700 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
               >
                 {isDeletingUser ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-sm">delete</span>
+                    <span>Confirm Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 9: CASCADING DELETE MEMORY CONFIRMATION */}
+      {isDeleteMemoryModalOpen && memoryToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/20 text-rose-600 flex items-center justify-center">
+                <span className="material-symbols-outlined text-xl">delete_forever</span>
+              </div>
+              <div>
+                <h3 className="font-headline font-bold text-base text-on-surface">
+                  Delete Memory Vault Post?
+                </h3>
+                <p className="text-xs text-on-surface-variant">
+                  This will permanently remove this memory and cascade delete all its comments and loves from PostgreSQL.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/20 space-y-2">
+              <div className="flex items-center gap-2">
+                <img
+                  src={memoryToDelete.authorAvatar}
+                  alt={memoryToDelete.authorName}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+                <span className="text-xs font-bold text-primary">{memoryToDelete.authorName}</span>
+                <span className="text-[10px] text-outline">({memoryToDelete.year})</span>
+              </div>
+              <p className="font-bold text-xs text-on-surface">{memoryToDelete.title}</p>
+              <p className="text-xs text-on-surface-variant line-clamp-2 italic">
+                &quot;{memoryToDelete.story}&quot;
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDeleteMemoryModalOpen(false);
+                  setMemoryToDelete(null);
+                }}
+                className="px-4 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-xs font-bold text-on-surface transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDeleteMemory}
+                disabled={isDeletingMemory}
+                className="px-5 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold transition-all shadow-sm hover:bg-rose-700 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+              >
+                {isDeletingMemory ? (
                   <>
                     <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     <span>Deleting...</span>

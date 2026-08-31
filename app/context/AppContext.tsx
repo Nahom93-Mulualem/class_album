@@ -75,7 +75,8 @@ interface AppContextType {
   markNotificationAsRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   memories: MemoryItem[];
-  addMemory: (memory: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => void;
+  addMemory: (memory: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => Promise<void> | void;
+  deleteMemory: (memoryId: string) => Promise<boolean>;
   toggleLikeMemory: (memoryId: string) => void;
   addMemoryComment: (memoryId: string, content: string) => void;
   isNewPostModalOpen: boolean;
@@ -91,6 +92,7 @@ interface AppContextType {
   closeLightbox: () => void;
   toast: ToastItem | null;
   showToast: (msg: string, type?: ToastItem["type"]) => void;
+  refreshLiveDatabaseData: () => Promise<void>;
   refreshAuthSession: () => Promise<ExtendedUser | null>;
   restoreAdminAuthority: () => Promise<boolean>;
   logoutUser: () => Promise<void>;
@@ -298,41 +300,74 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
-  // Fetch live database records for directory, posts, events, and signatures
+  // Fetch live database records for directory, posts, events, signatures, and memories
   const fetchLiveDatabaseData = useCallback(async () => {
     try {
-      const [usersRes, postsRes, eventsRes, sigsRes] = await Promise.all([
+      const [usersRes, postsRes, eventsRes, sigsRes, memsRes] = await Promise.all([
         fetch("/api/users"),
         fetch("/api/posts"),
         fetch("/api/events"),
         fetch("/api/signatures"),
+        fetch("/api/memories"),
       ]);
 
       if (usersRes.ok) {
         const data = await usersRes.json();
-        if (data.users && data.users.length > 0) {
-          setStudents(data.users);
+        if (data.users && Array.isArray(data.users)) {
+          const normalizedUsers: Student[] = data.users.map((u: any) => ({
+            id: u.id,
+            name: u.name || "Phoenix Senior",
+            avatar:
+              u.avatar ||
+              `https://api.dicebear.com/7.x/bottts/svg?seed=${u.username || "student"}`,
+            degree: u.degree || "B.S. Software Engineering",
+            gradYear: u.gradYear || "2026",
+            track: u.track || "Full-Stack & Cloud Architecture",
+            statusQuote: u.statusQuote || "",
+            bio: u.bio || "Software Engineering Senior Class of 2026.",
+            dorm: u.dorm || "Campus Residential",
+            skills:
+              Array.isArray(u.skills) && u.skills.length > 0
+                ? u.skills
+                : ["TypeScript", "Full-Stack"],
+            github: u.github || u.username || "",
+            linkedin: u.linkedin || "",
+            connected: Boolean(u.connected),
+            online: Boolean(u.online),
+            username: u.username,
+            email: u.email,
+            role: u.role,
+            isActive: u.isActive !== undefined ? u.isActive : true,
+          }));
+          setStudents(normalizedUsers);
         }
       }
 
       if (postsRes.ok) {
         const data = await postsRes.json();
-        if (data.posts && data.posts.length > 0) {
+        if (data.posts && Array.isArray(data.posts)) {
           setPosts(data.posts);
         }
       }
 
       if (eventsRes.ok) {
         const data = await eventsRes.json();
-        if (data.events && data.events.length > 0) {
+        if (data.events && Array.isArray(data.events)) {
           setEvents(data.events);
         }
       }
 
       if (sigsRes.ok) {
         const data = await sigsRes.json();
-        if (data.signatures && data.signatures.length > 0) {
+        if (data.signatures && Array.isArray(data.signatures)) {
           setYearbookSignatures(data.signatures);
+        }
+      }
+
+      if (memsRes.ok) {
+        const data = await memsRes.json();
+        if (data.memories && Array.isArray(data.memories) && data.memories.length > 0) {
+          setMemories(data.memories);
         }
       }
     } catch {
@@ -349,8 +384,32 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     };
     initialize();
+
+    const handleSyncEvent = () => {
+      fetchLiveDatabaseData();
+    };
+
+    const handleFocus = () => {
+      fetchLiveDatabaseData();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("phoenix_data_sync", handleSyncEvent);
+      window.addEventListener("focus", handleFocus);
+    }
+
+    // Auto-sync background interval (every 10s)
+    const syncInterval = setInterval(() => {
+      fetchLiveDatabaseData();
+    }, 10000);
+
     return () => {
       mounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("phoenix_data_sync", handleSyncEvent);
+        window.removeEventListener("focus", handleFocus);
+      }
+      clearInterval(syncInterval);
     };
   }, [refreshAuthSession, fetchLiveDatabaseData]);
 
@@ -546,39 +605,93 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Memories methods with persistent storage
-  const addMemory = (memoryData: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">) => {
-    const newMemory: MemoryItem = {
+  // Memories methods with persistent database storage
+  const addMemory = async (
+    memoryData: Omit<MemoryItem, "id" | "likesCount" | "isLiked" | "comments">
+  ) => {
+    const optimisticMemory: MemoryItem = {
       ...memoryData,
       id: `user-mem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      likesCount: 1,
-      isLiked: true,
+      likesCount: 0,
+      isLiked: false,
       comments: [],
     };
-    setMemories((prev) => {
-      const seenIds = new Set<string>();
-      const combined = [newMemory, ...prev];
-      const uniqueMemories: MemoryItem[] = [];
 
-      for (const item of combined) {
-        if (!seenIds.has(item.id)) {
-          seenIds.add(item.id);
-          uniqueMemories.push(item);
+    setMemories((prev) => [optimisticMemory, ...prev]);
+    setIsNewMemoryModalOpen(false);
+    showToast(`Memory uploaded to Digital Yearbook Vault! 🎓📸`, "success");
+
+    try {
+      const res = await fetch("/api/memories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(memoryData),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.memory) {
+          setMemories((prev) =>
+            prev.map((m) => (m.id === optimisticMemory.id ? data.memory : m))
+          );
+        }
+        await fetchLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
         }
       }
+    } catch {
+      // Keep optimistic
+    }
+  };
 
+  const deleteMemory = async (memoryId: string): Promise<boolean> => {
+    setMemories((prev) => prev.filter((m) => m.id !== memoryId));
+
+    if (typeof window !== "undefined") {
       try {
-        const customOnly = uniqueMemories.filter(
-          (m) => !INITIAL_MEMORIES.some((init) => init.id === m.id)
-        );
-        localStorage.setItem("phoenix_custom_memories", JSON.stringify(customOnly));
-      } catch {
-        // Fallback
+        const stored = localStorage.getItem("phoenix_custom_memories");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const filtered = parsed.filter((m: MemoryItem) => m.id !== memoryId);
+          localStorage.setItem("phoenix_custom_memories", JSON.stringify(filtered));
+        }
+      } catch {}
+    }
+
+    if (activeMemoryForDetail?.id === memoryId) {
+      setActiveMemoryForDetail(null);
+    }
+
+    showToast("🗑️ Memory post deleted from Vault.", "info");
+
+    try {
+      const res = await fetch(`/api/admin/memories?memoryId=${memoryId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await fetchLiveDatabaseData();
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("phoenix_data_sync"));
+        }
+        return true;
+      } else {
+        const fallbackRes = await fetch(`/api/memories/${memoryId}`, {
+          method: "DELETE",
+        });
+        if (fallbackRes.ok) {
+          await fetchLiveDatabaseData();
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("phoenix_data_sync"));
+          }
+          return true;
+        }
       }
-      return uniqueMemories;
-    });
-    setIsNewMemoryModalOpen(false);
-    showToast(`Memory added to Digital Yearbook! 🎓📸`, "success");
+    } catch {
+      // Optimistic state already updated
+    }
+    return true;
   };
 
   const toggleLikeMemory = (memoryId: string) => {
@@ -900,6 +1013,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         markAllNotificationsRead,
         memories,
         addMemory,
+        deleteMemory,
         toggleLikeMemory,
         addMemoryComment,
         isNewPostModalOpen,
@@ -915,6 +1029,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         closeLightbox,
         toast,
         showToast,
+        refreshLiveDatabaseData: fetchLiveDatabaseData,
         refreshAuthSession,
         restoreAdminAuthority,
         logoutUser,

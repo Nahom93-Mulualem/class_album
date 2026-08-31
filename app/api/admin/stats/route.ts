@@ -19,6 +19,7 @@ export async function GET() {
       totalComments,
       totalLikes,
       totalMessages,
+      totalMemories,
       recentUsers,
       recentPosts,
     ] = await Promise.all([
@@ -31,6 +32,7 @@ export async function GET() {
       prisma.comment.count(),
       prisma.postLike.count(),
       prisma.message.count(),
+      prisma.memory.count(),
       prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
@@ -67,6 +69,7 @@ export async function GET() {
         totalComments,
         totalLikes,
         totalMessages,
+        totalMemories,
         dbStatus: "Healthy (PostgreSQL Connected)",
       },
       recentUsers,

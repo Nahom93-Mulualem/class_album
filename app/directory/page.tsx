@@ -7,11 +7,16 @@ import { useApp } from "../context/AppContext";
 
 export default function DirectoryPage() {
   const router = useRouter();
-  const { students, toggleConnect, startConversationWithStudent } = useApp();
+  const { students, toggleConnect, startConversationWithStudent, refreshLiveDatabaseData } = useApp();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTrack, setSelectedTrack] = useState("All");
   const [visibleCount, setVisibleCount] = useState(12);
+
+  // Fetch live database data on mount to ensure newly added cohort members are present
+  React.useEffect(() => {
+    refreshLiveDatabaseData();
+  }, [refreshLiveDatabaseData]);
 
   const techTracks = [
     "All",
@@ -28,14 +33,23 @@ export default function DirectoryPage() {
   ];
 
   const filteredStudents = students.filter((student) => {
+    if (!student) return false;
+    const q = searchQuery.toLowerCase().trim();
+    const name = (student.name || "").toLowerCase();
+    const track = (student.track || "").toLowerCase();
+    const dorm = (student.dorm || "").toLowerCase();
+    const skills = Array.isArray(student.skills) ? student.skills : [];
+
     const matchesSearch =
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.track.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.skills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      student.dorm.toLowerCase().includes(searchQuery.toLowerCase());
+      !q ||
+      name.includes(q) ||
+      track.includes(q) ||
+      dorm.includes(q) ||
+      skills.some((sk) => (sk || "").toLowerCase().includes(q));
 
     const matchesTrack =
-      selectedTrack === "All" || student.track.toLowerCase().includes(selectedTrack.toLowerCase().split(" ")[0]);
+      selectedTrack === "All" ||
+      track.includes(selectedTrack.toLowerCase().split(" ")[0]);
 
     return matchesSearch && matchesTrack;
   });
@@ -155,7 +169,7 @@ export default function DirectoryPage() {
 
               {/* Skills Tags */}
               <div className="flex flex-wrap gap-1.5 justify-center mt-3 mb-5 max-h-14 overflow-hidden">
-                {student.skills.slice(0, 3).map((skill) => (
+                {(student.skills || []).slice(0, 3).map((skill) => (
                   <span
                     key={skill}
                     className="bg-primary-container/10 text-primary font-body text-[11px] font-semibold px-2.5 py-0.5 rounded-lg border border-primary-container/15"
@@ -163,9 +177,9 @@ export default function DirectoryPage() {
                     {skill}
                   </span>
                 ))}
-                {student.skills.length > 3 && (
+                {(student.skills || []).length > 3 && (
                   <span className="text-[10px] text-on-surface-variant font-medium self-center">
-                    +{student.skills.length - 3}
+                    +{(student.skills || []).length - 3}
                   </span>
                 )}
               </div>

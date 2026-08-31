@@ -18,10 +18,15 @@ export default function ClassmateProfilePage() {
     yearbookSignatures,
     addYearbookSignature,
     openLightbox,
+    refreshLiveDatabaseData,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<"about" | "gallery" | "yearbook">("about");
   const [newSignature, setNewSignature] = useState("");
+
+  React.useEffect(() => {
+    refreshLiveDatabaseData();
+  }, [refreshLiveDatabaseData]);
 
   const student = students.find(
     (s) => s.id === studentId || (s as ExtendedUser).username === studentId
@@ -184,7 +189,7 @@ export default function ClassmateProfilePage() {
                 Senior Engineering Bio
               </h3>
               <p className="font-body text-xs sm:text-sm text-on-surface-variant leading-relaxed">
-                {student.bio}
+                {student.bio || "Senior Software Engineering student at Phoenix Class of 2026."}
               </p>
             </div>
 
@@ -195,7 +200,7 @@ export default function ClassmateProfilePage() {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-outline">Degree</span>
-                  <p className="font-body text-xs font-bold text-on-surface">{student.degree}</p>
+                  <p className="font-body text-xs font-bold text-on-surface">{student.degree || "B.S. Software Engineering"}</p>
                 </div>
               </div>
 
@@ -215,7 +220,7 @@ export default function ClassmateProfilePage() {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-outline">Campus Dorm</span>
-                  <p className="font-body text-xs font-bold text-on-surface">{student.dorm}</p>
+                  <p className="font-body text-xs font-bold text-on-surface">{student.dorm || "Campus Residential"}</p>
                 </div>
               </div>
 
@@ -225,7 +230,9 @@ export default function ClassmateProfilePage() {
                 </div>
                 <div>
                   <span className="text-[10px] uppercase font-bold text-outline">GitHub</span>
-                  <p className="font-body text-xs font-bold text-on-surface">@{student.github}</p>
+                  <p className="font-body text-xs font-bold text-on-surface">
+                    {student.github ? `@${student.github}` : "Not specified"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -238,7 +245,7 @@ export default function ClassmateProfilePage() {
               Tech Stack & Languages
             </h3>
             <div className="flex flex-wrap gap-2">
-              {student.skills.map((skill) => (
+              {(student.skills || []).map((skill) => (
                 <span
                   key={skill}
                   className="px-3 py-1.5 bg-primary-container/10 text-primary font-headline text-xs font-bold rounded-xl border border-primary-container/15"

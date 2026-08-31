@@ -225,3 +225,49 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const currentUser = await getCurrentUserFromCookie();
+    if (!currentUser) {
+      return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const memoryId = searchParams.get("memoryId");
+
+    if (!memoryId) {
+      return NextResponse.json({ error: "Memory ID is required" }, { status: 400 });
+    }
+
+    const memory = await prisma.memory.findUnique({
+      where: { id: memoryId },
+    });
+
+    if (!memory) {
+      return NextResponse.json({ error: "Memory not found" }, { status: 404 });
+    }
+
+    if (currentUser.role !== "ADMIN" && memory.authorId !== currentUser.id) {
+      return NextResponse.json(
+        { error: "Forbidden. You can only delete your own memories unless you are an Admin." },
+        { status: 403 }
+      );
+    }
+
+    await prisma.memory.delete({
+      where: { id: memoryId },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: `Memory "${memory.title}" deleted successfully.`,
+    });
+  } catch (error) {
+    console.error("Delete memory error:", error);
+    return NextResponse.json(
+      { error: "Failed to delete memory", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
+}
