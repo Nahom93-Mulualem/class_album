@@ -49,11 +49,6 @@ export default function LoginPage() {
       };
 
       if (res.ok && data.user) {
-        showToast(
-          data.user.role === "ADMIN"
-            ? `👑 Welcome back, Administrator ${data.user.name}!`
-            : `🎓 Welcome back to Phoenix Lounge, ${data.user.name}!`
-        );
         await refreshAuthSession();
         router.push(getDestination(data.user.role));
       } else {

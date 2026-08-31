@@ -86,7 +86,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Post and all associated comments/likes deleted successfully via cascading delete.",
+      message: "Post and all associated comments/likes deleted successfully.",
     });
   } catch (error) {
     console.error("Admin delete post error:", error);

@@ -663,8 +663,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setActiveMemoryForDetail(null);
     }
 
-    showToast("🗑️ Memory post deleted from Vault.", "info");
-
     try {
       const res = await fetch(`/api/admin/memories?memoryId=${memoryId}`, {
         method: "DELETE",

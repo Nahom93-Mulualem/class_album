@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { showToast, refreshLiveDatabaseData } = useApp();
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "memories" | "events" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "posts" | "memories" | "events">("overview");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [posts, setPosts] = useState<AdminPost[]>([]);
@@ -537,7 +537,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // 5. Delete Post with Cascading Delete
+  // 5. Delete Post
   const handleConfirmDeletePost = async () => {
     if (!postToDelete) return;
 
@@ -618,7 +618,6 @@ export default function AdminDashboardPage() {
       });
 
       if (res.ok) {
-        showToast("💬 Comment removed.");
         setPosts((prev) =>
           prev.map((p) => {
             if (p.id === postId) {
@@ -739,7 +738,6 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       if (res.ok) {
         setEvents((prev) => prev.filter((e) => e.id !== eventToDelete.id));
-        showToast(data.message || `Event "${eventToDelete.title}" deleted.`);
         setIsDeleteEventModalOpen(false);
         setEventToDelete(null);
         await refreshLiveDatabaseData();
@@ -1010,17 +1008,6 @@ export default function AdminDashboardPage() {
           <span className="material-symbols-outlined text-lg">calendar_month</span>
           <span>Events & Reminders ({events.length})</span>
         </button>
-
-        <button
-          onClick={() => setActiveTab("logs")}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-headline font-bold text-xs md:text-sm transition-all cursor-pointer ${activeTab === "logs"
-            ? "bg-gradient-to-r from-slate-700 to-slate-900 text-white shadow-md scale-102"
-            : "bg-surface-container text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
-            }`}
-        >
-          <span className="material-symbols-outlined text-lg">security</span>
-          <span>Security & Audit</span>
-        </button>
       </div>
 
       {/* TAB 1: OVERVIEW */}
@@ -1127,7 +1114,7 @@ export default function AdminDashboardPage() {
                       Feed Activity Snapshot
                     </h3>
                     <p className="text-xs text-on-surface-variant">
-                      Moderation queue & cascading deletes
+                      Moderation queue & post removal
                     </p>
                   </div>
                   <button
@@ -1381,7 +1368,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 3: MANAGE POSTS & CASCADING DELETION */}
+      {/* TAB 3: MANAGE POSTS */}
       {activeTab === "posts" && (
         <div className="space-y-6">
           {/* Post Filter Bar */}
@@ -1484,7 +1471,7 @@ export default function AdminDashboardPage() {
                       className="px-3 py-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
                     >
                       <span className="material-symbols-outlined text-sm">delete</span>
-                      Cascading Delete
+                      <span>Delete</span>
                     </button>
                   </div>
                 </div>
@@ -1784,48 +1771,6 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* TAB 5: SECURITY & AUDIT */}
-      {activeTab === "logs" && (
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 ambient-shadow space-y-5">
-          <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
-            <div>
-              <h3 className="font-headline font-bold text-lg text-on-surface">
-                Platform Security & Database Architecture
-              </h3>
-              <p className="text-xs text-on-surface-variant">
-                Relational cascade validation and authentication integrity
-              </p>
-            </div>
-            <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 font-bold text-xs">
-              System Protected
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 space-y-1.5">
-              <span className="text-xs font-bold text-primary block">Password Hashing</span>
-              <p className="text-xs text-on-surface-variant">
-                Bcrypt with 10 salt rounds applied to all 50 student and admin passwords.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 space-y-1.5">
-              <span className="text-xs font-bold text-violet-600 block">Cascading Integrity</span>
-              <p className="text-xs text-on-surface-variant">
-                `onDelete: Cascade` active on Post -&gt; Comments, Post -&gt; Likes, User -&gt; Posts.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 space-y-1.5">
-              <span className="text-xs font-bold text-teal-600 block">RBAC Permission Gate</span>
-              <p className="text-xs text-on-surface-variant">
-                Only authenticated users with role `ADMIN` can view or execute admin APIs.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* MODAL 1: RESET PASSWORD */}
       {isResetPasswordModalOpen && selectedUserForPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
@@ -2033,7 +1978,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* MODAL 3: CASCADING DELETE POST CONFIRMATION */}
+      {/* MODAL 3: DELETE POST CONFIRMATION */}
       {isDeletePostModalOpen && postToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-surface-container-lowest border border-rose-500/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
@@ -2043,14 +1988,14 @@ export default function AdminDashboardPage() {
               </div>
               <div>
                 <h3 className="font-headline font-bold text-base text-on-surface">
-                  Cascading Delete Post
+                  Delete Post
                 </h3>
                 <p className="text-xs text-on-surface-variant">Post by {postToDelete.authorName}</p>
               </div>
             </div>
 
             <p className="text-xs text-on-surface leading-relaxed">
-              Are you sure you want to delete this post? This will permanently and automatically cascade to delete all <strong>{postToDelete.comments.length} comments</strong> and <strong>{postToDelete.likesCount} likes</strong> linked to this post in PostgreSQL.
+              Are you sure you want to delete this post? This will permanently remove this post and all associated comments and likes from PostgreSQL.
             </p>
 
             <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 text-xs text-on-surface-variant line-clamp-3">
@@ -2072,7 +2017,7 @@ export default function AdminDashboardPage() {
                 className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md transition-all cursor-pointer flex items-center gap-1.5"
               >
                 <span className="material-symbols-outlined text-base">delete_forever</span>
-                {isDeletingPost ? "Deleting..." : "Delete Cascading Post"}
+                <span>{isDeletingPost ? "Deleting..." : "Confirm Delete"}</span>
               </button>
             </div>
           </div>
@@ -2550,7 +2495,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* MODAL 9: CASCADING DELETE MEMORY CONFIRMATION */}
+      {/* MODAL 9: DELETE MEMORY CONFIRMATION */}
       {isDeleteMemoryModalOpen && memoryToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
@@ -2563,7 +2508,7 @@ export default function AdminDashboardPage() {
                   Delete Memory Vault Post?
                 </h3>
                 <p className="text-xs text-on-surface-variant">
-                  This will permanently remove this memory and cascade delete all its comments and loves from PostgreSQL.
+                  This will permanently remove this memory and all its comments and loves from PostgreSQL.
                 </p>
               </div>
             </div>

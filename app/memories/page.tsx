@@ -2,7 +2,6 @@
 
 import React, { useState, useTransition, useMemo } from "react";
 import Link from "next/link";
-import confetti from "canvas-confetti";
 import { useApp } from "../context/AppContext";
 import { MemoryCategory } from "../data/initialData";
 
@@ -30,7 +29,12 @@ export default function MemoriesPage() {
     setIsNewMemoryModalOpen,
     setActiveMemoryForDetail,
     showToast,
+    refreshLiveDatabaseData,
   } = useApp();
+
+  React.useEffect(() => {
+    refreshLiveDatabaseData();
+  }, [refreshLiveDatabaseData]);
 
   const [selectedCategory, setSelectedCategory] = useState<MemoryCategory | "All">("All");
   const [selectedYear, setSelectedYear] = useState<string>("All");
@@ -40,17 +44,6 @@ export default function MemoriesPage() {
   const [animatingHeartId, setAnimatingHeartId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [, startTransition] = useTransition();
-
-  // Trigger graduation cap celebration confetti
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 90,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ["#fcd400", "#002875", "#8ab4f8", "#ffd700", "#ffffff"],
-    });
-    showToast("🎓 Celebrating Phoenix Software Engineering Class of 2020 – 2026!", "success");
-  };
 
   // Filter change with brief smooth transition
   const handleCategoryChange = (cat: MemoryCategory | "All") => {
@@ -153,20 +146,10 @@ export default function MemoriesPage() {
           <div className="flex flex-row lg:flex-col gap-3 shrink-0">
             <button
               onClick={() => setIsNewMemoryModalOpen(true)}
-              className="flex-1 lg:flex-none px-5 py-3 bg-secondary-container text-on-secondary-container rounded-2xl font-headline font-bold text-xs shadow-lg hover:brightness-95 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="px-5 py-3 bg-secondary-container text-on-secondary-container rounded-2xl font-headline font-bold text-xs shadow-lg hover:brightness-95 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span className="material-symbols-outlined text-lg">cloud_upload</span>
               <span>Upload Memory</span>
-            </button>
-
-            <button
-              onClick={triggerConfetti}
-              className="flex-1 lg:flex-none px-4 py-3 bg-white/15 hover:bg-white/25 text-white rounded-2xl font-headline font-semibold text-xs backdrop-blur-md border border-white/20 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-lg text-secondary-container">
-                celebration
-              </span>
-              <span>Throw Caps 🎓</span>
             </button>
           </div>
         </div>

@@ -106,25 +106,6 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* Administrator Quick Switch Banner */}
-        {currentUser?.role === "ADMIN" && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-gradient-to-r from-violet-950/40 via-purple-900/30 to-indigo-950/40 border border-violet-500/40 rounded-2xl text-xs backdrop-blur-md">
-            <div className="flex items-center gap-2.5 text-violet-200">
-              <span className="material-symbols-outlined text-violet-400 text-lg">admin_panel_settings</span>
-              <span>
-                <strong>Administrator View:</strong> You are currently viewing the live <strong>Student Lounge (Class Feed)</strong>.
-              </span>
-            </div>
-            <Link
-              href="/admin"
-              className="px-3.5 py-1.5 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl text-xs shadow-sm transition-all text-center shrink-0 flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <span>Return to Admin Console</span>
-              <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </Link>
-          </div>
-        )}
-
         {/* Welcome Header */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-container via-primary to-[#001740] text-on-primary p-6 md:p-8 shadow-lg border border-secondary-container/20">
           <div className="absolute right-0 top-0 -mr-10 -mt-10 w-64 h-64 bg-secondary-container/15 rounded-full blur-3xl pointer-events-none"></div>
