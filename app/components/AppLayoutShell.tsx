@@ -8,6 +8,7 @@ import SideNavBar from "./SideNavBar";
 import MobileBottomNav from "./MobileBottomNav";
 import NewPostModal from "./NewPostModal";
 import EditProfileModal from "./EditProfileModal";
+import AccountCredentialsModal from "./AccountCredentialsModal";
 import ImageLightboxModal from "./ImageLightboxModal";
 import NewMemoryModal from "./NewMemoryModal";
 import MemoryDetailModal from "./MemoryDetailModal";
@@ -109,12 +110,12 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
       <TopNavBar />
 
       {/* Main App Layout Container */}
-      <div className="flex-1 w-full max-w-7xl mx-auto pt-16 flex">
+      <div className="flex-1 w-full max-w-7xl mx-auto pt-16 flex min-w-0">
         {/* Desktop Side Navigation */}
         <SideNavBar />
 
         {/* Page Content Container */}
-        <div className="flex-1 md:ml-64 w-full min-h-[calc(100vh-64px)] flex flex-col">
+        <div className="flex-1 md:ml-64 min-w-0 max-w-full min-h-[calc(100vh-64px)] flex flex-col overflow-x-clip">
           {children}
         </div>
       </div>
@@ -125,6 +126,7 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
       {/* Global Modals & Notifications */}
       <NewPostModal />
       <EditProfileModal />
+      <AccountCredentialsModal />
       <NewMemoryModal />
       <MemoryDetailModal />
       <ImageLightboxModal />

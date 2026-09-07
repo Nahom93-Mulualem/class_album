@@ -6,12 +6,14 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
   useSyncExternalStore,
 } from "react";
 import {
   Student,
   Post,
   Conversation,
+  MessageItem,
   ReactionItem,
   TechEvent,
   GalleryItem,
@@ -46,6 +48,8 @@ export interface LightboxData {
   title?: string;
 }
 
+const CLIENT_INSTANCE_ID = typeof window !== "undefined" ? Math.random().toString(36).substring(2, 11) : "server";
+
 interface AppContextType {
   theme: "light" | "dark";
   isThemeMounted: boolean;
@@ -64,6 +68,7 @@ interface AppContextType {
   activeConversationId: string;
   setActiveConversationId: (id: string) => void;
   sendMessage: (conversationId: string, text: string) => void;
+  markConversationAsRead: (conversationId: string) => void;
   toggleMessageReaction: (conversationId: string, messageId: string, emoji: string) => void;
   startConversationWithStudent: (studentId: string) => string;
   events: TechEvent[];
@@ -83,6 +88,13 @@ interface AppContextType {
   setIsNewPostModalOpen: (open: boolean) => void;
   isEditProfileModalOpen: boolean;
   setIsEditProfileModalOpen: (open: boolean) => void;
+  isChangePasswordModalOpen: boolean;
+  setIsChangePasswordModalOpen: (open: boolean) => void;
+  credentialsModalTab: "username" | "password" | "both";
+  setCredentialsModalTab: (tab: "username" | "password" | "both") => void;
+  openCredentialsModal: (tab?: "username" | "password" | "both") => void;
+  isMobileChatOpen: boolean;
+  setIsMobileChatOpen: (open: boolean) => void;
   isNewMemoryModalOpen: boolean;
   setIsNewMemoryModalOpen: (open: boolean) => void;
   activeMemoryForDetail: MemoryItem | null;
@@ -170,12 +182,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
-  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
+  const [conversations, setConversations] = useState<Conversation[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("phoenix_conversations_current");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch { }
+    }
+    return INITIAL_CONVERSATIONS;
+  });
   const [activeConversationId, setActiveConversationId] = useState<string>("conv-sarah");
   const [events, setEvents] = useState<TechEvent[]>(INITIAL_EVENTS);
   const [gallery] = useState<GalleryItem[]>(INITIAL_GALLERY);
   const [yearbookSignatures, setYearbookSignatures] = useState<YearbookSignature[]>(INITIAL_SIGNATURES);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("phoenix_notifications_current");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch { }
+    }
+    return INITIAL_NOTIFICATIONS;
+  });
   const [memories, setMemories] = useState<MemoryItem[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -212,6 +246,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Modals & UI States
   const [isNewPostModalOpen, setIsNewPostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [credentialsModalTab, setCredentialsModalTab] = useState<"username" | "password" | "both">("password");
+
+  const openCredentialsModal = useCallback((tab: "username" | "password" | "both" = "password") => {
+    setCredentialsModalTab(tab);
+    setIsChangePasswordModalOpen(true);
+  }, []);
+
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
   const [isNewMemoryModalOpen, setIsNewMemoryModalOpen] = useState(false);
   const [activeMemoryForDetail, setActiveMemoryForDetail] = useState<MemoryItem | null>(null);
   const [lightboxMedia, setLightboxMedia] = useState<LightboxData | null>(null);
@@ -314,7 +357,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (usersRes.ok) {
         const data = await usersRes.json();
         if (data.users && Array.isArray(data.users)) {
-          const normalizedUsers: Student[] = data.users.map((u: any) => ({
+          const normalizedUsers: Student[] = data.users.map((u: Partial<ExtendedUser>) => ({
             id: u.id,
             name: u.name || "Phoenix Senior",
             avatar:
@@ -375,22 +418,88 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Fetch live database messages for the logged-in user in real time
+  const fetchLiveMessages = useCallback(async () => {
+    if (!currentUser?.id) return;
+    try {
+      const res = await fetch("/api/messages");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.messages || !Array.isArray(data.messages)) return;
+
+      setConversations((prevConvs) => {
+        let hasAnyChange = false;
+        const currentList = prevConvs.map((c) => ({ ...c, messages: [...c.messages] }));
+
+        for (const msg of data.messages) {
+          const partnerId = msg.senderId === currentUser.id ? msg.receiverId : msg.senderId;
+
+          const convIndex = currentList.findIndex(
+            (c) =>
+              c.studentId === partnerId ||
+              `student-${c.studentId}` === partnerId ||
+              c.studentId === `student-${partnerId}`
+          );
+
+          if (convIndex === -1) {
+            const isUnreadForMe = !msg.isRead && msg.receiverId === currentUser.id;
+            const newConv: Conversation = {
+              id: `conv-${partnerId}`,
+              studentId: partnerId,
+              lastMessage: msg.text,
+              lastMessageTime: msg.time,
+              unreadCount: isUnreadForMe ? 1 : 0,
+              messages: [msg],
+            };
+            currentList.unshift(newConv);
+            hasAnyChange = true;
+          } else {
+            const conv = currentList[convIndex];
+            const alreadyExists = conv.messages.some((m) => m.id === msg.id);
+            if (!alreadyExists) {
+              const isIncomingUnread =
+                !msg.isRead &&
+                msg.receiverId === currentUser.id &&
+                activeConversationId !== conv.id;
+
+              conv.messages.push(msg);
+              conv.lastMessage = msg.text;
+              conv.lastMessageTime = msg.time;
+              if (isIncomingUnread) {
+                conv.unreadCount += 1;
+              }
+              hasAnyChange = true;
+            }
+          }
+        }
+
+        if (!hasAnyChange) return prevConvs;
+        return currentList;
+      });
+    } catch {
+      // offline fallback
+    }
+  }, [currentUser?.id, activeConversationId]);
+
   useEffect(() => {
     let mounted = true;
     const initialize = async () => {
       if (mounted) {
         await refreshAuthSession();
         await fetchLiveDatabaseData();
+        await fetchLiveMessages();
       }
     };
     initialize();
 
     const handleSyncEvent = () => {
       fetchLiveDatabaseData();
+      fetchLiveMessages();
     };
 
     const handleFocus = () => {
       fetchLiveDatabaseData();
+      fetchLiveMessages();
     };
 
     if (typeof window !== "undefined") {
@@ -398,10 +507,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       window.addEventListener("focus", handleFocus);
     }
 
-    // Auto-sync background interval (every 10s)
+    // Auto-sync general data every 10s, live messages every 3s
     const syncInterval = setInterval(() => {
       fetchLiveDatabaseData();
     }, 10000);
+
+    const messageInterval = setInterval(() => {
+      fetchLiveMessages();
+    }, 3000);
 
     return () => {
       mounted = false;
@@ -410,8 +523,78 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         window.removeEventListener("focus", handleFocus);
       }
       clearInterval(syncInterval);
+      clearInterval(messageInterval);
     };
-  }, [refreshAuthSession, fetchLiveDatabaseData]);
+  }, [refreshAuthSession, fetchLiveDatabaseData, fetchLiveMessages]);
+
+  // User-specific notification and conversation persistence
+  const previousUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!currentUser || typeof window === "undefined") return;
+    if (previousUserIdRef.current === currentUser.id) return;
+    previousUserIdRef.current = currentUser.id;
+
+    // Load user notifications from localStorage if exists
+    try {
+      const storedNotifs = localStorage.getItem(`phoenix_notifications_${currentUser.id}`);
+      if (storedNotifs) {
+        const parsed = JSON.parse(storedNotifs);
+        if (Array.isArray(parsed)) {
+          setNotifications(parsed);
+        }
+      } else {
+        // If demo user alex.chen, load INITIAL_NOTIFICATIONS
+        if (currentUser.username === "alex.chen") {
+          setNotifications(INITIAL_NOTIFICATIONS);
+          localStorage.setItem(`phoenix_notifications_${currentUser.id}`, JSON.stringify(INITIAL_NOTIFICATIONS));
+        } else {
+          // Tailored welcome notification for new student or admin
+          const welcomeNotifs: NotificationItem[] = [
+            {
+              id: `notif-welcome-${Date.now()}`,
+              type: "event",
+              title: `Welcome to Phoenix Lounge! 🎓`,
+              description: `Glad to have you with us, ${currentUser.name}. Explore the digital class album and connect with classmates.`,
+              time: "Just now",
+              read: false,
+            },
+          ];
+          setNotifications(welcomeNotifs);
+          localStorage.setItem(`phoenix_notifications_${currentUser.id}`, JSON.stringify(welcomeNotifs));
+        }
+      }
+    } catch { }
+
+    // Load user conversations from localStorage if exists
+    try {
+      const storedConvs = localStorage.getItem(`phoenix_conversations_${currentUser.id}`);
+      if (storedConvs) {
+        const parsed = JSON.parse(storedConvs);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setConversations(parsed);
+        }
+      }
+    } catch { }
+  }, [currentUser]);
+
+  // Persist notifications whenever updated
+  useEffect(() => {
+    if (typeof window === "undefined" || !currentUser?.id) return;
+    try {
+      localStorage.setItem(`phoenix_notifications_${currentUser.id}`, JSON.stringify(notifications));
+      localStorage.setItem("phoenix_notifications_current", JSON.stringify(notifications));
+    } catch { }
+  }, [notifications, currentUser?.id]);
+
+  // Persist conversations whenever updated
+  useEffect(() => {
+    if (typeof window === "undefined" || !currentUser?.id) return;
+    try {
+      localStorage.setItem(`phoenix_conversations_${currentUser.id}`, JSON.stringify(conversations));
+      localStorage.setItem("phoenix_conversations_current", JSON.stringify(conversations));
+    } catch { }
+  }, [conversations, currentUser?.id]);
 
   const logoutUser = async () => {
     try {
@@ -745,6 +928,71 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast("Yearbook comment added! ✍️", "success");
   };
 
+  const markConversationAsRead = useCallback((conversationId: string) => {
+    let wasUpdated = false;
+    let partnerStudentId: string | null = null;
+
+    setConversations((prev) => {
+      const target = prev.find((c) => c.id === conversationId);
+      if (!target) return prev;
+      partnerStudentId = target.studentId;
+
+      // If already marked as read and unreadCount is 0, do nothing (preserves reference)
+      const allMessagesRead = target.messages.every((m) => m.isRead);
+      if (target.unreadCount === 0 && allMessagesRead) {
+        return prev;
+      }
+
+      wasUpdated = true;
+      return prev.map((conv) => {
+        if (conv.id === conversationId) {
+          return {
+            ...conv,
+            unreadCount: 0,
+            messages: conv.messages.map((m) => ({ ...m, isRead: true })),
+          };
+        }
+        return conv;
+      });
+    });
+
+    // Mark related notifications as read outside of setConversations
+    if (partnerStudentId) {
+      const student = students.find((s) => s.id === partnerStudentId);
+      if (student) {
+        setNotifications((prev) => {
+          const hasMatchingUnread = prev.some(
+            (n) => !n.read && n.type === "message" && n.title.toLowerCase().includes(student.name.toLowerCase())
+          );
+          if (!hasMatchingUnread) return prev;
+          return prev.map((n) =>
+            n.type === "message" && n.title.toLowerCase().includes(student.name.toLowerCase())
+              ? { ...n, read: true }
+              : n
+          );
+        });
+
+        // Notify backend if recipient is in DB
+        fetch("/api/messages/read", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ partnerId: student.id }),
+        }).catch(() => {});
+      }
+    }
+
+    // Broadcast only if updated, and include senderId to prevent echo loop
+    if (wasUpdated) {
+      try {
+        if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+          const bc = new BroadcastChannel("phoenix_realtime_sync");
+          bc.postMessage({ type: "MARK_CONVERSATION_READ", conversationId, senderId: CLIENT_INSTANCE_ID });
+          bc.close();
+        }
+      } catch {}
+    }
+  }, [students]);
+
   const sendMessage = (conversationId: string, text: string) => {
     if (!text.trim()) return;
 
@@ -754,10 +1002,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       hour12: true,
     }).format(new Date());
 
-    const newMessage = {
-      id: `msg-${Date.now()}`,
+    const tempMessageId = `msg-${Date.now()}`;
+    const newMessage: MessageItem = {
+      id: tempMessageId,
       senderId: currentUser?.id || "current-user",
-      text,
+      text: text.trim(),
       time: timeNow,
       isRead: true,
     };
@@ -767,7 +1016,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (conv.id === conversationId) {
           return {
             ...conv,
-            lastMessage: text,
+            lastMessage: text.trim(),
             lastMessageTime: timeNow,
             messages: [...conv.messages, newMessage],
           };
@@ -776,47 +1025,97 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    // Simulated reply
-    setTimeout(() => {
-      const conv = conversations.find((c) => c.id === conversationId);
-      const student = students.find((s) => s.id === conv?.studentId);
-      if (!student) return;
+    // Save message to backend database (real persistence, no fake automated replies)
+    const currentConv = conversations.find((c) => c.id === conversationId);
+    if (currentConv) {
+      fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receiverId: currentConv.studentId, text: text.trim() }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.message) {
+            // Replace temporary message with actual database message
+            setConversations((prev) =>
+              prev.map((c) => {
+                if (c.id === conversationId) {
+                  return {
+                    ...c,
+                    messages: c.messages.map((m) => (m.id === tempMessageId ? data.message : m)),
+                  };
+                }
+                return c;
+              })
+            );
 
-      const replySamples = [
-        `Sounds awesome! Let's sync up after the afternoon lecture! 🚀`,
-        `Got it! I'm pushing my code branch now, let me know what you think. 💻`,
-      ];
-      const randomReply = replySamples[Math.floor(Math.random() * replySamples.length)];
-
-      const replyTime = new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      }).format(new Date());
-
-      const replyMsg = {
-        id: `msg-reply-${Date.now()}`,
-        senderId: student.id,
-        text: randomReply,
-        time: replyTime,
-        isRead: false,
-      };
-
-      setConversations((currentConvs) =>
-        currentConvs.map((c) => {
-          if (c.id === conversationId) {
-            return {
-              ...c,
-              lastMessage: randomReply,
-              lastMessageTime: replyTime,
-              messages: [...c.messages, replyMsg],
-            };
+            // Broadcast real message to other open tabs
+            try {
+              if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+                const bc = new BroadcastChannel("phoenix_realtime_sync");
+                bc.postMessage({
+                  type: "NEW_DB_MESSAGE",
+                  conversationId,
+                  message: data.message,
+                  senderId: CLIENT_INSTANCE_ID,
+                });
+                bc.close();
+              }
+            } catch {}
           }
-          return c;
         })
-      );
-    }, 1400);
+        .catch(() => {});
+    }
   };
+
+  // Cross-tab real-time sync listener & periodic database poll
+  useEffect(() => {
+    if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
+
+    const bc = new BroadcastChannel("phoenix_realtime_sync");
+    bc.onmessage = (event) => {
+      const data = event.data;
+      if (!data || data.senderId === CLIENT_INSTANCE_ID) return;
+
+      if (data.type === "MARK_CONVERSATION_READ" && data.conversationId) {
+        setConversations((prev) => {
+          const target = prev.find((c) => c.id === data.conversationId);
+          if (!target || (target.unreadCount === 0 && target.messages.every((m) => m.isRead))) {
+            return prev;
+          }
+          return prev.map((c) =>
+            c.id === data.conversationId
+              ? { ...c, unreadCount: 0, messages: c.messages.map((m) => ({ ...m, isRead: true })) }
+              : c
+          );
+        });
+      } else if (data.type === "NEW_LOCAL_MESSAGE" && data.conversationId && data.message) {
+        setConversations((prev) => {
+          const conv = prev.find((c) => c.id === data.conversationId);
+          if (!conv || conv.messages.some((m) => m.id === data.message.id)) {
+            return prev;
+          }
+          return prev.map((c) => {
+            if (c.id === data.conversationId) {
+              return {
+                ...c,
+                lastMessage: data.message.text,
+                lastMessageTime: data.message.time,
+                messages: [...c.messages, data.message],
+              };
+            }
+            return c;
+          });
+        });
+      } else if (data.type === "NEW_DB_MESSAGE") {
+        fetchLiveMessages();
+      }
+    };
+
+    return () => {
+      bc.close();
+    };
+  }, [fetchLiveMessages]);
 
   const toggleMessageReaction = (conversationId: string, messageId: string, emoji: string) => {
     if (!currentUser) return;
@@ -889,7 +1188,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const startConversationWithStudent = (studentId: string): string => {
+  const startConversationWithStudent = useCallback((studentId: string): string => {
     const existing = conversations.find((c) => c.studentId === studentId);
     if (existing) {
       setActiveConversationId(existing.id);
@@ -907,10 +1206,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       messages: [],
     };
 
-    setConversations([newConv, ...conversations]);
+    setConversations((prev) => [newConv, ...prev]);
     setActiveConversationId(newConvId);
     return newConvId;
-  };
+  }, [conversations, students]);
 
   const toggleRSVP = async (eventId: string) => {
     setEvents((prev) =>
@@ -971,11 +1270,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const markNotificationAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
+      if (typeof window !== "undefined" && currentUser?.id) {
+        try {
+          localStorage.setItem(`phoenix_notifications_${currentUser.id}`, JSON.stringify(updated));
+          localStorage.setItem("phoenix_notifications_current", JSON.stringify(updated));
+        } catch { }
+      }
+      return updated;
+    });
   };
 
   const markAllNotificationsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, read: true }));
+      if (typeof window !== "undefined" && currentUser?.id) {
+        try {
+          localStorage.setItem(`phoenix_notifications_${currentUser.id}`, JSON.stringify(updated));
+          localStorage.setItem("phoenix_notifications_current", JSON.stringify(updated));
+        } catch { }
+      }
+      return updated;
+    });
     showToast("All notifications marked as read.", "info");
   };
 
@@ -999,6 +1316,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         activeConversationId,
         setActiveConversationId,
         sendMessage,
+        markConversationAsRead,
         toggleMessageReaction,
         startConversationWithStudent,
         events,
@@ -1018,6 +1336,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsNewPostModalOpen,
         isEditProfileModalOpen,
         setIsEditProfileModalOpen,
+        isChangePasswordModalOpen,
+        setIsChangePasswordModalOpen,
+        credentialsModalTab,
+        setCredentialsModalTab,
+        openCredentialsModal,
+        isMobileChatOpen,
+        setIsMobileChatOpen,
         isNewMemoryModalOpen,
         setIsNewMemoryModalOpen,
         activeMemoryForDetail,

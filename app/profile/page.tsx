@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Link from "next/link";
 import { useApp } from "../context/AppContext";
 
 export default function CurrentUserProfilePage() {
@@ -9,16 +8,21 @@ export default function CurrentUserProfilePage() {
     currentUser,
     updateCurrentUser,
     setIsEditProfileModalOpen,
+    setIsChangePasswordModalOpen,
+    openCredentialsModal,
     gallery,
     yearbookSignatures,
     addYearbookSignature,
     openLightbox,
+    showToast,
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<"about" | "gallery" | "yearbook">("about");
   const [newSignature, setNewSignature] = useState("");
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   if (!currentUser) {
     return (
@@ -60,12 +64,23 @@ export default function CurrentUserProfilePage() {
     setNewSignature("");
   };
 
+  // Close more menu on click outside
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
+        setIsMoreMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-12 space-y-6 animate-page-entry">
-      {/* Profile Header Card */}
-      <section className="bg-surface-container-lowest rounded-3xl overflow-hidden ambient-shadow border border-outline-variant/30 flex flex-col relative pb-6">
+      {/* Profile Header Card - overflow visible so action dropdowns are never clipped */}
+      <section className="bg-surface-container-lowest rounded-3xl ambient-shadow border border-outline-variant/30 flex flex-col relative pb-6 z-10">
         {/* Cover Photo / Background */}
-        <div className="w-full h-48 sm:h-64 bg-surface-container-highest relative overflow-hidden group">
+        <div className="w-full h-48 sm:h-64 bg-surface-container-highest relative overflow-hidden rounded-t-3xl group">
           <img
             src={
               currentUser.coverImage ||
@@ -137,22 +152,43 @@ export default function CurrentUserProfilePage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2.5 w-full md:w-auto justify-center md:justify-end mb-1">
+          {/* Action Buttons: Clean & Modern Header Action System */}
+          <div className="flex items-center gap-2.5 w-full md:w-auto justify-center md:justify-end mb-1">
+            {/* Primary Action Button */}
             <button
               onClick={() => setIsEditProfileModalOpen(true)}
-              className="px-5 py-2.5 rounded-2xl bg-primary-container text-on-primary font-headline text-xs font-bold hover:brightness-105 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary via-primary-container to-[#1a4494] text-on-primary font-headline text-xs font-bold hover:brightness-110 shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95 border border-white/10"
             >
               <span className="material-symbols-outlined text-base">edit</span>
               <span>Edit Profile</span>
             </button>
-            <Link
-              href="/directory"
-              className="px-5 py-2.5 rounded-2xl border border-outline-variant/40 text-primary font-headline text-xs font-bold hover:bg-surface-container-low transition-colors flex items-center gap-1.5"
-            >
-              <span className="material-symbols-outlined text-base">group</span>
-              <span>Directory</span>
-            </Link>
+
+            {/* Compact More Actions Dropdown (⋮) */}
+            <div className="relative" ref={moreMenuRef}>
+              <button
+                onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+                className="w-10 h-10 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/30 text-primary flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
+                aria-label="More actions"
+                title="Account Settings & More Options"
+              >
+                <span className="material-symbols-outlined text-xl">more_vert</span>
+              </button>
+
+              {isMoreMenuOpen && (
+                <div className="absolute right-0 mt-2 w-60 bg-surface border border-outline-variant/30 rounded-2xl shadow-2xl p-1.5 z-50 animate-modal-entry backdrop-blur-xl">
+                  <button
+                    onClick={() => {
+                      setIsMoreMenuOpen(false);
+                      openCredentialsModal("both");
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-semibold text-on-surface hover:bg-surface-container-low rounded-xl transition-colors text-left cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-base text-primary">manage_accounts</span>
+                    <span>Change Login Credentials</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

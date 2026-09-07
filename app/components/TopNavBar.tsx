@@ -274,33 +274,40 @@ export default function TopNavBar() {
                   </button>
                 </div>
                 <div className="space-y-2 max-h-72 overflow-y-auto hide-scrollbar">
-                  {notifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      onClick={() => markNotificationAsRead(notif.id)}
-                      className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${notif.read
-                          ? "bg-surface hover:bg-surface-container-low"
-                          : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
-                        }`}
-                    >
-                      <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 text-sm font-bold">
-                        {notif.type === "message" && "💬"}
-                        {notif.type === "like" && "❤️"}
-                        {notif.type === "event" && "📅"}
-                        {notif.type === "connect" && "🤝"}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-primary line-clamp-1">{notif.title}</p>
-                        <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">
-                          {notif.description}
-                        </p>
-                        <span className="text-[10px] text-outline mt-1 block">{notif.time}</span>
-                      </div>
-                      {!notif.read && (
-                        <span className="w-2 h-2 rounded-full bg-secondary shrink-0 mt-1.5"></span>
-                      )}
+                  {notifications.length === 0 ? (
+                    <div className="py-8 text-center text-xs text-on-surface-variant font-medium">
+                      <span className="material-symbols-outlined text-2xl text-outline mb-1 block">notifications_off</span>
+                      No notifications right now
                     </div>
-                  ))}
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => markNotificationAsRead(notif.id)}
+                        className={`p-2.5 rounded-xl cursor-pointer transition-colors flex items-start gap-3 ${notif.read
+                            ? "bg-surface hover:bg-surface-container-low"
+                            : "bg-primary-fixed/20 hover:bg-primary-fixed/30"
+                          }`}
+                      >
+                        <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 text-sm font-bold">
+                          {notif.type === "message" && "💬"}
+                          {notif.type === "like" && "❤️"}
+                          {notif.type === "event" && "📅"}
+                          {notif.type === "connect" && "🤝"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-primary line-clamp-1">{notif.title}</p>
+                          <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">
+                            {notif.description}
+                          </p>
+                          <span className="text-[10px] text-outline mt-1 block">{notif.time}</span>
+                        </div>
+                        {!notif.read && (
+                          <span className="w-2 h-2 rounded-full bg-secondary shrink-0 mt-1.5"></span>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}

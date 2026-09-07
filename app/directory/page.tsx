@@ -62,9 +62,9 @@ export default function DirectoryPage() {
   };
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 pb-24 md:pb-12 animate-page-entry">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 pb-24 md:pb-12 min-w-0 max-w-full overflow-x-hidden animate-page-entry">
       {/* Header Banner */}
-      <div className="mb-8 bg-surface-container-lowest border border-outline-variant/30 ambient-shadow rounded-3xl p-6 md:p-8">
+      <div className="mb-8 bg-surface-container-lowest border border-outline-variant/30 ambient-shadow rounded-3xl p-6 md:p-8 w-full max-w-full">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-[11px] font-bold text-secondary-container bg-primary-container px-3 py-0.5 rounded-full uppercase tracking-wider">
@@ -79,9 +79,9 @@ export default function DirectoryPage() {
       </div>
 
       {/* Search & Track Filters */}
-      <div className="mb-6 space-y-4">
+      <div className="mb-6 space-y-4 w-full max-w-full">
         {/* Search Input Bar */}
-        <div className="relative max-w-xl">
+        <div className="relative max-w-xl w-full">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-xl">
             search
           </span>
@@ -103,34 +103,36 @@ export default function DirectoryPage() {
         </div>
 
         {/* Specialization / Tech Track Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
-          <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap mr-1 flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">filter_list</span>
-            Track:
-          </span>
-          {techTracks.map((track) => (
-            <button
-              key={track}
-              onClick={() => setSelectedTrack(track)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                selectedTrack === track
-                  ? "bg-secondary-container text-on-secondary-container font-bold shadow-xs scale-102"
-                  : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/20"
-              }`}
-            >
-              {track}
-            </button>
-          ))}
+        <div className="w-full max-w-full overflow-hidden">
+          <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap mr-1 flex items-center gap-1">
+              <span className="material-symbols-outlined text-sm">filter_list</span>
+              Track:
+            </span>
+            {techTracks.map((track) => (
+              <button
+                key={track}
+                onClick={() => setSelectedTrack(track)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  selectedTrack === track
+                    ? "bg-secondary-container text-on-secondary-container font-bold shadow-xs scale-102"
+                    : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high border border-outline-variant/20"
+                }`}
+              >
+                {track}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Students Bento Grid */}
       {displayedStudents.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 w-full max-w-full">
           {displayedStudents.map((student) => (
             <div
               key={student.id}
-              className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-6 ambient-shadow card-hover flex flex-col items-center text-center relative group"
+              className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-5 sm:p-6 ambient-shadow card-hover flex flex-col items-center text-center relative group min-w-0 max-w-full overflow-hidden"
             >
               {/* Online Indicator */}
               {student.online && (

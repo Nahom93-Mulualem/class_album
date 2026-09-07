@@ -7,7 +7,13 @@ import { useApp } from "../context/AppContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const { conversations, currentUser } = useApp();
+  const { conversations, currentUser, isMobileChatOpen } = useApp();
+
+  // If user is inside an active mobile 1-on-1 chat, hide the bottom bar completely
+  // so the message composer has full unobstructed visibility above keyboards and safe areas!
+  if (pathname.startsWith("/messages") && isMobileChatOpen) {
+    return null;
+  }
 
   const totalUnreadMessages = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
   const isAdmin = currentUser?.role === "ADMIN";

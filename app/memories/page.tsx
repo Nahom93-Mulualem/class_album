@@ -115,9 +115,9 @@ export default function MemoriesPage() {
   }, [memories, selectedCategory, selectedYear, searchQuery, sortBy]);
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6 space-y-6 pb-24 md:pb-12 animate-page-entry">
+    <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-6 space-y-6 pb-24 md:pb-12 min-w-0 max-w-full overflow-x-hidden animate-page-entry">
       {/* 1. Digital Yearbook Hero Banner with Official Logo */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-container via-primary to-[#00102e] text-on-primary p-6 md:p-10 shadow-2xl border border-secondary-container/30">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-container via-primary to-[#00102e] text-on-primary p-6 md:p-10 shadow-2xl border border-secondary-container/30 w-full max-w-full">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-secondary-container/10 blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-1/3 -mb-20 w-96 h-96 rounded-full bg-primary-fixed-dim/10 blur-3xl pointer-events-none"></div>
 
@@ -156,7 +156,7 @@ export default function MemoriesPage() {
       </div>
 
       {/* 2. Filter & Navigation Controls */}
-      <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-4 md:p-6 shadow-sm space-y-4">
+      <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-3xl p-4 md:p-6 shadow-sm space-y-4 w-full max-w-full overflow-hidden">
         {/* Category Pills Bar */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-primary uppercase tracking-wider px-1">
@@ -199,9 +199,9 @@ export default function MemoriesPage() {
         </div>
 
         {/* Year Filter (2020 - 2026), Search, Sort & View Mode */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-outline-variant/15">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 pt-3 border-t border-outline-variant/15 w-full max-w-full">
           {/* Year Chips */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 hide-scrollbar">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 hide-scrollbar w-full lg:w-auto max-w-full">
             <span className="text-xs font-bold text-on-surface-variant mr-1 shrink-0 flex items-center gap-1">
               <span className="material-symbols-outlined text-sm">calendar_today</span>
               Timeline:
@@ -224,9 +224,9 @@ export default function MemoriesPage() {
           </div>
 
           {/* Search, Sort, View Modes */}
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full lg:w-auto min-w-0">
             {/* Search Input */}
-            <div className="relative flex-1 sm:w-60">
+            <div className="relative flex-1 min-w-[140px] sm:w-60">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">
                 search
               </span>
@@ -340,20 +340,20 @@ export default function MemoriesPage() {
         </div>
       ) : viewMode === "timeline" ? (
         /* 4. Timeline View */
-        <div className="space-y-6 relative before:absolute before:left-4 md:before:left-1/2 before:top-4 before:bottom-4 before:w-0.5 before:bg-outline-variant/40">
+        <div className="space-y-6 relative before:absolute before:left-4 md:before:left-1/2 before:top-4 before:bottom-4 before:w-0.5 before:bg-outline-variant/40 w-full max-w-full overflow-hidden">
           {filteredMemories.map((mem, idx) => {
             const isEven = idx % 2 === 0;
             return (
               <div
                 key={mem.id}
                 className={`relative flex flex-col md:flex-row items-start md:items-center ${isEven ? "md:flex-row-reverse" : ""
-                  } gap-6 pl-10 md:pl-0`}
+                  } gap-4 sm:gap-6 pl-8 sm:pl-10 md:pl-0 w-full max-w-full`}
               >
                 {/* Center Node */}
                 <div className="absolute left-2.5 md:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-secondary-container border-4 border-surface-container-lowest shadow-md z-10"></div>
 
                 {/* Content Card */}
-                <div className="w-full md:w-[calc(50%-2rem)]">
+                <div className="w-full md:w-[calc(50%-1.5rem)] min-w-0 max-w-full">
                   <div
                     onClick={() => setActiveMemoryForDetail(mem)}
                     className="yearbook-polaroid rounded-3xl p-5 cursor-pointer group"
@@ -446,8 +446,8 @@ export default function MemoriesPage() {
         <div
           className={
             viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-              : "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-full"
+              : "columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 w-full max-w-full"
           }
         >
           {filteredMemories.map((mem) => {
@@ -459,7 +459,7 @@ export default function MemoriesPage() {
               <article
                 key={mem.id}
                 onClick={() => setActiveMemoryForDetail(mem)}
-                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between ${isFeatured ? "ring-2 ring-secondary-container/50" : ""
+                className={`break-inside-avoid yearbook-polaroid rounded-3xl overflow-hidden p-4 sm:p-5 cursor-pointer group flex flex-col justify-between w-full max-w-full ${isFeatured ? "ring-2 ring-secondary-container/50" : ""
                   }`}
               >
                 {/* Media Container with Polaroid Styling */}

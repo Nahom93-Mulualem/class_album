@@ -16,6 +16,8 @@ function MessagesContent() {
     activeConversationId,
     setActiveConversationId,
     sendMessage,
+    markConversationAsRead,
+    setIsMobileChatOpen,
     toggleMessageReaction,
     startConversationWithStudent,
     refreshLiveDatabaseData,
@@ -41,13 +43,32 @@ function MessagesContent() {
     if (targetUserParam) {
       const convId = startConversationWithStudent(targetUserParam);
       setActiveConversationId(convId);
-      const timer = setTimeout(() => setShowMobileChatPane(true), 50);
+      markConversationAsRead(convId);
+      const timer = setTimeout(() => {
+        setShowMobileChatPane(true);
+        setIsMobileChatOpen(true);
+      }, 50);
       return () => clearTimeout(timer);
     }
-  }, [targetUserParam, startConversationWithStudent, setActiveConversationId]);
+  }, [targetUserParam, startConversationWithStudent, setActiveConversationId, markConversationAsRead, setIsMobileChatOpen]);
 
   const activeConv = conversations.find((c) => c.id === activeConversationId) || conversations[0];
   const activeStudent = students.find((s) => s.id === activeConv?.studentId);
+
+  // Mark active conversation as read immediately so unread badges update accurately
+  useEffect(() => {
+    if (activeConv && activeConv.unreadCount > 0) {
+      markConversationAsRead(activeConv.id);
+    }
+  }, [activeConv?.id, activeConv?.unreadCount, markConversationAsRead]);
+
+  // Keep mobile bottom navigation state in sync with active chat pane
+  useEffect(() => {
+    setIsMobileChatOpen(showMobileChatPane);
+    return () => {
+      setIsMobileChatOpen(false);
+    };
+  }, [showMobileChatPane, setIsMobileChatOpen]);
 
   // Scroll to bottom of message stream
   useEffect(() => {
@@ -116,7 +137,7 @@ function MessagesContent() {
   });
 
   return (
-    <main className="flex-1 w-full max-w-7xl mx-auto flex h-[calc(100vh-64px)] overflow-hidden bg-surface-container-lowest border-l border-r border-outline-variant/30 animate-page-entry">
+    <main className="flex-1 w-full max-w-7xl mx-auto flex h-[calc(100dvh-64px)] overflow-hidden bg-surface-container-lowest border-l border-r border-outline-variant/30 animate-page-entry">
       {/* Conversations List (Left Pane) */}
       <aside
         className={`w-full md:w-80 border-r border-outline-variant/30 flex flex-col bg-surface-container-lowest h-full z-10 transition-transform duration-300 md:relative absolute inset-0 ${
@@ -150,7 +171,7 @@ function MessagesContent() {
         </div>
 
         {/* Chat List */}
-        <div className="flex-1 overflow-y-auto hide-scrollbar p-2 space-y-1">
+        <div className="flex-1 overflow-y-auto hide-scrollbar p-2 pb-24 md:pb-2 space-y-1">
           {filteredConversations.map((conv) => {
             const student = students.find((s) => s.id === conv.studentId);
             if (!student) return null;
@@ -161,7 +182,9 @@ function MessagesContent() {
                 key={conv.id}
                 onClick={() => {
                   setActiveConversationId(conv.id);
+                  markConversationAsRead(conv.id);
                   setShowMobileChatPane(true);
+                  setIsMobileChatOpen(true);
                 }}
                 className={`w-full flex items-start gap-3 p-3 rounded-2xl transition-all text-left cursor-pointer ${
                   isActive
@@ -215,19 +238,22 @@ function MessagesContent() {
 
       {/* Active 1-on-1 Chat Window (Right Pane) */}
       <section
-        className={`flex-1 flex flex-col bg-surface-bright h-full relative z-20 transition-transform duration-300 md:translate-x-0 ${
+        className={`flex-1 flex flex-col bg-surface-bright h-full min-h-0 relative z-20 transition-transform duration-300 md:translate-x-0 ${
           showMobileChatPane ? "translate-x-0" : "translate-x-full md:translate-x-0"
         }`}
       >
         {activeStudent ? (
           <>
             {/* Active Chat Header */}
-            <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md sticky top-0 z-10">
+            <header className="h-14 sm:h-16 shrink-0 flex items-center justify-between px-4 md:px-6 border-b border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 {/* Mobile Back to List Button */}
                 <button
-                  onClick={() => setShowMobileChatPane(false)}
-                  className="md:hidden p-1.5 -ml-1 text-on-surface-variant hover:bg-surface-container-low rounded-full cursor-pointer"
+                  onClick={() => {
+                    setShowMobileChatPane(false);
+                    setIsMobileChatOpen(false);
+                  }}
+                  className="md:hidden p-1.5 -ml-1 text-on-surface-variant hover:bg-surface-container-low rounded-full cursor-pointer active:scale-95"
                   aria-label="Back to conversations"
                 >
                   <span className="material-symbols-outlined text-xl">arrow_back</span>
@@ -425,7 +451,7 @@ function MessagesContent() {
             </div>
 
             {/* Message Input Box & Emoji Picker */}
-            <div className="p-3 md:p-4 bg-surface-container-lowest border-t border-outline-variant/30 relative">
+            <div className="shrink-0 p-2.5 sm:p-3 md:p-4 bg-surface-container-lowest border-t border-outline-variant/30 relative pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {/* Emoji Picker Popover */}
               {isEmojiPickerOpen && (
                 <div
