@@ -165,7 +165,6 @@ export default function LoginPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. alex.chen or admin"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-surface border border-outline-variant/50 text-xs sm:text-sm font-body text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-inner"
@@ -186,7 +185,6 @@ export default function LoginPage() {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-11 py-3 rounded-xl bg-surface border border-outline-variant/50 text-xs sm:text-sm font-body text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-inner"
@@ -225,7 +223,6 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-
           </div>
         </section>
       </div>

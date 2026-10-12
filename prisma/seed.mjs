@@ -4,27 +4,27 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-const connectionString =
-  process.env.DATABASE_URL ||
-  "postgresql://postgres:postgres2@localhost:5432/class_album?schema=public";
+export async function seedDatabase(customConnectionString) {
+  const connectionString =
+    customConnectionString ||
+    process.env.DATABASE_URL ||
+    "postgresql://postgres:postgres2@localhost:5432/class_album?schema=public";
 
-const needsSsl =
-  connectionString.includes("sslmode=require") ||
-  connectionString.includes("render.com") ||
-  connectionString.includes("neon.tech") ||
-  connectionString.includes("supabase.co") ||
-  process.env.PGSSLMODE === "require";
+  const needsSsl =
+    connectionString.includes("sslmode=require") ||
+    connectionString.includes("render.com") ||
+    connectionString.includes("neon.tech") ||
+    connectionString.includes("supabase.co") ||
+    process.env.PGSSLMODE === "require";
 
-const pool = new Pool({
-  connectionString,
-  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
-});
+  const pool = new Pool({
+    connectionString,
+    ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+  });
 
-async function main() {
   console.log("🌱 Starting PostgreSQL database seeding via pg pool...");
 
   const client = await pool.connect();
-
   try {
     // 1. Clean existing records in correct foreign key order
     console.log("Cleaning old records...");
@@ -955,13 +955,23 @@ async function main() {
     );
 
     console.log("🎉 Database successfully seeded with 1 Admin + 50 Students + Posts + Comments + Events + Messages!");
+    return { success: true, count: 51 };
   } finally {
     client.release();
     await pool.end();
   }
 }
 
-main().catch((err) => {
-  console.error("❌ Seeding failed:", err);
-  process.exit(1);
-});
+export { seedDatabase as main };
+
+const isDirectRun =
+  process.argv[1] &&
+  (process.argv[1].endsWith("seed.mjs") || process.argv[1].endsWith("seed.js"));
+
+if (isDirectRun) {
+  seedDatabase().catch((err) => {
+    console.error("❌ Seeding failed:", err);
+    process.exit(1);
+  });
+}
+
