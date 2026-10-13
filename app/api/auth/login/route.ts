@@ -191,17 +191,39 @@ export async function POST(req: NextRequest) {
     console.error("Login API Error:", error);
     const msg = error instanceof Error ? error.message : String(error);
     let userFriendlyError = "An error occurred while logging in.";
+    let needsSeed = false;
 
-    if (msg.includes("relation") && msg.includes("does not exist")) {
+    const isMissingTable =
+      msg.includes("does not exist") ||
+      msg.includes("relation") ||
+      msg.includes("table") ||
+      msg.includes("P2021");
+
+    const isConnError =
+      msg.includes("ECONNREFUSED") ||
+      msg.includes("password authentication failed") ||
+      msg.includes("ETIMEDOUT") ||
+      msg.includes("ENOTFOUND") ||
+      msg.includes("P1001") ||
+      msg.includes("Can't reach database") ||
+      msg.includes("SSL") ||
+      msg.includes("connection");
+
+    if (isMissingTable) {
       userFriendlyError =
-        "Database tables have not been created yet. Please visit /api/seed on your deployed website once to initialize the database and cohort accounts.";
-    } else if (msg.includes("ECONNREFUSED") || msg.includes("password authentication failed")) {
+        "Database tables have not been created yet. Please visit /api/seed on your website once to initialize the database and cohort accounts.";
+      needsSeed = true;
+    } else if (isConnError) {
       userFriendlyError =
-        "Unable to connect to PostgreSQL. Please check your DATABASE_URL environment variable on Render.";
+        "Unable to connect to PostgreSQL. Please check your DATABASE_URL environment variable and ensure your database server is running.";
     }
 
     return NextResponse.json(
-      { error: userFriendlyError },
+      {
+        error: userFriendlyError,
+        needsSeed,
+        details: process.env.NODE_ENV !== "production" ? msg : undefined,
+      },
       { status: 500 }
     );
   }

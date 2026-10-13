@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsSeed, setNeedsSeed] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,7 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError(null);
+      setNeedsSeed(false);
 
       const res = await fetch("/api/auth/login", {
         method: "POST",
@@ -52,6 +54,9 @@ export default function LoginPage() {
         await refreshAuthSession();
         router.push(getDestination(data.user.role));
       } else {
+        if (data.needsSeed || (data.error && data.error.includes("/api/seed"))) {
+          setNeedsSeed(true);
+        }
         setError(data.error || "Login failed. Please verify your cohort credentials.");
       }
     } catch {
@@ -80,10 +85,6 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary-container/20 border border-secondary-container/40 text-secondary text-xs font-headline font-bold uppercase tracking-wider mb-1">
-                <span>🎓</span>
-                <span>Phoenix Batch • 2020 – 2026</span>
-              </div>
               <h2 className="font-headline text-xl sm:text-2xl font-extrabold text-primary tracking-tight">
                 Software Engineering
               </h2>
@@ -147,7 +148,19 @@ export default function LoginPage() {
                 <span className="material-symbols-outlined text-error text-lg shrink-0 mt-0.5">
                   error
                 </span>
-                <div className="leading-relaxed font-medium">{error}</div>
+                <div className="space-y-2 leading-relaxed font-medium">
+                  <div>{error}</div>
+                  {needsSeed && (
+                    <a
+                      href="/api/seed"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs hover:brightness-110 shadow transition-all"
+                    >
+                      <span>🚀 Initialize Database (/api/seed)</span>
+                    </a>
+                  )}
+                </div>
               </div>
             )}
 
@@ -213,7 +226,7 @@ export default function LoginPage() {
                 {loading ? (
                   <>
                     <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    <span>Authenticating Cohort Session...</span>
+                    <span>Authenticating ...</span>
                   </>
                 ) : (
                   <>
