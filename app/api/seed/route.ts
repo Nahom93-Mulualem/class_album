@@ -13,7 +13,7 @@ async function handleSeed() {
     if (errMsg.includes("does not exist") || errMsg.includes("relation")) {
       console.log("Tables missing in PostgreSQL. Running npx prisma db push...");
       try {
-        execSync("npx prisma db push --skip-generate", { stdio: "pipe" });
+        execSync("npx prisma db push --accept-data-loss", { stdio: "pipe" });
         result = await seedDatabase();
       } catch (pushErr) {
         const pushMsg = pushErr instanceof Error ? pushErr.message : String(pushErr);
