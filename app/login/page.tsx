@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useApp } from "../context/AppContext";
 
@@ -92,11 +93,14 @@ export default function LoginPage() {
         <section className="lg:col-span-7 flex flex-col justify-center space-y-6 md:space-y-8 py-4">
           {/* Official Badge & Logo */}
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-2xl border-2 border-secondary-container/60 p-1 bg-black/40 shrink-0 animate-float">
-              <img
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl overflow-hidden shadow-2xl border-2 border-secondary-container/60 p-1 bg-black/40 shrink-0 animate-float relative">
+              <Image
                 src="/phoenix-logo.png"
                 alt="Phoenix Batch 2026 Crest"
+                width={96}
+                height={96}
                 className="w-full h-full object-cover rounded-2xl"
+                priority
               />
             </div>
             <div>

@@ -13,6 +13,28 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Phoenix • Software Engineering Class of 2026 Digital Yearbook & Lounge",
   description: "Official digital lounge, class directory, and digital yearbook memory vault for the Phoenix Software Engineering Batch of 2026.",
+  openGraph: {
+    title: "Phoenix • Software Engineering Class of 2026",
+    description: "Celebrating 6 Years of Innovation, Friendship & Milestones. Explore our memories, directory, and digital yearbook vault.",
+    url: "/",
+    siteName: "Phoenix Class Album 2026",
+    images: [
+      {
+        url: "/phoenix-logo.png",
+        width: 800,
+        height: 800,
+        alt: "Phoenix Class of 2026 Crest",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Phoenix • Software Engineering Class of 2026",
+    description: "Official digital lounge and yearbook memory vault for the Phoenix Software Engineering Batch of 2026.",
+    images: ["/phoenix-logo.png"],
+  },
 };
 
 export default function RootLayout({

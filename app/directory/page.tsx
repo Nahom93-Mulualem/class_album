@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import SafeImage from "../components/SafeImage";
 import { useApp } from "../context/AppContext";
 
 export default function DirectoryPage() {
@@ -147,10 +148,12 @@ export default function DirectoryPage() {
 
               {/* Avatar with Class Gradient Badge */}
               <Link href={`/profile/${student.id}`} className="relative mb-4 block group">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-surface shadow-md group-hover:scale-105 transition-transform">
-                  <img
+                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-surface shadow-md group-hover:scale-105 transition-transform relative">
+                  <SafeImage
                     src={student.avatar}
                     alt={student.name}
+                    width={96}
+                    height={96}
                     className="w-full h-full object-cover"
                   />
                 </div>

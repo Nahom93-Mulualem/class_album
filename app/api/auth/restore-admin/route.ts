@@ -4,6 +4,16 @@ import { createSessionToken, AUTH_COOKIE_NAME, hashPassword } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
+    // In production, block unauthorized admin restoration to prevent backdoors
+    const secret = req.headers.get("x-admin-secret") || req.nextUrl.searchParams.get("secret");
+    const validSecret = process.env.ADMIN_RESTORE_SECRET;
+    if (process.env.NODE_ENV === "production" && (!validSecret || secret !== validSecret)) {
+      return NextResponse.json(
+        { error: "Forbidden. Admin restore is locked in production." },
+        { status: 403 }
+      );
+    }
+
     // 1. Check if admin exists in database
     let admin = await prisma.user.findFirst({
       where: {

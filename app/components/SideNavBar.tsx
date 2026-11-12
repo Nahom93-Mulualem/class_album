@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useApp } from "../context/AppContext";
 
@@ -63,11 +64,14 @@ export default function SideNavBar() {
     <aside className="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface border-r border-outline-variant/30 p-3 space-y-2 z-40 overflow-y-auto hide-scrollbar transition-colors duration-300">
       {/* Lounge Badge with Official Crest */}
       <div className="flex items-center gap-3 p-2 mb-1">
-        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-secondary/50 shrink-0 p-0.5 bg-black/40">
-          <img
+        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-md border border-secondary/50 shrink-0 p-0.5 bg-black/40 relative">
+          <Image
             src="/phoenix-logo.png"
             alt="Phoenix Logo"
+            width={48}
+            height={48}
             className="w-full h-full object-cover rounded-xl"
+            priority
           />
         </div>
         <div>

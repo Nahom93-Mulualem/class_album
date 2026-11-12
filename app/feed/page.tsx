@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import SafeImage from "../components/SafeImage";
 import { useApp } from "../context/AppContext";
 import { Post } from "../data/initialData";
 
@@ -131,10 +132,12 @@ export default function FeedPage() {
         <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 ambient-shadow p-4 sm:p-5">
           <div className="flex gap-3.5">
             <Link href="/profile" className="shrink-0">
-              <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30 hover:scale-105 transition-transform shadow-xs">
-                <img
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/30 hover:scale-105 transition-transform shadow-xs relative">
+                <SafeImage
                   src={currentUser?.avatar || "/phoenix-logo.png"}
                   alt={currentUser?.name || "Classmate"}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -222,10 +225,12 @@ export default function FeedPage() {
                 <div className="p-5 pb-3 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Link href={`/profile/${post.authorId}`} className="shrink-0 group">
-                      <div className="w-11 h-11 rounded-full overflow-hidden border border-outline-variant/30 group-hover:scale-105 transition-transform shadow-xs">
-                        <img
+                      <div className="w-11 h-11 rounded-full overflow-hidden border border-outline-variant/30 group-hover:scale-105 transition-transform shadow-xs relative">
+                        <SafeImage
                           src={post.authorAvatar}
                           alt={post.authorName}
+                          width={44}
+                          height={44}
                           className="w-full h-full object-cover"
                         />
                       </div>

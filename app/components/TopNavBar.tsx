@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import SafeImage from "./SafeImage";
 import { useApp } from "../context/AppContext";
 
 export default function TopNavBar() {
@@ -76,10 +77,13 @@ export default function TopNavBar() {
         <div className="flex items-center gap-3">
           <Link href={currentUser?.role === "ADMIN" ? "/admin" : "/feed"} className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform border border-secondary/50 p-0.5 bg-black/40 shrink-0 relative">
-              <img
+              <SafeImage
                 src="/phoenix-logo.png"
                 alt="Phoenix Batch Crest"
+                width={40}
+                height={40}
                 className="w-full h-full object-cover rounded-xl"
+                priority
               />
             </div>
             <div>
@@ -319,10 +323,12 @@ export default function TopNavBar() {
               onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
               className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-primary/40 transition-all active:scale-95 cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-surface-container-high shrink-0 shadow-sm">
-                <img
+              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-surface-container-high shrink-0 shadow-sm relative">
+                <SafeImage
                   src={currentUser?.avatar || "/phoenix-logo.png"}
                   alt={currentUser?.name || "User"}
+                  width={36}
+                  height={36}
                   className="w-full h-full object-cover"
                 />
               </div>

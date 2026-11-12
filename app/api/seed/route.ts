@@ -1,8 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { seedDatabase } from "@/prisma/seed.mjs";
+import { getCurrentUserFromCookie } from "@/lib/auth";
 import { execSync } from "child_process";
 
 export const dynamic = "force-dynamic";
+
+async function isAuthorized(req: NextRequest): Promise<boolean> {
+  // Always allow in development
+  if (process.env.NODE_ENV !== "production") return true;
+
+  // In production, require either valid secret or an authenticated ADMIN session
+  const secret = req.nextUrl.searchParams.get("secret");
+  const validSecret = process.env.ADMIN_SEED_SECRET;
+  if (validSecret && secret === validSecret) return true;
+
+  const user = await getCurrentUserFromCookie();
+  return user?.role === "ADMIN";
+}
 
 async function handleSeed() {
   let result;
@@ -27,7 +41,14 @@ async function handleSeed() {
   return result;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  if (!(await isAuthorized(req))) {
+    return NextResponse.json(
+      { error: "Forbidden. Database seeding is locked in production to protect your cohort data." },
+      { status: 403 }
+    );
+  }
+
   try {
     const result = await handleSeed();
     return NextResponse.json({
@@ -48,7 +69,14 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  if (!(await isAuthorized(req))) {
+    return NextResponse.json(
+      { error: "Forbidden. Database seeding is locked in production to protect your cohort data." },
+      { status: 403 }
+    );
+  }
+
   try {
     const result = await handleSeed();
     return NextResponse.json({

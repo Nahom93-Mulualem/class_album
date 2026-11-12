@@ -18,7 +18,7 @@ const needsSsl =
 
 const pool = new Pool({
   connectionString,
-  max: isProduction ? 15 : 10,
+  max: isProduction ? 2 : 10,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
   ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
