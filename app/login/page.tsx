@@ -16,21 +16,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [needsSeed, setNeedsSeed] = useState(false);
 
-  // If visitor is already authenticated, redirect them directly to feed or admin
-  useEffect(() => {
-    if (!isAuthLoading && currentUser) {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        const redirect = params.get("redirect");
-        if (redirect && redirect.startsWith("/") && redirect !== "/" && redirect !== "/login") {
-          router.replace(redirect);
-          return;
-        }
-      }
-      router.replace(currentUser.role === "ADMIN" ? "/admin" : "/feed");
-    }
-  }, [currentUser, isAuthLoading, router]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) {

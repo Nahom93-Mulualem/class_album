@@ -4,8 +4,11 @@ import { verifySessionToken, AUTH_COOKIE_NAME } from "./lib/session";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // 1. Allow public static assets
+  // 1. Immediately pass landing page, login page, and static assets with 0ms edge delay
   if (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname.startsWith("/login") ||
     pathname.startsWith("/_next") ||
     pathname === "/favicon.ico" ||
     pathname === "/phoenix-logo.png" ||
@@ -27,19 +30,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. Read session token from cookie
+  // 3. Read session token from cookie for protected internal pages
   const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = token ? await verifySessionToken(token) : null;
 
-  const isPublicAuthPage = pathname === "/login" || pathname === "/";
-
-  // 4. If visitor is on public login entry points (/ or /login), NEVER auto-redirect to /admin or /feed
-  // The Login page must always be displayed as the entry point!
-  if (isPublicAuthPage) {
-    return NextResponse.next();
-  }
-
-  // 5. Handle unauthenticated visitors attempting to access any protected route directly
+  // 4. Handle unauthenticated visitors attempting to access any protected route directly
   if (!session) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
