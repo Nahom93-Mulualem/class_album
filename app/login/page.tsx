@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "../context/AppContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { showToast, refreshAuthSession } = useApp();
+  const { showToast, refreshAuthSession, currentUser, isAuthLoading } = useApp();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -14,6 +14,21 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [needsSeed, setNeedsSeed] = useState(false);
+
+  // If visitor is already authenticated, redirect them directly to feed or admin
+  useEffect(() => {
+    if (!isAuthLoading && currentUser) {
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get("redirect");
+        if (redirect && redirect.startsWith("/") && redirect !== "/" && redirect !== "/login") {
+          router.replace(redirect);
+          return;
+        }
+      }
+      router.replace(currentUser.role === "ADMIN" ? "/admin" : "/feed");
+    }
+  }, [currentUser, isAuthLoading, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

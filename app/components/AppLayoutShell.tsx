@@ -19,17 +19,18 @@ export default function AppLayoutShell({ children }: { children: React.ReactNode
   const router = useRouter();
   const { currentUser, isAuthLoading, theme, toggleTheme, isThemeMounted } = useApp();
 
-  const isLoginPage = pathname === "/login" || pathname === "/";
+  // Detect public auth entry pages immediately (handles null/empty during hydration)
+  const isLoginPage = !pathname || pathname === "/login" || pathname === "/" || pathname.startsWith("/login");
 
-  // Strict client-side authentication guard for protected routes
+  // Strict client-side authentication guard: only protect non-login internal routes
   useEffect(() => {
     if (!isAuthLoading && !currentUser && !isLoginPage) {
-      const redirectParam = `?redirect=${encodeURIComponent(pathname)}`;
+      const redirectParam = pathname ? `?redirect=${encodeURIComponent(pathname)}` : "";
       router.replace(`/login${redirectParam}`);
     }
   }, [isAuthLoading, currentUser, isLoginPage, pathname, router]);
 
-  // If on login page, render clean, cinematic graduation entrance layout
+  // If on login page, ALWAYS render the login page immediately without waiting for auth loaders
   if (isLoginPage) {
     return (
       <div className="min-h-screen w-full flex flex-col bg-background text-on-background relative overflow-x-hidden selection:bg-secondary-container selection:text-on-secondary-container transition-colors duration-300">

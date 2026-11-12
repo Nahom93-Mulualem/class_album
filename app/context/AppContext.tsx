@@ -502,25 +502,45 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fetchLiveMessages();
     };
 
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        fetchLiveMessages();
+      }
+    };
+
+    let chatChannel: BroadcastChannel | null = null;
     if (typeof window !== "undefined") {
       window.addEventListener("phoenix_data_sync", handleSyncEvent);
       window.addEventListener("focus", handleFocus);
+      document.addEventListener("visibilitychange", handleVisibility);
+
+      if ("BroadcastChannel" in window) {
+        chatChannel = new BroadcastChannel("phoenix_chat_sync");
+        chatChannel.onmessage = () => {
+          fetchLiveMessages();
+        };
+      }
     }
 
-    // Auto-sync general data every 10s, live messages every 3s
+    // Auto-sync general data every 10s, live messages every 1.2s for responsive real-time conversation
     const syncInterval = setInterval(() => {
       fetchLiveDatabaseData();
     }, 10000);
 
     const messageInterval = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
       fetchLiveMessages();
-    }, 3000);
+    }, 1200);
 
     return () => {
       mounted = false;
       if (typeof window !== "undefined") {
         window.removeEventListener("phoenix_data_sync", handleSyncEvent);
         window.removeEventListener("focus", handleFocus);
+        document.removeEventListener("visibilitychange", handleVisibility);
+      }
+      if (chatChannel) {
+        chatChannel.close();
       }
       clearInterval(syncInterval);
       clearInterval(messageInterval);
@@ -1036,6 +1056,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data && data.message) {
+            // Broadcast to other tabs/windows for instant real-time sync
+            if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+              try {
+                const bc = new BroadcastChannel("phoenix_chat_sync");
+                bc.postMessage({ type: "new_message", conversationId });
+                bc.close();
+              } catch {}
+            }
+
             // Replace temporary message with actual database message
             setConversations((prev) =>
               prev.map((c) => {
